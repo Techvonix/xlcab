@@ -1,0 +1,63 @@
+@import 'tailwindcss';
+
+/* Polices auto-hébergées (Partie 5 : Poppins titres, Inter corps).
+   Pas de Google Fonts en CDN : cela transmettrait l'IP des visiteurs à
+   Google (RGPD). */
+@font-face { font-family: 'Inter'; src: url('/fonts/Inter-Regular.ttf') format('truetype'); font-weight: 400; font-display: swap; }
+@font-face { font-family: 'Inter'; src: url('/fonts/Inter-SemiBold.ttf') format('truetype'); font-weight: 600; font-display: swap; }
+@font-face { font-family: 'Inter'; src: url('/fonts/Inter-Bold.ttf') format('truetype'); font-weight: 700; font-display: swap; }
+@font-face { font-family: 'Poppins'; src: url('/fonts/Poppins-Regular.ttf') format('truetype'); font-weight: 400; font-display: swap; }
+@font-face { font-family: 'Poppins'; src: url('/fonts/Poppins-SemiBold.ttf') format('truetype'); font-weight: 600; font-display: swap; }
+@font-face { font-family: 'Poppins'; src: url('/fonts/Poppins-Bold.ttf') format('truetype'); font-weight: 700; font-display: swap; }
+
+/* Tokens du design system (Partie 5), mêmes valeurs que l'app Flutter. */
+@theme {
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-heading: 'Poppins', 'Inter', system-ui, sans-serif;
+
+  --color-rose: #e91e63; /* navette Rose (catégorie de service) */
+  --color-primary: #0e7490; /* marque Orbite (cyan profond) : 5,4:1 avec le blanc */
+  --color-bleu: #2196f3;
+  --color-orange: #ff9800;
+  --color-pmr: #607d8b;
+  --color-success: #4caf50;
+  --color-warning: #ffc107;
+  --color-error: #f44336;
+  --color-ink: #0b1220;
+  --color-muted: #5f6368; /* texte secondaire : 6,2:1 sur blanc */
+  --color-surface: #f4f7fb;
+  --color-line: #d9e0ea;
+
+  --radius-button: 12px;
+  --radius-card: 16px;
+  --radius-input: 12px;
+  --radius-modal: 24px;
+
+  --shadow-1: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --shadow-2: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+html {
+  color: var(--color-ink);
+  background: #ffffff;
+  font-family: var(--font-sans);
+}
+
+h1, h2, h3 {
+  font-family: var(--font-heading);
+}
+
+/* Montants : chiffres tabulaires (Partie 5, style "Price"). */
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Focus clavier toujours visible (WCAG 2.4.7). */
+:focus-visible {
+  outline: 2px solid var(--color-bleu);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}

@@ -1,0 +1,30 @@
+# Livraisons antérieures, installateurs, fichiers Windows
+*.zip
+*.exe
+desktop.ini
+Thumbs.db
+
+# Secrets et clés (ne jamais versionner)
+.env
+.env.*
+!.env.example
+*.local.txt
+local.properties
+key.properties
+*.jks
+*.keystore
+google-services.json
+GoogleService-Info.plist
+Secrets.xcconfig
+
+# Dépendances et builds
+node_modules/
+dist/
+build/
+coverage/
+.dart_tool/
+*.tsbuildinfo
+
+# Vidéos de démonstration (volumineuses) et réglages locaux de Claude Code
+demo/videos/
+.claude/settings.local.json

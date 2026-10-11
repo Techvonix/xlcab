@@ -1,0 +1,8 @@
+# Traductions de l'app (gen-l10n) : app_fr.arb = référence, app_en.arb = anglais.
+# Après modification d'un .arb : flutter gen-l10n (lancé aussi par flutter pub get / build).
+arb-dir: lib/l10n
+template-arb-file: app_fr.arb
+output-dir: lib/l10n/generated
+output-localization-file: app_localizations.dart
+output-class: AppLocalizations
+untranslated-messages-file: l10n_untranslated.json

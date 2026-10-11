@@ -1,0 +1,17 @@
+# Secrets : ne jamais versionner (JWT, clés Google, base de données)
+.env
+.env.*
+!.env.example
+
+# Documents chauffeurs (permis, carte VTC, carte grise…) stockés en
+# local en développement : données personnelles sensibles.
+storage/
+
+# Dépendances et builds
+node_modules/
+dist/
+coverage/
+*.tsbuildinfo
+
+# Identifiants des comptes de démonstration (générés par prisma/seed-demo.ts)
+*.local.txt

@@ -1,0 +1,3 @@
+#include "Generated.xcconfig"
+// Clés locales (ignoré par Git) : GOOGLE_MAPS_API_KEY=... — optionnel.
+#include? "Secrets.xcconfig"

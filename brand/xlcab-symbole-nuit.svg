@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="XLCAB">
+  <!-- Symbole « Orbite », fond sombre (nuit #070B1A). -->
+  <circle cx="60" cy="60" r="53" fill="none" stroke="#22D3EE" stroke-width="4"/>
+  <path fill="none" stroke="#22D3EE" stroke-width="10.5" stroke-linecap="round" d="M32 32 L88 88 M88 32 L69 51 M32 88 L51 69"/>
+  <circle cx="104" cy="30.5" r="8.5" fill="#F0ABFC"/>
+</svg>

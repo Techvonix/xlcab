@@ -1,0 +1,187 @@
+import 'package:dio/dio.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../models/operator.dart';
+import 'api_service.dart';
+import 'package:xlcab_app/l10n/l10n.dart';
+
+/// Espace opérateur (xlcab_backend/src/operators et src/line-bookings) :
+/// profil, véhicules, lignes régulières, départs, réserves, reprises de
+/// départ et annulations. Réservé au rôle chauffeur.
+class OperatorService {
+  OperatorService(this._dio);
+
+  final Dio _dio;
+  static const _me = '/api/v1/operators/me';
+  String _id(String id) => Uri.encodeComponent(id);
+
+  // ── Profil et véhicules ──
+
+  Future<OperatorProfile> profile() => _guard(() async {
+        final res = await _dio.get<Map<String, dynamic>>(_me);
+        return OperatorProfile.fromJson(res.data);
+      });
+
+  /// Enregistre le profil ; [acceptTermsVersion] = version des conditions générales opérateur acceptées.
+  Future<OperatorProfile> saveProfile({
+    required String kind,
+    String? legalName,
+    String? siret,
+    String? transportLicense,
+    List<String> cities = const [],
+    List<String> services = const [],
+    String? description,
+    String? acceptTermsVersion,
+  }) =>
+      _guard(() async {
+        final res = await _dio.put<Map<String, dynamic>>(_me, data: {
+          'kind': kind,
+          if (legalName != null && legalName.isNotEmpty) 'legalName': legalName,
+          if (siret != null && siret.isNotEmpty) 'siret': siret,
+          if (transportLicense != null && transportLicense.isNotEmpty) 'transportLicense': transportLicense,
+          'cities': cities,
+          'services': services,
+          if (description != null && description.isNotEmpty) 'description': description,
+          if (acceptTermsVersion != null) ...{'acceptTerms': true, 'termsVersion': acceptTermsVersion},
+        });
+        return OperatorProfile.fromJson(res.data);
+      });
+
+  Future<List<OperatorVehicle>> vehicles() => _guard(() async {
+        final res = await _dio.get<List<dynamic>>('$_me/vehicles');
+        return (res.data ?? const []).map(OperatorVehicle.fromJson).whereType<OperatorVehicle>().toList();
+      });
+
+  // ── Lignes ──
+
+  Future<List<RecurringLine>> lines() => _guard(() async {
+        final res = await _dio.get<List<dynamic>>('$_me/lines');
+        return (res.data ?? const []).map(RecurringLine.fromJson).whereType<RecurringLine>().toList();
+      });
+
+  Future<void> createLine(LineDraft draft) => _guard(() => _dio.post<void>('$_me/lines', data: draft.toJson()));
+
+  Future<void> setLineStatus(String lineId, LineStatus status) => _guard(() => _dio.post<void>(
+        '$_me/lines/${_id(lineId)}/${switch (status) { LineStatus.active => 'resume', LineStatus.paused => 'pause', LineStatus.closed => 'close' }}',
+      ));
+
+  /// Jour sans départ ([seats] null) ou à capacité réduite.
+  Future<void> addException(String lineId, String date, {int? seats, String? reason}) => _guard(() => _dio.post<void>(
+        '$_me/lines/${_id(lineId)}/exceptions',
+        data: {'date': date, if (seats != null) 'seats': seats, if (reason != null && reason.isNotEmpty) 'reason': reason},
+      ));
+
+  Future<void> removeException(String lineId, String date) =>
+      _guard(() => _dio.delete<void>('$_me/lines/${_id(lineId)}/exceptions/${_id(date)}'));
+
+  // ── Départs de mes lignes ──
+
+  Future<List<LineDeparture>> departures({String? lineId}) => _guard(() async {
+        final res = await _dio.get<List<dynamic>>('$_me/departures', queryParameters: {if (lineId != null) 'lineId': lineId});
+        return (res.data ?? const []).map(LineDeparture.fromJson).whereType<LineDeparture>().toList();
+      });
+
+  /// « J'assure ces départs jusqu'au … » : ils deviennent réservables.
+  Future<int> confirmDepartures({required String until, String? lineId}) => _guard(() async {
+        final res = await _dio.post<Map<String, dynamic>>('$_me/departures/confirm', data: {'until': until, if (lineId != null) 'lineId': lineId});
+        final n = res.data?['confirmed'];
+        return n is num ? n.toInt() : 0;
+      });
+
+  /// Arrêter (« plus de places ») ou reprendre la vente d'un départ.
+  Future<void> setDepartureClosed(String departureId, bool closed) =>
+      _guard(() => _dio.patch<void>('$_me/departures/${_id(departureId)}', data: {'closed': closed}));
+
+  // ── Départs que j'assure ──
+
+  Future<List<Assignment>> assignments() => _guard(() async {
+        final res = await _dio.get<List<dynamic>>('$_me/assignments');
+        return (res.data ?? const []).map(Assignment.fromJson).whereType<Assignment>().toList();
+      });
+
+  Future<Manifest> manifest(String departureId) => _guard(() async {
+        final res = await _dio.get<Map<String, dynamic>>('$_me/departures/${_id(departureId)}/manifest');
+        return Manifest.fromJson(res.data);
+      });
+
+  Future<void> ready(String departureId) => _guard(() => _dio.post<void>('$_me/departures/${_id(departureId)}/ready'));
+
+  /// Scan du QR d'un passager ; renvoie son prénom.
+  Future<String?> checkIn(String departureId, String qrCode) => _guard(() async {
+        final res = await _dio.post<Map<String, dynamic>>('$_me/departures/${_id(departureId)}/checkin', data: {'qrCode': qrCode});
+        final name = res.data?['firstName'];
+        return name is String ? name : null;
+      });
+
+  Future<void> startDeparture(String departureId) => _guard(() => _dio.post<void>('$_me/departures/${_id(departureId)}/start'));
+
+  Future<void> completeDeparture(String departureId) => _guard(() => _dio.post<void>('$_me/departures/${_id(departureId)}/complete'));
+
+  /// Annule le départ : un chauffeur de secours prend le relais (protocole d'annulation).
+  Future<void> cancelDeparture(String departureId, String reason) =>
+      _guard(() => _dio.post<void>('$_me/departures/${_id(departureId)}/cancel', data: {'reason': reason}));
+
+  // ── Réserves ──
+
+  Future<List<LineBackup>> backups(String lineId) => _guard(() async {
+        final res = await _dio.get<List<dynamic>>('$_me/lines/${_id(lineId)}/backups');
+        return (res.data ?? const []).map(LineBackup.fromJson).whereType<LineBackup>().toList();
+      });
+
+  Future<void> inviteBackup(String lineId, String email, int rank) =>
+      _guard(() => _dio.post<void>('$_me/lines/${_id(lineId)}/backups', data: {'email': email, 'rank': rank}));
+
+  Future<void> removeBackup(String lineId, int rank) => _guard(() => _dio.delete<void>('$_me/lines/${_id(lineId)}/backups/$rank'));
+
+  Future<List<BackupRole>> backupRoles() => _guard(() async {
+        final res = await _dio.get<List<dynamic>>('$_me/backups');
+        return (res.data ?? const []).map(BackupRole.fromJson).whereType<BackupRole>().toList();
+      });
+
+  Future<void> answerBackup(String backupId, {required bool accept, String? vehicleId}) => _guard(() => _dio.post<void>(
+        '$_me/backups/${_id(backupId)}/${accept ? 'accept' : 'decline'}',
+        data: accept ? {'vehicleId': vehicleId} : null,
+      ));
+
+  // ── Reprises ──
+
+  Future<List<RescueOffer>> rescues() => _guard(() async {
+        final res = await _dio.get<List<dynamic>>('$_me/rescues');
+        return (res.data ?? const []).map(RescueOffer.fromJson).whereType<RescueOffer>().toList();
+      });
+
+  Future<void> answerRescue(String offerId, {required bool accept}) =>
+      _guard(() => _dio.post<void>('$_me/rescues/${_id(offerId)}/${accept ? 'accept' : 'decline'}', data: accept ? <String, dynamic>{} : null));
+
+  // ── Annulations et pénalités ──
+
+  Future<List<DriverCancellation>> cancellations() => _guard(() async {
+        final res = await _dio.get<List<dynamic>>('$_me/cancellations');
+        return (res.data ?? const []).map(DriverCancellation.fromJson).whereType<DriverCancellation>().toList();
+      });
+
+  Future<void> justify(String cancellationId, String justification) =>
+      _guard(() => _dio.post<void>('$_me/cancellations/${_id(cancellationId)}/justify', data: {'justification': justification}));
+
+  Future<void> contest(String penaltyId, String reason) =>
+      _guard(() => _dio.post<void>('$_me/penalties/${_id(penaltyId)}/contest', data: {'reason': reason}));
+
+  Future<T> _guard<T>(Future<T> Function() call) => guardOperatorCall(call);
+}
+
+/// Erreurs serveur → message affichable : 403 / 404 portent un message
+/// destiné à l'utilisateur (compte non validé, ligne introuvable…).
+Future<T> guardOperatorCall<T>(Future<T> Function() call) async {
+  try {
+    return await call();
+  } on DioException catch (e) {
+    final data = e.response?.data;
+    if (const {403, 404}.contains(e.response?.statusCode) && data is Map && data['message'] is String) {
+      throw ApiException(data['message'] as String);
+    }
+    throw ApiException.fromDio(e);
+  } on FormatException {
+    throw ApiException(l10n.reponseInattendueDuServeurReessayez);
+  }
+}
+
+final operatorServiceProvider = Provider<OperatorService>((ref) => OperatorService(ref.watch(dioProvider)));

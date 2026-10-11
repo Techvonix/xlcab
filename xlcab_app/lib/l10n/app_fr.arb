@@ -1,0 +1,1913 @@
+{
+  "@@locale": "fr",
+  "france": "France",
+  "irlande": "Irlande",
+  "espagne": "Espagne",
+  "italie": "Italie",
+  "allemagne": "Allemagne",
+  "portugal": "Portugal",
+  "carte": "Carte",
+  "carteGrise": "Carte grise",
+  "attestationDAssurance": "Attestation d’assurance",
+  "controleTechnique": "Contrôle technique",
+  "permisDeConduire": "Permis de conduire",
+  "carteProfessionnelleVtc": "Carte professionnelle VTC",
+  "justificatifRevtcFacultatif": "Justificatif REVTC (facultatif)",
+  "comportementDuChauffeur": "Comportement du chauffeur",
+  "conduiteDangereuse": "Conduite dangereuse",
+  "etatDuVehicule": "État du véhicule",
+  "retardImportant": "Retard important",
+  "autre": "Autre",
+  "francais": "Français",
+  "anglais": "Anglais",
+  "irlandais": "Irlandais",
+  "espagnol": "Espagnol",
+  "italien": "Italien",
+  "allemand": "Allemand",
+  "portugais": "Portugais",
+  "arabe": "Arabe",
+  "paiementEnAttente": "Paiement en attente",
+  "enAttenteDEnlevement": "En attente d’enlèvement",
+  "prisEnCharge": "Pris en charge",
+  "enRoute": "En route",
+  "livre": "Livré",
+  "problemeSignale": "Problème signalé",
+  "annule": "Annulé",
+  "navetteRose": "Navette Rose",
+  "femmesFamilles": "Femmes & familles",
+  "navetteBleue": "Navette Bleue",
+  "suburbainMixte": "Suburbain mixte",
+  "navetteOrange": "Navette Orange",
+  "corporateB2b": "Corporate / B2B",
+  "navetteAccessibilite": "Navette Accessibilité",
+  "personnesAMobiliteReduite": "Personnes à mobilité réduite",
+  "votreChauffeur": "Votre chauffeur",
+  "enAttente": "En attente",
+  "rechercheDUnChauffeur": "Recherche d'un chauffeur",
+  "aucunChauffeurDisponible": "Aucun chauffeur disponible",
+  "chauffeurEnRoute": "Chauffeur en route",
+  "enCours": "En cours",
+  "termine": "Terminé",
+  "confieAUneNavette": "Confié à une navette",
+  "statutInconnu": "Statut inconnu",
+  "votreCompteAEteSupprime": "Votre compte a été supprimé. Merci d’avoir voyagé avec XLCAB.",
+  "votreSessionAExpireReconnectez": "Votre session a expiré. Reconnectez-vous.",
+  "connexionImpossibleReessayezPlusTard": "Connexion impossible. Réessayez plus tard.",
+  "serviceMomentanementIndisponibleReessayezPlus": "Service momentanément indisponible. Réessayez plus tard.",
+  "activezLaLocalisationDuTelephone": "Activez la localisation du téléphone pour passer en ligne.",
+  "autorisezLAccesAVotre": "Autorisez l’accès à votre position pour recevoir des missions.",
+  "offreExpireeLaCourseA": "Offre expirée : la course a été proposée à un autre chauffeur.",
+  "uneDeVosCoursesA": "Une de vos courses a été annulée.",
+  "missionAcceptee": "Mission acceptée.",
+  "courseDemarree": "Course démarrée.",
+  "passagerEmbarqueCourseDemarree": "Passager embarqué, course démarrée.",
+  "courseTermineeMerci": "Course terminée. Merci !",
+  "desistementEnregistreLaCourseEst": "Désistement enregistré : la course est proposée à un autre chauffeur.",
+  "colisABord": "Colis à bord.",
+  "colisRemisMerci": "Colis remis. Merci !",
+  "problemeSignaleALEquipe": "Problème signalé à l’équipe XLCAB.",
+  "informationsPersonnelles": "Informations personnelles",
+  "documentsDuVehicule": "Documents du véhicule",
+  "documentsPersonnels": "Documents personnels",
+  "informationsVehicule": "Informations véhicule",
+  "envoiPourValidation": "Envoi pour validation",
+  "aEnvoyer": "{value1} à envoyer",
+  "@aEnvoyer": {
+    "placeholders": {
+      "value1": {
+        "type": "Object"
+      }
+    }
+  },
+  "prenomRequis": "Prénom requis",
+  "nomRequis": "Nom requis",
+  "numeroDeTelephoneInvalide": "Numéro de téléphone invalide",
+  "auMoinsUneLangueParlee": "Au moins une langue parlée",
+  "numeroDePermisRequis": "Numéro de permis requis",
+  "dateDExpirationDuPermis": "Date d’expiration du permis à venir requise",
+  "numeroDeCarteVtcRequis": "Numéro de carte VTC requis",
+  "dateDExpirationDeLa": "Date d’expiration de la carte VTC à venir requise",
+  "marqueRequise": "Marque requise",
+  "modeleRequis": "Modèle requis",
+  "couleurRequise": "Couleur requise",
+  "immatriculationAuFormatAb123": "Immatriculation au format AB-123-CD",
+  "uneDashcamEstObligatoire": "Une dashcam est obligatoire",
+  "echeanceDAssuranceAVenir": "Échéance d’assurance à venir requise",
+  "echeanceDuControleTechniqueA": "Échéance du contrôle technique à venir requise",
+  "navetteAccessibiliteVehiculeEquipePmr": "Navette Accessibilité : véhicule équipé PMR et formation PMR requis",
+  "consentementRequisPourEnvoyerVotre": "Consentement requis pour envoyer votre dossier",
+  "accessibilite": "Accessibilité",
+  "laTailleDuTexteSuit": "La taille du texte suit les réglages de votre téléphone, jusqu'à 200 %.",
+  "affichage": "Affichage",
+  "auto": "Auto",
+  "clair": "Clair",
+  "sombre": "Sombre",
+  "reserverUneNavetteAccessibilite": "Réserver une Navette Accessibilité",
+  "seConnecter": "Se connecter",
+  "creerUnCompte": "Créer un compte",
+  "email": "Email",
+  "emailRequis": "Email requis",
+  "motDePasse": "Mot de passe",
+  "n8CaracteresMinimum": "8 caractères minimum",
+  "afficherLeMotDePasse": "Afficher le mot de passe",
+  "masquerLeMotDePasse": "Masquer le mot de passe",
+  "motDePasseRequis": "Mot de passe requis",
+  "leMotDePasseDoit": "Le mot de passe doit contenir au moins 8 caractères",
+  "jAccepteLesConditionsGenerales": "J’accepte les conditions générales d’utilisation et la politique de confidentialité de XLCAB.",
+  "vousDevezAccepterLesConditions": "Vous devez accepter les conditions pour créer un compte.",
+  "patientez": "Patientez…",
+  "creerMonCompte": "Créer mon compte",
+  "adresseGareAeroport": "Adresse, gare, aéroport…",
+  "rechercheEnCours": "Recherche en cours",
+  "aucuneAdresseTrouvee": "Aucune adresse trouvée.",
+  "adressesFavorites": "Adresses favorites",
+  "reservation": "Réservation",
+  "chargementDeLaReservation": "Chargement de la réservation",
+  "impossibleDeChargerLaReservation": "Impossible de charger la réservation.",
+  "reessayer": "Réessayer",
+  "reservationAnnulee": "Réservation annulée",
+  "courseTerminee": "Course terminée",
+  "reservationConfirmee": "Réservation confirmée",
+  "qrCodeDEmbarquementA": "QR code d’embarquement, à présenter au chauffeur",
+  "aPresenterAuChauffeurA": "À présenter au chauffeur à la montée",
+  "suivreMaCourse": "Suivre ma course",
+  "noterLeTrajet": "Noter le trajet",
+  "profilDuChauffeur": "Profil du chauffeur",
+  "annulerLaReservation": "Annuler la réservation",
+  "telechargerLaFacture": "Télécharger la facture {value1}",
+  "@telechargerLaFacture": {
+    "placeholders": {
+      "value1": {
+        "type": "Object"
+      }
+    }
+  },
+  "retourALAccueil": "Retour à l’accueil",
+  "votreChauffeurSeraAttribueA": "Votre chauffeur sera attribué à partir du {value1}",
+  "@votreChauffeurSeraAttribueA": {
+    "placeholders": {
+      "value1": {
+        "type": "Object"
+      }
+    }
+  },
+  "impossibleDOuvrirLaFacture": "Impossible d’ouvrir la facture sur ce téléphone.",
+  "annulerLaReservation2": "Annuler la réservation ?",
+  "gratuitJusquA24H": "Gratuit jusqu’à 24 h avant le départ (ou si aucun chauffeur n’a encore été trouvé), ",
+  "puis50DeFraisJusqu": "puis 50 % de frais jusqu’à 2 h avant, 100 % ensuite. Le remboursement est automatique.",
+  "garder": "Garder",
+  "annulationParLePassager": "Annulation par le passager",
+  "reservationAnnuleeLeRemboursementSera": "Réservation annulée. Le remboursement sera traité par notre équipe.",
+  "reservationAnnuleeRemboursementDeFrais": "Réservation annulée. Remboursement de {refund} (frais : {value1}).",
+  "@reservationAnnuleeRemboursementDeFrais": {
+    "placeholders": {
+      "refund": {
+        "type": "Object"
+      },
+      "value1": {
+        "type": "Object"
+      }
+    }
+  },
+  "reservationAnnuleeRemboursementIntegralDe": "Réservation annulée. Remboursement intégral de {refund}.",
+  "@reservationAnnuleeRemboursementIntegralDe": {
+    "placeholders": {
+      "refund": {
+        "type": "Object"
+      }
+    }
+  },
+  "passager": "{value1} passager{value2}",
+  "@passager": {
+    "placeholders": {
+      "value1": {
+        "type": "Object"
+      },
+      "value2": {
+        "type": "Object"
+      }
+    }
+  },
+  "montant": "Montant : {value1}",
+  "@montant": {
+    "placeholders": {
+      "value1": {
+        "type": "Object"
+      }
+    }
+  },
+  "chargementDuProfil": "Chargement du profil",
+  "profilIndisponible": "Profil indisponible.",
+  "nouveauChauffeur": "Nouveau chauffeur",
+  "n5Avis": "★ {value1} / 5 · {value2} avis",
+  "@n5Avis": {
+    "placeholders": {
+      "value1": {
+        "type": "Object"
+      },
+      "value2": {
+        "type": "Object"
+      }
+    }
+  },
+  "nouveauChauffeurPasEncoreNote": "Nouveau chauffeur, pas encore noté",
+  "noteSur5Avis": "Note {value1} sur 5, {value2} avis",
+  "@noteSur5Avis": {
+    "placeholders": {
+      "value1": {
+        "type": "Object"
+      },
+      "value2": {
+        "type": "Object"
+      }
+    }
+  },
+  "trajetsRealises": "{value1} trajets réalisés",
+  "@trajetsRealises": {
+    "placeholders": {
+      "value1": {
+        "type": "Object"
+      }
+    }
+  },
+  "dashcamActive": "Dashcam active",
+  "formeALAccueilPmr": "Formé à l’accueil PMR",
+  "vehiculeEquipePmr": "Véhicule équipé PMR",
+  "languesParlees": "Langues parlées",
+  "vousAvezDonne5": "Vous avez donné {value1} / 5",
+  "@vousAvezDonne5": {
+    "placeholders": {
+      "value1": {
+        "type": "Object"
+      }
+    }
+  },
+  "merciVotreAvisAideLes": "Merci, votre avis aide les autres passagers.",
+  "signalerUnProbleme": "Signaler un problème",
+  "signalementEnvoyeNotreEquipeLe": "Signalement envoyé. Notre équipe le traite et peut vous recontacter.",
+  "vehicule": "Véhicule",
+  "places": "{value1} places",
+  "@places": {
+    "placeholders": {
+      "value1": {
+        "type": "Object"
+      }
+    }
+  },
+  "immatriculation": "Immatriculation {value1}",
+  "@immatriculation": {
+    "placeholders": {
+      "value1": {
+        "type": "Object"
+      }
+    }
+  },
+  "merciPourVotreNote": "Merci pour votre note !",
+  "commentSEstPasseVotre": "Comment s’est passé votre trajet avec {value1} ?",
+  "@commentSEstPasseVotre": {
+    "placeholders": {
+      "value1": {
+        "type": "Object"
+      }
+    }
+  },
+  "n1Etoile": "1 étoile",
+  "etoiles": "{i} étoiles",
+  "@etoiles": {
+    "placeholders": {
+      "i": {
+        "type": "Object"
+      }
+    }
+  },
+  "tresDecevant": "Très décevant",
+  "decevant": "Décevant",
+  "correct": "Correct",
+  "bien": "Bien",
+  "excellent": "Excellent",
+  "unCommentaireFacultatif": "Un commentaire ? (facultatif)",
+  "luUniquementParLEquipe": "Lu uniquement par l’équipe XLCAB",
+  "envoyerMaNote": "Envoyer ma note",
+  "enCasDeDangerImmediat": "En cas de danger immédiat, appelez le 112.",
+  "queSEstIlPasse": "Que s’est-il passé ? (facultatif)",
+  "annuler": "Annuler",
+  "envoyer": "Envoyer",
+  "dateDEnlevement": "Date d’enlèvement",
+  "heureDEnlevement": "Heure d’enlèvement",
+  "choisissezLAdresseDEnlevement": "Choisissez l’adresse d’enlèvement.",
+  "choisissezLAdresseDeLivraison": "Choisissez l’adresse de livraison.",
+  "enlevementEtLivraisonDoiventEtre": "Enlèvement et livraison doivent être différents.",
+  "choisissezLaDateDEnlevement": "Choisissez la date d’enlèvement.",
+  "envoiAuMoins2H": "Envoi au moins 2 h à l’avance.",
+  "confirmezQueLeColisNe": "Confirmez que le colis ne contient aucun objet interdit.",
+  "aucuneOptionDisponiblePourCe": "Aucune option disponible pour ce trajet.",
+  "paiementMomentanementIndisponibleReessayezPlus": "Paiement momentanément indisponible. Réessayez plus tard.",
+  "paiementAnnuleVotreEnvoiN": "Paiement annulé. Votre envoi n’est pas confirmé.",
+  "paiementRefuse": "Paiement refusé.",
+  "adresseDEnlevement": "Adresse d’enlèvement",
+  "adresseDeLivraison": "Adresse de livraison",
+  "requis": "Requis",
+  "envoyerUnColis": "Envoyer un colis",
+  "trajet": "Trajet",
+  "dateEtHeureDEnlevement": "Date et heure d’enlèvement",
+  "auMoins2HA": "Au moins 2 h à l’avance",
+  "colis": "Colis",
+  "poidsKg": "Poids (kg)",
+  "n30KgMaximum": "30 kg maximum",
+  "longueurCm": "Longueur (cm)",
+  "largeurCm": "Largeur (cm)",
+  "hauteurCm": "Hauteur (cm)",
+  "tropGrand1208080": "Trop grand : 120 × 80 × 80 cm maximum.",
+  "maximum30KgEt120": "Maximum 30 kg et 120 × 80 × 80 cm.",
+  "contenuExCartonDeLivres": "Contenu (ex. carton de livres)",
+  "decrivezLeContenu": "Décrivez le contenu",
+  "colisFragile": "Colis fragile",
+  "destinataire": "Destinataire",
+  "nomDuDestinataire": "Nom du destinataire",
+  "telephoneDuDestinataire": "Téléphone du destinataire",
+  "numeroInvalide": "Numéro invalide",
+  "jeCertifieQueLeColis": "Je certifie que le colis ne contient aucun objet interdit : matières dangereuses, ",
+  "armesStupefiantsAnimauxDenreesPerissables": "armes, stupéfiants, animaux, denrées périssables, objets de valeur (bijoux, espèces).",
+  "commentVoyageVotreColis": "Comment voyage votre colis ?",
+  "navettePartageeTrajetRetour": "Navette partagée (trajet retour)",
+  "navettePartagee": "Navette partagée",
+  "votreColisVoyageAuRetour": "Votre colis voyage au retour d’une navette XLCAB qui rentrerait sinon à vide.",
+  "votreColisVoyageAvecUne": "Votre colis voyage avec une navette déjà prévue sur ce trajet, avec des passagers.",
+  "navetteDediee": "Navette dédiée",
+  "uneNavettePartPourVotre": "Une navette part pour votre colis à l’heure choisie.",
+  "annulationGratuiteJusquAL": "Annulation gratuite jusqu’à l’enlèvement si aucun chauffeur n’est encore engagé ; ",
+  "sinon50DeFraisEntre": "sinon 50 % de frais entre 24 h et 2 h avant, 100 % ensuite.",
+  "voirLesOptionsEtLe": "Voir les options et le prix",
+  "aucuneOptionDisponible": "Aucune option disponible",
+  "payer": "Payer {value1}",
+  "@payer": {
+    "placeholders": {
+      "value1": {
+        "type": "Object"
+      }
+    }
+  },
+  "indisponible": "Indisponible",
+  "departPrevu": "Départ prévu : {value1}",
+  "@departPrevu": {
+    "placeholders": {
+      "value1": {
+        "type": "Object"
+      }
+    }
+  },
+  "suiviDuColis": "Suivi du colis",
+  "actualiser": "Actualiser",
+  "chargementDuColis": "Chargement du colis",
+  "suiviIndisponible": "Suivi indisponible.",
+  "navettePartageeAuRetourD": "Navette partagée, au retour d’un chauffeur XLCAB",
+  "navettePartageeAvecDesPassagers": "Navette partagée, avec des passagers",
+  "notreEquipeVousRecontacte": "{value1}. Notre équipe vous recontacte.",
+  "@notreEquipeVousRecontacte": {
+    "placeholders": {
+      "value1": {
+        "type": "Object"
+      }
+    }
+  },
+  "qrCodeDuColisA": "QR code du colis, à présenter au chauffeur à l’enlèvement",
+  "aPresenterAuChauffeurA2": "À présenter au chauffeur à l’enlèvement",
+  "codeDeRemise": "Code de remise",
+  "codeDeRemise2": "Code de remise : {value1}",
+  "@codeDeRemise2": {
+    "placeholders": {
+      "value1": {
+        "type": "Object"
+      }
+    }
+  },
+  "transmettezCeCodeAIl": "Transmettez ce code à {value1} : il le donnera au chauffeur pour recevoir le colis.",
+  "@transmettezCeCodeAIl": {
+    "placeholders": {
+      "value1": {
+        "type": "Object"
+      }
+    }
+  },
+  "copierLeCode": "Copier le code",
+  "codeCopie": "Code copié.",
+  "destinataire2": "Destinataire : {value1}",
+  "@destinataire2": {
+    "placeholders": {
+      "value1": {
+        "type": "Object"
+      }
+    }
+  },
+  "ajouterUnePhotoDuColis": "Ajouter une photo du colis",
+  "annulerLEnvoi": "Annuler l’envoi",
+  "photoAjoutee": "Photo ajoutée.",
+  "annulerLEnvoi2": "Annuler l’envoi ?",
+  "leRemboursementEstAutomatiqueSelon": "Le remboursement est automatique, selon les conditions d’annulation.",
+  "annulationParLExpediteur": "Annulation par l’expéditeur",
+  "envoiAnnuleLeRemboursementSera": "Envoi annulé. Le remboursement sera traité par notre équipe.",
+  "envoiAnnuleRemboursementDe": "Envoi annulé. Remboursement de {value1}.",
+  "@envoiAnnuleRemboursementDe": {
+    "placeholders": {
+      "value1": {
+        "type": "Object"
+      }
+    }
+  },
+  "envoiConfirme": "Envoi confirmé",
+  "prisEnChargeParLe": "Pris en charge par le chauffeur",
+  "livreAuDestinataire": "Livré au destinataire",
+  "reserverUnTrajet": "Réserver un trajet",
+  "depart": "Départ",
+  "adresseDeDepart": "Adresse de départ",
+  "inverserDepartEtArrivee": "Inverser départ et arrivée",
+  "arrivee": "Arrivée",
+  "lArriveeDoitEtreDifferente": "L'arrivée doit être différente du départ",
+  "adresseDArrivee": "Adresse d'arrivée",
+  "reservationAuMoins2H": "Réservation au moins 2 h à l’avance (à partir de ",
+  "passagers": "Passagers",
+  "ajouterUnColis": "Ajouter un colis",
+  "votreColisVoyageAvecVous": "Votre colis voyage avec vous",
+  "renseignezLeDepartLArrivee": "Renseignez le départ, l’arrivée et la date pour obtenir un prix.",
+  "payer2": "Payer",
+  "dateDeDepart": "Date de départ",
+  "heureDeDepart": "Heure de départ",
+  "navette": "Navette",
+  "ouvreLaRechercheDAdresse": "Ouvre la recherche d’adresse",
+  "dateEtHeureDeDepart": "Date et heure de départ : {value1}",
+  "@dateEtHeureDeDepart": {
+    "placeholders": {
+      "value1": {
+        "type": "Object"
+      }
+    }
+  },
+  "dateEtHeureDeDepart2": "Date et heure de départ",
+  "retirerUn": "Retirer un {unit}",
+  "@retirerUn": {
+    "placeholders": {
+      "unit": {
+        "type": "Object"
+      }
+    }
+  },
+  "ajouterUn": "Ajouter un {unit}",
+  "@ajouterUn": {
+    "placeholders": {
+      "unit": {
+        "type": "Object"
+      }
+    }
+  },
+  "siegeEnfant": "{value1} siège{value2} enfant",
+  "@siegeEnfant": {
+    "placeholders": {
+      "value1": {
+        "type": "Object"
+      },
+      "value2": {
+        "type": "Object"
+      }
+    }
+  },
+  "bagageSupplementaire": "bagage supplémentaire",
+  "options": "Options",
+  "aucuneOption": "Aucune option",
+  "siegesEnfants": "Sièges enfants",
+  "siegeEnfant2": "siège enfant",
+  "wiFiABord": "Wi-Fi à bord",
+  "bagageSupplementaire2": "Bagage supplémentaire",
+  "lePrixAEteMis": "Le prix a été mis à jour : {value1}. Confirmez pour payer ce montant.",
+  "@lePrixAEteMis": {
+    "placeholders": {
+      "value1": {
+        "type": "Object"
+      }
+    }
+  },
+  "paiementAnnuleVotreReservationN": "Paiement annulé. Votre réservation n’est pas confirmée tant qu’elle n’est pas payée.",
+  "paiementRefuseEssayezUnAutre": "Paiement refusé. Essayez un autre moyen de paiement.",
+  "paiement": "Paiement",
+  "aucuneReservationEnCoursRecommencez": "Aucune réservation en cours. Recommencez depuis l’écran de réservation.",
+  "votreTrajet": "Votre trajet",
+  "passager2": "{value1} passager{value2} · {value3}",
+  "@passager2": {
+    "placeholders": {
+      "value1": {
+        "type": "Object"
+      },
+      "value2": {
+        "type": "Object"
+      },
+      "value3": {
+        "type": "Object"
+      }
+    }
+  },
+  "prix": "Prix",
+  "htTva": "{value1} (HT, TVA {value2} %)",
+  "@htTva": {
+    "placeholders": {
+      "value1": {
+        "type": "Object"
+      },
+      "value2": {
+        "type": "Object"
+      }
+    }
+  },
+  "totalTtc": "Total TTC",
+  "annulation": "Annulation",
+  "gratuiteJusquA24H": "Gratuite jusqu’à 24 h avant le départ, puis 50 % de frais jusqu’à 2 h avant, 100 % ensuite. ",
+  "aucunFraisSiAucunChauffeur": "Aucun frais si aucun chauffeur n’a encore été trouvé. Remboursement automatique.",
+  "paiementSecuriseParStripeXlcab": "Paiement sécurisé par Stripe. XLCAB ne voit jamais votre numéro de carte.",
+  "paiementEnCours": "Paiement en cours…",
+  "selectionNavetteAVenir": "Sélection navette — à venir",
+  "carteDuTrajet": "Carte du trajet",
+  "impossibleDeCalculerLePrix": "Impossible de calculer le prix.",
+  "calculDuPrix": "Calcul du prix…",
+  "recapitulatif": "Récapitulatif",
+  "calculDuPrixEnCours": "Calcul du prix en cours",
+  "environ": "{value1} · environ {value2}",
+  "@environ": {
+    "placeholders": {
+      "value1": {
+        "type": "Object"
+      },
+      "value2": {
+        "type": "Object"
+      }
+    }
+  },
+  "colisHt": "Colis (HT)",
+  "transportPassagersHt": "Transport passagers (HT)",
+  "tva": "TVA {value1} : {value2}",
+  "@tva": {
+    "placeholders": {
+      "value1": {
+        "type": "Object"
+      },
+      "value2": {
+        "type": "Object"
+      }
+    }
+  },
+  "portailCorporateAVenir": "Portail corporate — à venir",
+  "impossibleDOuvrirLItineraire": "Impossible d’ouvrir l’itinéraire sur ce téléphone.",
+  "photoDuColisRemisObligatoire": "Photo du colis remis obligatoire.",
+  "demarrerSansScanner": "Démarrer sans scanner ?",
+  "leScanDuQrProuve": "Le scan du QR prouve que le passager est bien monté. Sans lui, ",
+  "lEmbarquementNeSeraPas": "l’embarquement ne sera pas confirmé en cas de litige.",
+  "demarrer": "Démarrer",
+  "terminerLaCourse": "Terminer la course ?",
+  "confirmezQueLePassagerA": "Confirmez que le passager a été déposé à destination.",
+  "terminer": "Terminer",
+  "vousDesister": "Vous désister ?",
+  "laCourseSeraProposeeA": "La course sera proposée à un autre chauffeur. Les désistements ",
+  "repetesPeuventEntrainerUneSuspension": "répétés peuvent entraîner une suspension du compte.",
+  "meDesister": "Me désister",
+  "desistementDuChauffeur": "Désistement du chauffeur",
+  "qrCodeNonReconnuCe": "QR code non reconnu : ce n’est pas un QR XLCAB.",
+  "retour": "Retour",
+  "modeChauffeur": "Mode chauffeur",
+  "monCompte": "Mon compte",
+  "chargementDuModeChauffeur": "Chargement du mode chauffeur",
+  "votreCompteChauffeurEstEn": "Votre compte chauffeur est en cours de validation par XLCAB. ",
+  "vousPourrezPasserEnLigne": "Vous pourrez passer en ligne dès son approbation.",
+  "enCourse": "En course",
+  "mission": "Mission",
+  "missionsAVenir": "Missions à venir",
+  "revenus": "Revenus",
+  "coursesRecentes": "Courses récentes",
+  "passezEnLignePourRecevoir": "Passez en ligne pour recevoir des missions.",
+  "connexionAuServeurLesMissions": "Connexion au serveur… Les missions arriveront dès qu’elle sera rétablie.",
+  "enAttenteDeMissionsGardez": "En attente de missions. Gardez l’application ouverte.",
+  "enLigne": "En ligne",
+  "horsLigne": "Hors ligne",
+  "noteCourses": "Note {value1} · {value2} courses",
+  "@noteCourses": {
+    "placeholders": {
+      "value1": {
+        "type": "Object"
+      },
+      "value2": {
+        "type": "Object"
+      }
+    }
+  },
+  "disponiblePourDesMissions": "Disponible pour des missions",
+  "course": "{value1} course{value2}",
+  "@course": {
+    "placeholders": {
+      "value1": {
+        "type": "Object"
+      },
+      "value2": {
+        "type": "Object"
+      }
+    }
+  },
+  "aujourdHui": "Aujourd’hui",
+  "cetteSemaine": "Cette semaine",
+  "ceMois": "Ce mois",
+  "revenuNetDesCoursesTerminees": "Revenu net des courses terminées.",
+  "revenuNetCommissionXlcabDe": "Revenu net, commission XLCAB de {value1} déduite. ",
+  "@revenuNetCommissionXlcabDe": {
+    "placeholders": {
+      "value1": {
+        "type": "Object"
+      }
+    }
+  },
+  "ceMoisPayesParLes": "Ce mois : {value1} payés par les clients, ",
+  "@ceMoisPayesParLes": {
+    "placeholders": {
+      "value1": {
+        "type": "Object"
+      }
+    }
+  },
+  "commission": "commission {value1}.",
+  "@commission": {
+    "placeholders": {
+      "value1": {
+        "type": "Object"
+      }
+    }
+  },
+  "remiseDuColis": "Remise du colis",
+  "demandezAuDestinataireSonCode": "Demandez au destinataire son code de remise à 4 chiffres, puis photographiez le colis remis.",
+  "photographierEtValider": "Photographier et valider",
+  "jeNeRentrePasPar": "Je ne rentre pas par ce trajet",
+  "expediteurAbsent": "Expéditeur absent",
+  "colisNonConformePoidsTaille": "Colis non conforme (poids, taille, contenu)",
+  "destinataireAbsentOuInjoignable": "Destinataire absent ou injoignable",
+  "codeDeRemiseRefuse": "Code de remise refusé",
+  "colisEndommage": "Colis endommagé",
+  "signaler": "Signaler",
+  "chargement": "Chargement",
+  "devenirChauffeur": "Devenir chauffeur",
+  "photographiezChaqueDocumentEnEntier": "Photographiez chaque document en entier, à plat et bien éclairé.",
+  "precedent": "Précédent",
+  "envoi": "Envoi…",
+  "envoyerMonDossier": "Envoyer mon dossier",
+  "suivant": "Suivant",
+  "prenom": "Prénom",
+  "nom": "Nom",
+  "telephoneMobile": "Téléphone mobile",
+  "numeroDePermis": "Numéro de permis",
+  "dateDExpirationDuPermis2": "Date d’expiration du permis",
+  "numeroDeCarteVtc": "Numéro de carte VTC",
+  "dateDExpirationDeLa2": "Date d’expiration de la carte VTC",
+  "numeroRevtcFacultatif": "Numéro REVTC (facultatif)",
+  "formeEALAccueil": "Formé(e) à l’accueil des personnes à mobilité réduite",
+  "obligatoirePourLaNavetteAccessibilite": "Obligatoire pour la Navette Accessibilité",
+  "photosDuPermisRectoEt": "Photos du permis (recto) et de la carte VTC.",
+  "marque": "Marque",
+  "modele": "Modèle",
+  "couleur": "Couleur",
+  "immatriculation2": "Immatriculation",
+  "placesPassagers": "Places passagers",
+  "n7Places": "7 places",
+  "n8Places": "8 places",
+  "navetteSouhaitee": "Navette souhaitée",
+  "navetteRoseConductricesUniquementSous": "Navette Rose : conductrices uniquement, sous réserve d’habilitation par l’équipe XLCAB.",
+  "vehiculeEquipePmrRampeFixations": "Véhicule équipé PMR (rampe, fixations)",
+  "dashcamInstalleeEtFonctionnelleObligatoire": "Dashcam installée et fonctionnelle (obligatoire)",
+  "echeanceDeLAssurance": "Échéance de l’assurance",
+  "echeanceDuControleTechnique": "Échéance du contrôle technique",
+  "identite": "Identité",
+  "places2": "{value1} places · {value2}",
+  "@places2": {
+    "placeholders": {
+      "value1": {
+        "type": "Object"
+      },
+      "value2": {
+        "type": "Object"
+      }
+    }
+  },
+  "documents": "Documents",
+  "documentsObligatoiresRecus": "{docsCount} / {value1} documents obligatoires reçus",
+  "@documentsObligatoiresRecus": {
+    "placeholders": {
+      "docsCount": {
+        "type": "Object"
+      },
+      "value1": {
+        "type": "Object"
+      }
+    }
+  },
+  "jAccepteQueXlcabTraite": "J’accepte que XLCAB traite mes documents pour vérifier mon dossier chauffeur. ",
+  "lesJustificatifsVtcSontConserves": "Les justificatifs VTC sont conservés 10 ans (obligation légale).",
+  "etapeSur": "Étape {value1} sur {onboardingStepCount} : {value2}",
+  "@etapeSur": {
+    "placeholders": {
+      "value1": {
+        "type": "Object"
+      },
+      "onboardingStepCount": {
+        "type": "Object"
+      },
+      "value2": {
+        "type": "Object"
+      }
+    }
+  },
+  "etapeSur2": "Étape {value1} sur {onboardingStepCount}",
+  "@etapeSur2": {
+    "placeholders": {
+      "value1": {
+        "type": "Object"
+      },
+      "onboardingStepCount": {
+        "type": "Object"
+      }
+    }
+  },
+  "compteChauffeurValide": "Compte chauffeur validé",
+  "dossierEnCoursDeVerification": "Dossier en cours de vérification",
+  "vousPouvezPasserEnLigne": "Vous pouvez passer en ligne et recevoir des missions.",
+  "lEquipeXlcabVerifieVos": "L’équipe XLCAB vérifie vos documents. Vous serez informé(e) dès la validation de votre dossier.",
+  "passerEnModeChauffeur": "Passer en mode chauffeur",
+  "nonEnvoye": "Non envoyé",
+  "envoiEnCours": "Envoi en cours…",
+  "recuEnAttenteDeVerification": "Reçu — en attente de vérification",
+  "echecDeLEnvoi": "Échec de l’envoi",
+  "texte8": "{value1} : {text}",
+  "@texte8": {
+    "placeholders": {
+      "value1": {
+        "type": "Object"
+      },
+      "text": {
+        "type": "Object"
+      }
+    }
+  },
+  "reprendreLaPhoto": "Reprendre la photo",
+  "photographier": "Photographier",
+  "galerie": "Galerie",
+  "retourColisARamener": "Retour : colis à ramener",
+  "courseEnCours": "Course en cours",
+  "navetteColis": "Navette colis",
+  "prochaineMission": "Prochaine mission",
+  "embarque": "{value1} (embarqué)",
+  "@embarque": {
+    "placeholders": {
+      "value1": {
+        "type": "Object"
+      }
+    }
+  },
+  "colisARamenerAuRetour": "{value1} colis à ramener au retour : vous ne rentrerez pas à vide.",
+  "@colisARamenerAuRetour": {
+    "placeholders": {
+      "value1": {
+        "type": "Object"
+      }
+    }
+  },
+  "itineraireDuRetour": "Itinéraire du retour",
+  "versLArrivee": "Vers l’arrivée",
+  "versLeDepart": "Vers le départ",
+  "appeler": "Appeler",
+  "terminerLaCourse2": "Terminer la course",
+  "scannerLeColisEtDemarrer": "Scanner le colis et démarrer",
+  "scannerLeQrEtDemarrer": "Scanner le QR et démarrer",
+  "demarrerSansScanner2": "Démarrer sans scanner",
+  "demarragePossible1HAvant": "Démarrage possible 1 h avant le départ.",
+  "meDesisterDeCetteCourse": "Me désister de cette course",
+  "pass": "{value1} pass.",
+  "@pass": {
+    "placeholders": {
+      "value1": {
+        "type": "Object"
+      }
+    }
+  },
+  "colis2": "{value1} colis",
+  "@colis2": {
+    "placeholders": {
+      "value1": {
+        "type": "Object"
+      }
+    }
+  },
+  "nouvelleMission": "Nouvelle mission",
+  "priseEnChargeA": "Prise en charge à {value1}",
+  "@priseEnChargeA": {
+    "placeholders": {
+      "value1": {
+        "type": "Object"
+      }
+    }
+  },
+  "refuser": "Refuser",
+  "accepter": "Accepter",
+  "secondesPourRepondre": "{seconds} secondes pour répondre",
+  "@secondesPourRepondre": {
+    "placeholders": {
+      "seconds": {
+        "type": "Object"
+      }
+    }
+  },
+  "colisTraite": "Colis ({done}/{value1} traité{value2})",
+  "@colisTraite": {
+    "placeholders": {
+      "done": {
+        "type": "Object"
+      },
+      "value1": {
+        "type": "Object"
+      },
+      "value2": {
+        "type": "Object"
+      }
+    }
+  },
+  "remise": "Remise : {value1} — {value2}",
+  "@remise": {
+    "placeholders": {
+      "value1": {
+        "type": "Object"
+      },
+      "value2": {
+        "type": "Object"
+      }
+    }
+  },
+  "enlevement": "Enlèvement : {value1} — {value2}",
+  "@enlevement": {
+    "placeholders": {
+      "value1": {
+        "type": "Object"
+      },
+      "value2": {
+        "type": "Object"
+      }
+    }
+  },
+  "scannerLeColis": "Scanner le colis",
+  "remettreLeColis": "Remettre le colis",
+  "appelerLExpediteur": "Appeler l’expéditeur",
+  "appelerLeDestinataire": "Appeler le destinataire",
+  "nosNavettes": "Nos navettes",
+  "derniersTrajets": "Derniers trajets",
+  "chargementDeVosTrajets": "Chargement de vos trajets",
+  "impossibleDeChargerVosTrajets": "Impossible de charger vos trajets.",
+  "monProfil": "Mon profil",
+  "bonjour": "Bonjour",
+  "ouAllonsNousAujourdHui": "Où allons-nous aujourd'hui ?",
+  "notifications": "Notifications",
+  "lesNotificationsArriventBientot": "Les notifications arrivent bientôt.",
+  "navettes7PlacesTrajets60": "Navettes 7+ places · Trajets 60 km+ · Colis inclus",
+  "aucunTrajetPourLInstant": "Aucun trajet pour l'instant",
+  "vosProchainsTrajetsApparaitrontIci": "Vos prochains trajets apparaîtront ici.",
+  "vousEtesChauffeurVtc": "Vous êtes chauffeur VTC ?",
+  "rejoignezXlcabEtConduisezUne": "Rejoignez XLCAB et conduisez une navette 7+ places sur des trajets de 60 km et plus.",
+  "devenirChauffeurXlcab": "Devenir chauffeur XLCAB",
+  "accueil": "Accueil",
+  "reserver": "Réserver",
+  "profil": "Profil",
+  "ouvreLeSuiviEnTemps": "Ouvre le suivi en temps réel",
+  "depart2": "Départ : {value1}",
+  "@depart2": {
+    "placeholders": {
+      "value1": {
+        "type": "Object"
+      }
+    }
+  },
+  "arrivee2": "Arrivée : {value1}",
+  "@arrivee2": {
+    "placeholders": {
+      "value1": {
+        "type": "Object"
+      }
+    }
+  },
+  "navettes7Places": "Navettes 7+ places",
+  "voyagezAPlusieursDansUne": "Voyagez à plusieurs dans une navette confortable, réservée à l’avance.",
+  "trajets60Km": "Trajets 60 km+",
+  "pensePourLesLonguesDistances": "Pensé pour les longues distances : grandes villes, aéroports, régions voisines.",
+  "colisInclus": "Colis inclus",
+  "envoyezUnColisSurLe": "Envoyez un colis sur le trajet d’une navette, suivi jusqu’à sa remise.",
+  "passer": "Passer",
+  "pageSur": "Page {value1} sur {value2}",
+  "@pageSur": {
+    "placeholders": {
+      "value1": {
+        "type": "Object"
+      },
+      "value2": {
+        "type": "Object"
+      }
+    }
+  },
+  "commencer": "Commencer",
+  "chargementDesPreferences": "Chargement des préférences",
+  "preferencesIndisponibles": "Préférences indisponibles.",
+  "lesMessagesIndispensablesAUne": "Les messages indispensables à une course (chauffeur en route, arrivée, sécurité) sont toujours envoyés.",
+  "notificationsSurLeTelephone": "Notifications sur le téléphone",
+  "rappelsDeDepartSuiviDe": "Rappels de départ, suivi de colis",
+  "confirmationsFacturesRecus": "Confirmations, factures, reçus",
+  "rappelLaVeilleDuDepart": "Rappel la veille du départ",
+  "offresEtNouveautesXlcab": "Offres et nouveautés XLCAB",
+  "nouvellesLignesPromotionsDesactivableA": "Nouvelles lignes, promotions. Désactivable à tout moment.",
+  "carteEnregistree": "Carte enregistrée.",
+  "carteRefusee": "Carte refusée.",
+  "supprimerCetteCarte": "Supprimer cette carte ?",
+  "seTerminantPar": "{value1} se terminant par {value2}",
+  "@seTerminantPar": {
+    "placeholders": {
+      "value1": {
+        "type": "Object"
+      },
+      "value2": {
+        "type": "Object"
+      }
+    }
+  },
+  "supprimer": "Supprimer",
+  "carteSupprimee": "Carte supprimée.",
+  "moyensDePaiement": "Moyens de paiement",
+  "chargementDesCartes": "Chargement des cartes",
+  "cartesIndisponibles": "Cartes indisponibles.",
+  "aucuneCarteEnregistreeVousPourrez": "Aucune carte enregistrée. Vous pourrez aussi en enregistrer une au moment du paiement.",
+  "expiree": "Expirée ({value1})",
+  "@expiree": {
+    "placeholders": {
+      "value1": {
+        "type": "Object"
+      }
+    }
+  },
+  "expireFin": "Expire fin {value1}",
+  "@expireFin": {
+    "placeholders": {
+      "value1": {
+        "type": "Object"
+      }
+    }
+  },
+  "supprimerLaCarteSeTerminant": "Supprimer la carte {value1} se terminant par {value2}",
+  "@supprimerLaCarteSeTerminant": {
+    "placeholders": {
+      "value1": {
+        "type": "Object"
+      },
+      "value2": {
+        "type": "Object"
+      }
+    }
+  },
+  "ajouterUneCarte": "Ajouter une carte",
+  "cartesConserveesParStripeCertifie": "Cartes conservées par Stripe (certifié PCI-DSS). XLCAB ne voit jamais votre numéro de carte.",
+  "passager3": "Passager",
+  "chauffeur2": "Chauffeur",
+  "administrateurEntreprise": "Administrateur entreprise",
+  "collaborateurEntreprise": "Collaborateur entreprise",
+  "equipeXlcab": "Équipe XLCAB",
+  "mesTrajetsEtPaiements": "Mes trajets et paiements",
+  "historiqueDesTrajets": "Historique des trajets",
+  "preferences": "Préférences",
+  "informationsLegales": "Informations légales",
+  "politiqueDeConfidentialite": "Politique de confidentialité",
+  "conditionsGeneralesCguCgv": "Conditions générales (CGU / CGV)",
+  "protectionDesDonnees": "Protection des données",
+  "seDeconnecter": "Se déconnecter",
+  "supprimerMonCompte": "Supprimer mon compte",
+  "xlcabVersion": "XLCAB version {appVersion}",
+  "@xlcabVersion": {
+    "placeholders": {
+      "appVersion": {
+        "type": "Object"
+      }
+    }
+  },
+  "impossibleDOuvrirLeLien": "Impossible d’ouvrir le lien sur ce téléphone.",
+  "modifierMonNom": "Modifier mon nom",
+  "champObligatoire": "Champ obligatoire",
+  "monNom": "Mon nom",
+  "enregistrer": "Enregistrer",
+  "supprimerVotreCompte": "Supprimer votre compte ?",
+  "cetteActionEstDefinitiveVos": "Cette action est définitive. Vos nom, e-mail, téléphone et cartes enregistrées seront effacés. ",
+  "lHistoriqueDeVosCourses": "L’historique de vos courses est conservé de façon anonyme pour nos obligations comptables.",
+  "garderMonCompte": "Garder mon compte",
+  "apparence": "Apparence",
+  "systeme": "Système",
+  "nouvelleAdresseFavorite": "Nouvelle adresse favorite",
+  "ajouteeAVosAdresses": "« {label} » ajoutée à vos adresses.",
+  "@ajouteeAVosAdresses": {
+    "placeholders": {
+      "label": {
+        "type": "Object"
+      }
+    }
+  },
+  "supprimer2": "Supprimer « {value1} » ?",
+  "@supprimer2": {
+    "placeholders": {
+      "value1": {
+        "type": "Object"
+      }
+    }
+  },
+  "chargementDesAdresses": "Chargement des adresses",
+  "adressesIndisponibles": "Adresses indisponibles.",
+  "enregistrezVosAdressesHabituellesMaison": "Enregistrez vos adresses habituelles (maison, travail…) pour réserver plus vite.",
+  "supprimer3": "Supprimer {value1}",
+  "@supprimer3": {
+    "placeholders": {
+      "value1": {
+        "type": "Object"
+      }
+    }
+  },
+  "ajouterUneAdresse": "Ajouter une adresse",
+  "n10AdressesAuMaximumSupprimez": "10 adresses au maximum : supprimez-en une pour en ajouter.",
+  "nomDeLAdresse": "Nom de l’adresse",
+  "maison": "Maison",
+  "travail": "Travail",
+  "famille": "Famille",
+  "historiqueIndisponible": "Historique indisponible.",
+  "chargementDeLHistorique": "Chargement de l’historique",
+  "aucunTrajetPourLeMoment": "Aucun trajet pour le moment.",
+  "voirLesTrajetsPlusAnciens": "Voir les trajets plus anciens",
+  "payeParLEntreprise": "Payé par l’entreprise",
+  "navettes7PlacesTrajets602": "Navettes 7+ places.\nTrajets 60 km+. Colis inclus.",
+  "suiviDuTrajet": "Suivi du trajet",
+  "chargementDuSuivi": "Chargement du suivi",
+  "environMinutes": "{value1} : environ {value2} minutes",
+  "@environMinutes": {
+    "placeholders": {
+      "value1": {
+        "type": "Object"
+      },
+      "value2": {
+        "type": "Object"
+      }
+    }
+  },
+  "voirLeProfilDuChauffeur": "Voir le profil du chauffeur",
+  "avantLArriveeDuChauffeur": "avant l’arrivée du chauffeur",
+  "avantLArriveeADestination": "avant l’arrivée à destination",
+  "noteSur5": "Note {value1} sur 5",
+  "@noteSur5": {
+    "placeholders": {
+      "value1": {
+        "type": "Object"
+      }
+    }
+  },
+  "dashcam": "Dashcam",
+  "equipePmr": "Équipé PMR",
+  "message": "Message",
+  "partager": "Partager",
+  "jeSuisEnTrajetXlcab": "Je suis en trajet XLCAB vers {value1}.",
+  "@jeSuisEnTrajetXlcab": {
+    "placeholders": {
+      "value1": {
+        "type": "Object"
+      }
+    }
+  },
+  "chauffeur3": "Chauffeur : {value1}",
+  "@chauffeur3": {
+    "placeholders": {
+      "value1": {
+        "type": "Object"
+      }
+    }
+  },
+  "arriveeEstimeeDansMin": "Arrivée estimée dans ≈ {value1} min.",
+  "@arriveeEstimeeDansMin": {
+    "placeholders": {
+      "value1": {
+        "type": "Object"
+      }
+    }
+  },
+  "infosDuTrajetCopieesCollez": "Infos du trajet copiées : collez-les dans un message à un proche.",
+  "connexionAuSuiviEnDirect": "Connexion au suivi en direct…",
+  "connexionPerdueMiseAJour": "Connexion perdue · mise à jour toutes les 10 s",
+  "messages": "Messages",
+  "aucunMessagePourLInstant": "Aucun message pour l’instant.",
+  "votreMessage": "Votre message",
+  "sosAlerteDUrgence": "SOS, alerte d’urgence",
+  "besoinDAide": "Besoin d’aide ?",
+  "enCasDeDangerImmediat2": "En cas de danger immédiat, appelez le 112.\n\n",
+  "vousPouvezAussiAlerterL": "Vous pouvez aussi alerter l’équipe XLCAB : votre position sera ",
+  "transmiseAvecLAlerte": "transmise avec l’alerte.",
+  "appelerLe": "Appeler le {emergencyNumber}",
+  "@appelerLe": {
+    "placeholders": {
+      "emergencyNumber": {
+        "type": "Object"
+      }
+    }
+  },
+  "alerterXlcab": "Alerter XLCAB",
+  "alerteEnvoyeeALEquipe": "Alerte envoyée à l’équipe XLCAB avec votre position.",
+  "alerteNonTransmiseAppelezLe": "Alerte non transmise. Appelez le {emergencyNumber}.",
+  "@alerteNonTransmiseAppelezLe": {
+    "placeholders": {
+      "emergencyNumber": {
+        "type": "Object"
+      }
+    }
+  },
+  "carteDuTrajetEnTemps": "Carte du trajet en temps réel",
+  "reponseInattendueDuServeurReessayez": "Réponse inattendue du serveur. Réessayez plus tard.",
+  "pasDeConnexionInternetVerifiez": "Pas de connexion internet. Vérifiez votre réseau.",
+  "emailOuMotDePasse": "Email ou mot de passe incorrect.",
+  "photoTropLourdeMemeApres": "Photo trop lourde même après compression. Réessayez avec une photo plus nette et mieux cadrée.",
+  "xlcabVousEtesEnLigne": "XLCAB — vous êtes en ligne",
+  "votrePositionEstPartageePour": "Votre position est partagée pour recevoir des missions.",
+  "scannerLeQrDuPassager": "Scanner le QR du passager",
+  "cadrezLeQrCodeAffiche": "Cadrez le QR code affiché sur le téléphone du passager",
+  "fichierTropVolumineux2Mo": "Fichier trop volumineux (2 Mo maximum).",
+  "colisIntrouvable": "Colis introuvable.",
+  "rechercheDAdresseIndisponibleCle": "Recherche d'adresse indisponible (clé Google non configurée).",
+  "adresseIntrouvableEssayezUneAutre": "Adresse introuvable. Essayez une autre suggestion.",
+  "rechercheDAdresseMomentanementIndisponible": "Recherche d'adresse momentanément indisponible.",
+  "trajetIntrouvable": "Trajet introuvable.",
+  "factureIntrouvable": "Facture introuvable.",
+  "avancementDuTrajet": "Avancement du trajet",
+  "disponible": ", disponible",
+  "indisponible2": ", indisponible",
+  "disponible2": "Disponible",
+  "navettes7PlacesTrajets603": "Navettes 7+ places. Trajets 60 km+. Colis inclus.",
+  "xlcab": "XLCAB. {baseline}",
+  "@xlcab": {
+    "placeholders": {
+      "baseline": {
+        "type": "Object"
+      }
+    }
+  },
+  "plaqueDansPhrase": "immatriculation {plate}",
+  "@plaqueDansPhrase": {
+    "description": "Plaque au milieu d’une phrase (partage du trajet)",
+    "placeholders": {
+      "plate": {
+        "type": "Object"
+      }
+    }
+  },
+  "langue": "Langue",
+  "langueDuTelephone": "Téléphone",
+  "choisissezVotreNavette": "Choisissez votre navette",
+  "aPartirDe": "À partir de {price}",
+  "@aPartirDe": {
+    "placeholders": {
+      "price": {
+        "type": "Object"
+      }
+    }
+  },
+  "prixPourUnTrajetDe": "Prix pour un trajet de {km} km, 1 passager, sans option.",
+  "@prixPourUnTrajetDe": {
+    "placeholders": {
+      "km": {
+        "type": "Object"
+      }
+    }
+  },
+  "disponibiliteExplication": "« Disponible » : un chauffeur est en ligne près de vous en ce moment. Vous pouvez réserver à l’avance dans tous les cas.",
+  "chargementDesNavettes": "Chargement des navettes",
+  "navettesIndisponibles": "Navettes indisponibles pour le moment.",
+  "offreNavetteSemantique": "{name}, {audience}{availability}, à partir de {price}",
+  "@offreNavetteSemantique": {
+    "placeholders": {
+      "name": {
+        "type": "Object"
+      },
+      "audience": {
+        "type": "Object"
+      },
+      "availability": {
+        "type": "Object"
+      },
+      "price": {
+        "type": "Object"
+      }
+    }
+  },
+  "pasEncoreDeNoteCourses": "Pas encore de note · {count} courses",
+  "@pasEncoreDeNoteCourses": {
+    "placeholders": {
+      "count": {
+        "type": "Object"
+      }
+    }
+  },
+  "mkAConfirmerAvant": "À confirmer avant {date}",
+  "@mkAConfirmerAvant": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "mkAccessible": "Accès PMR",
+  "mkAucunMessage": "Aucun message pour l’instant.",
+  "mkAucunVehiculeAdapte": "Aucun de vos véhicules ne convient (places ou accès PMR).",
+  "mkAucuneDemande": "Aucune demande compatible avec vos véhicules pour le moment.",
+  "mkAucuneProposition": "Vous n’avez fait aucune proposition.",
+  "mkBagages": "{count, plural, =1{1 bagage} other{{count} bagages}}",
+  "@mkBagages": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "mkBourse": "Bourse de transport",
+  "mkBudget": "Budget {amount}",
+  "@mkBudget": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "mkChargementDesDemandes": "Chargement des demandes",
+  "mkChargementDesMessages": "Chargement des messages",
+  "mkChargementDesPropositions": "Chargement de vos propositions",
+  "mkChoisieAConfirmer": "Choisie par le client : à confirmer",
+  "mkConfirmee": "Confirmée : course réservée",
+  "mkDemandes": "Demandes",
+  "mkEnAttenteDuClient": "En attente du client",
+  "mkEnvoyer": "Envoyer",
+  "mkEnvoyerLaProposition": "Envoyer la proposition",
+  "mkExpiree": "Expirée",
+  "mkFaireUneProposition": "Faire une proposition",
+  "mkFeedExplication": "Demandes que vos véhicules peuvent assurer. L’identité du client et l’adresse exacte ne sont communiquées qu’après confirmation.",
+  "mkJeConfirme": "Je confirme ma disponibilité",
+  "mkJeNePeuxPlus": "Je ne peux plus",
+  "mkKm": "{count} km",
+  "@mkKm": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "mkMesPropositions": "Mes propositions",
+  "mkMesPropositionsAConfirmer": "Mes propositions ({count} à confirmer)",
+  "@mkMesPropositionsAConfirmer": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "mkMessages": "Messages",
+  "mkNonRetenue": "Non retenue",
+  "mkPasDeCoordonnees": "Pas de téléphone ni d’e-mail avant la confirmation : la messagerie XLCAB reste votre canal.",
+  "mkPassagers": "{count, plural, =1{1 passager} other{{count} passagers}}",
+  "@mkPassagers": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "mkPrixTtc": "Prix TTC",
+  "mkPropositionEnvoyee": "Proposition envoyée au client.",
+  "mkPropositionNEngagePas": "Si le client choisit votre proposition, vous devrez reconfirmer votre disponibilité sous 2 heures.",
+  "mkRefuseeParVous": "Non confirmée par vous",
+  "mkRegulier": "Besoin régulier",
+  "mkReservationConfirmeeMission": "Réservation confirmée : la course est dans vos missions.",
+  "mkRetiree": "Retirée",
+  "mkRetirer": "Retirer",
+  "mkRetourCompris": "Retour compris",
+  "mkRetourLe": "Retour : {date}",
+  "@mkRetourLe": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "mkSouplesse": "± {minutes} min",
+  "@mkSouplesse": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "mkVotreMessage": "Votre message",
+  "mkVotreProposition": "Votre proposition : {price} · {status}",
+  "@mkVotreProposition": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      },
+      "status": {
+        "type": "String"
+      }
+    }
+  },
+  "opAConfirmer": "À confirmer",
+  "opAConfirmerEnRoute": "« Je suis en route » à confirmer",
+  "opAccepter": "Accepter",
+  "opAcceptezLesConditionsAvantDePublier": "Acceptez d’abord les conditions générales opérateur.",
+  "opActivite": "Activité",
+  "opAjouterUnRetour": "Ajouter",
+  "opAlerteGenerale": "Urgent : un départ cherche un chauffeur",
+  "opAller": "Aller",
+  "opAnnulationComptee": "Annulation de dernière minute comptée",
+  "opAnnulationLe": "Le {date}, {delay} avant le départ",
+  "@opAnnulationLe": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "delay": {
+        "type": "String"
+      }
+    }
+  },
+  "opAnnulationLevee": "Levée par XLCAB",
+  "opAnnulationNonComptee": "Prévenue à temps : non comptée",
+  "opAnnulerCeDepart": "Annuler ce départ",
+  "opAnnulerCeDepartExplication": "Vos passagers seront confiés à un chauffeur de secours. Une annulation le jour même ou moins de 12 h avant compte : à partir de la 3e en 12 mois, pénalité de 260 €. Cas de force majeure : vous pourrez envoyer un justificatif.",
+  "opAnnulerLeDepart": "Annuler le départ",
+  "opAppelerLePassager": "Appeler {name}",
+  "@opAppelerLePassager": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "opApresPublication": "Les départs sont créés pour les 30 prochains jours. Confirmez ceux que vous assurez : seuls ceux-là sont proposés aux voyageurs.",
+  "opArreterLaVente": "Arrêter la vente",
+  "opArriveeDeLaLigne": "Arrivée",
+  "opAuPlus": "{count} au plus",
+  "@opAuPlus": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "opAucunDepartAVenir": "Aucun départ à venir.",
+  "opAucunVehicule": "Aucun véhicule enregistré sur votre compte.",
+  "opAucunVehiculeAssezGrand": "Il faut un véhicule d’au moins {count} places passagers.",
+  "@opAucunVehiculeAssezGrand": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "opAucuneAnnulation": "Aucune annulation. Merci pour votre fiabilité !",
+  "opAucuneLignePresentation": "Publiez vos trajets réguliers (par exemple Paris – Beauvais à 5 h) : XLCAB les propose aux voyageurs, entreprises et agences.",
+  "opBagagesParDepart": "Bagages par départ",
+  "opBanniereConditions": "Acceptez les conditions générales opérateur pour publier vos lignes.",
+  "opBanniereSuspendu": "Votre profil opérateur est suspendu : vos lignes ne sont plus proposées. Contactez le support XLCAB.",
+  "opBanniereVerification": "Profil en cours de vérification par XLCAB : vos lignes seront proposées aux voyageurs après validation.",
+  "opBanniereVerifiePlace": "Profil vérifié : vente à la place et par véhicule.",
+  "opBanniereVerifieVehicule": "Profil vérifié : vente par véhicule. Vente à la place après vérification de votre licence de transport.",
+  "opBonneRoute": "Bonne route !",
+  "opCapaciteEtPrix": "Capacité et prix",
+  "opCaracteresMinimum": "{count} caractères minimum",
+  "@opCaracteresMinimum": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "opChargementDesAnnulations": "Chargement des annulations",
+  "opChargementDesDeparts": "Chargement des départs",
+  "opChargementDesLignes": "Chargement des lignes",
+  "opChargementDesReserves": "Chargement des réserves",
+  "opChargementDesVehicules": "Chargement des véhicules",
+  "opChargementDuDepart": "Chargement du départ",
+  "opChargementDuProfil": "Chargement du profil",
+  "opChargementImpossible": "Chargement impossible. Vérifiez votre connexion.",
+  "opChauffeursDeReserve": "Chauffeurs de réserve",
+  "opChoisirUneAdresse": "Choisir une adresse",
+  "opChoisissezAuMoinsUnJour": "Choisissez au moins un jour.",
+  "opChoisissezDepartEtArrivee": "Choisissez le départ et l’arrivée.",
+  "opChoisissezUnVehicule": "Choisissez un véhicule.",
+  "opConditionsAcceptees": "Conditions générales opérateur acceptées.",
+  "opConditionsExemple": "Ex. : 1 valise + 1 bagage cabine par personne",
+  "opConditionsFacultatif": "Conditions (facultatif)",
+  "opConditionsOperateur": "Conditions générales opérateur",
+  "opConditionsResume": "Elles prévoient notamment le protocole de secours en cas d’annulation et la pénalité de 260 € à partir de la 3e annulation de dernière minute sur 12 mois.",
+  "opConfirmerQuinzeJours": "Confirmer les 14 prochains jours",
+  "opConfirmerSeptJours": "J’assure mes départs des 7 prochains jours",
+  "opContestationEnvoyee": "Contestation envoyée : rien n’est retenu en attendant la décision.",
+  "opContester": "Contester",
+  "opContesterLaPenalite": "Contester la pénalité",
+  "opContinuer": "Continuer",
+  "opDecliner": "Décliner",
+  "opDemarrerLeDepart": "Démarrer le départ",
+  "opDepart": "Départ",
+  "opDepartConfieAuSecours": "Départ annulé : un chauffeur de secours est sollicité.",
+  "opDepartDeLaLigne": "Départ",
+  "opDepartRepris": "Merci ! Le départ est à vous.",
+  "opDepartTermine": "Départ terminé. Merci !",
+  "opDepartsAConfirmer": "{count, plural, =1{1 départ à confirmer} other{{count} départs à confirmer}}",
+  "@opDepartsAConfirmer": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "opDepartsAConfirmerExplication": "Un départ n’est proposé aux voyageurs qu’une fois confirmé par vous.",
+  "opDepartsAReprendre": "Départs à reprendre en urgence",
+  "opDepartsConfirmes": "{count, plural, =0{Aucun départ à confirmer} =1{1 départ confirmé} other{{count} départs confirmés}}",
+  "@opDepartsConfirmes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "opDim": "Dim",
+  "opDuLundiAuVendredi": "Du lundi au vendredi",
+  "opDureeEstimeeMinutes": "Durée estimée (minutes)",
+  "opEmbarque": "à bord",
+  "opEnCours": "En cours",
+  "opEnRoute": "En route",
+  "opEnRouteConfirme": "« Je suis en route » confirmé.",
+  "opEnVente": "En vente",
+  "opEnvoyerUnJustificatif": "Envoyer un justificatif",
+  "opEspaceOperateur": "Espace opérateur",
+  "opFermer": "Fermer",
+  "opFermerLaLigne": "Fermer la ligne",
+  "opFermerLaLigneExplication": "La ligne ne sera plus proposée. Les départs déjà réservés restent dus aux passagers.",
+  "opFermerUnJour": "Fermer un jour",
+  "opForceMajeureReconnue": "Force majeure reconnue : non comptée",
+  "opHeureDeDepart": "Heure de départ",
+  "opHoraireJours": "{time} · {days}",
+  "@opHoraireJours": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      },
+      "days": {
+        "type": "String"
+      }
+    }
+  },
+  "opHoraireRetourJours": "{time}, retour {returnTime} · {days}",
+  "@opHoraireRetourJours": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      },
+      "returnTime": {
+        "type": "String"
+      },
+      "days": {
+        "type": "String"
+      }
+    }
+  },
+  "opHorairesEtJours": "Horaires et jours",
+  "opInvitationDeclinee": "Invitation déclinée",
+  "opInvitationEnAttente": "Invitation en attente de réponse",
+  "opInvitationEnvoyee": "Invitation envoyée.",
+  "opInvitationReserve": "Invitation : chauffeur de réserve n° {rank}",
+  "@opInvitationReserve": {
+    "placeholders": {
+      "rank": {
+        "type": "int"
+      }
+    }
+  },
+  "opInvitationReserveExplication": "Si le chauffeur de cette ligne annule, vous serez sollicité pour reprendre ses passagers (au prix du départ, plus un bonus de reprise).",
+  "opInvitationsDeReserve": "Invitations de réserve",
+  "opInviter": "Inviter",
+  "opInviterReserve": "Inviter la réserve n° {rank}",
+  "@opInviterReserve": {
+    "placeholders": {
+      "rank": {
+        "type": "int"
+      }
+    }
+  },
+  "opInviterReserveExplication": "E-mail du compte XLCAB d’un chauffeur validé. Il devra accepter et choisir son véhicule.",
+  "opJAccepteLesConditions": "J’ai lu et j’accepte les conditions générales opérateur",
+  "opJeNePeuxPas": "Je ne peux pas",
+  "opJeReprends": "Je reprends ce départ",
+  "opJeSuisEnRoute": "Je suis en route",
+  "opJeSuisEnRouteExplication": "Confirmez avant 1 h du départ : sans confirmation, un chauffeur de secours sera sollicité.",
+  "opJeu": "Jeu",
+  "opJourFerme": "Jour fermé.",
+  "opJoursSansDepart": "Jours sans départ",
+  "opJustificatif": "Justificatif",
+  "opJustificatifEnExamen": "Justificatif en cours d’examen",
+  "opJustificatifEnvoye": "Justificatif envoyé à l’équipe XLCAB.",
+  "opJustificatifExplication": "Accident, hospitalisation, panne constatée… Décrivez la situation ; l’équipe XLCAB pourra vous demander un document.",
+  "opKindCollectif": "Transport collectif",
+  "opKindFlotte": "Exploitant de flotte",
+  "opKindIndependant": "Chauffeur indépendant",
+  "opKindSocieteVtc": "Société VTC",
+  "opLicenceTransport": "Licence de transport (LOTI, registre)",
+  "opLicenceTransportAide": "Nécessaire pour vendre à la place. Vérifiée par XLCAB ; la modifier suspend la vente à la place jusqu’à la nouvelle vérification.",
+  "opLigne": "Ligne régulière",
+  "opLigneActive": "Active",
+  "opLigneEnPause": "En pause",
+  "opLigneFermee": "Fermée",
+  "opLigneIntrouvable": "Ligne introuvable.",
+  "opLignePublieeConfirmez": "Ligne publiée. Confirmez maintenant les départs que vous assurez.",
+  "opLireLesConditions": "Lire les conditions générales opérateur",
+  "opListeDEmbarquement": "Liste d’embarquement",
+  "opLun": "Lun",
+  "opMar": "Mar",
+  "opMer": "Mer",
+  "opMesAnnulations": "Mes annulations",
+  "opMesDepartsDeLigne": "Mes départs de ligne",
+  "opMesLignes": "Mes lignes régulières",
+  "opMettreEnPause": "Mettre en pause",
+  "opMotif": "Motif",
+  "opMotifFacultatif": "Motif (facultatif)",
+  "opNomCommercial": "Nom commercial ou raison sociale",
+  "opNombreInvalide": "Nombre invalide",
+  "opNouvelleLigne": "Nouvelle ligne",
+  "opParPlace": "Par place",
+  "opParVehicule": "Par véhicule",
+  "opPasDeDepart": "Pas de départ",
+  "opPasDeRetour": "Pas de retour",
+  "opPassager": "Passager",
+  "opPassagerEmbarque": "{name} est à bord.",
+  "@opPassagerEmbarque": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "opPassagersNonScannes": "{count, plural, =1{1 réservation n’a pas été scannée. Démarrer quand même ?} other{{count} réservations n’ont pas été scannées. Démarrer quand même ?}}",
+  "@opPassagersNonScannes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "opPassagersReservations": "{seats, plural, =1{1 passager} other{{seats} passagers}} · {bookings, plural, =1{1 réservation} other{{bookings} réservations}}",
+  "@opPassagersReservations": {
+    "placeholders": {
+      "seats": {
+        "type": "int"
+      },
+      "bookings": {
+        "type": "int"
+      }
+    }
+  },
+  "opPenalite": "Pénalité {amount} · {status}",
+  "@opPenalite": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "status": {
+        "type": "String"
+      }
+    }
+  },
+  "opPenaliteAnnulee": "annulée",
+  "opPenaliteAppliquee": "retenue sur vos versements",
+  "opPenaliteContestable": "contestable pendant 7 jours",
+  "opPenaliteContestee": "contestée, en attente de décision",
+  "opPersonneDesigne": "Personne pour l’instant",
+  "opPlaces": "{count, plural, =1{1 place} other{{count} places}}",
+  "@opPlaces": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "opPlacesCeJour": "{count} places ce jour-là",
+  "@opPlacesCeJour": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "opPlacesParDepart": "Places par départ",
+  "opPlacesReservees": "{booked}/{total} places réservées",
+  "@opPlacesReservees": {
+    "placeholders": {
+      "booked": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "opPremierJour": "Premier jour",
+  "opPresentation": "Présentation",
+  "opPrestations": "Prestations",
+  "opPrixDuVehiculeTtc": "Prix du véhicule (TTC)",
+  "opPrixInvalide": "Prix invalide (1 € minimum)",
+  "opPrixParPlace": "{price} par place · {seats} places",
+  "@opPrixParPlace": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      },
+      "seats": {
+        "type": "int"
+      }
+    }
+  },
+  "opPrixParPlaceTtc": "Prix par place (TTC)",
+  "opPrixVehicule": "{price} le véhicule · {seats} places",
+  "@opPrixVehicule": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      },
+      "seats": {
+        "type": "int"
+      }
+    }
+  },
+  "opProchainsDeparts": "Prochains départs",
+  "opProfilEnregistre": "Profil enregistré.",
+  "opProfilOperateur": "Profil opérateur",
+  "opPublierLaLigne": "Publier la ligne",
+  "opReglesAnnulation": "Une annulation le jour même ou moins de 12 h avant le départ compte. À partir de la 3e sur 12 mois : 260 € retenus, contestables pendant 7 jours. La force majeure justifiée ne compte pas.",
+  "opRepondezAvant": "Répondez avant {date}",
+  "@opRepondezAvant": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "opReprendre": "Reprendre",
+  "opRepris": "repris en secours",
+  "opReserveAcceptee": "Vous êtes chauffeur de réserve sur cette ligne.",
+  "opReserveConfirmee": "Confirmée · {vehicle}",
+  "@opReserveConfirmee": {
+    "placeholders": {
+      "vehicle": {
+        "type": "String"
+      }
+    }
+  },
+  "opReserveNumero": "Réserve n° {rank}",
+  "@opReserveNumero": {
+    "placeholders": {
+      "rank": {
+        "type": "int"
+      }
+    }
+  },
+  "opReservesExplication": "Si vous annulez un départ réservé, le n° 2 puis le n° 3 sont sollicités, puis tous les opérateurs compatibles.",
+  "opRetablirCeJour": "Rétablir ce jour",
+  "opRetirerCetteReserve": "Retirer cette réserve",
+  "opRetirerLeRetour": "Retirer le retour",
+  "opRetour": "Retour",
+  "opRetourLeMemeJour": "Retour le même jour",
+  "opRouvrir": "Rouvrir",
+  "opSam": "Sam",
+  "opScannerUnQr": "Scanner le QR d’un passager",
+  "opServiceAeroport": "Aéroports",
+  "opServiceAffaires": "Affaires",
+  "opServiceGare": "Gares",
+  "opServiceGroupe": "Groupes",
+  "opServiceInterurbain": "Interurbain",
+  "opServiceMiseADisposition": "Mise à disposition",
+  "opServiceTourisme": "Tourisme",
+  "opSiegesEnfant": "{count, plural, =1{1 siège enfant} other{{count} sièges enfant}}",
+  "@opSiegesEnfant": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "opSiret": "SIRET",
+  "opStatutEnVerification": "En vérification",
+  "opStatutSuspendu": "Suspendu",
+  "opStatutVerifie": "Vérifié par XLCAB",
+  "opTerminerLeDepart": "Terminer le départ",
+  "opTerminerLeDepartExplication": "Confirmez que tous les passagers sont arrivés à destination.",
+  "opTousEmbarques": "Tous les passagers sont à bord.",
+  "opTousLesJours": "Tous les jours",
+  "opTrajet": "{origin} → {destination}",
+  "@opTrajet": {
+    "placeholders": {
+      "origin": {
+        "type": "String"
+      },
+      "destination": {
+        "type": "String"
+      }
+    }
+  },
+  "opTrajetNonModifiable": "Le trajet ne pourra plus être modifié : pour en changer, fermez la ligne et créez-en une autre.",
+  "opTrajetSection": "Trajet",
+  "opTriggerAnnulation": "Départ annulé",
+  "opTriggerPasEnRoute": "« Je suis en route » non confirmé à 1 h du départ",
+  "opTriggerSansPosition": "Plus de position GPS avant le départ",
+  "opVehicule": "Véhicule",
+  "opVehiculePlaces": "{label} · {count} places",
+  "@opVehiculePlaces": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "opVen": "Ven",
+  "opVenteALaPlaceAutorisee": "Vente à la place autorisée",
+  "opVenteALaPlaceReservee": "Vente à la place : réservée aux licences de transport collectif vérifiées par XLCAB.",
+  "opVenteArretee": "Vente arrêtée",
+  "opVenteParVehiculeSeulement": "Vente par véhicule seulement",
+  "opVillesDesservies": "Villes desservies (séparées par des virgules)",
+  "opVillesExemple": "Paris, Beauvais, Orléans",
+  "opVousEtesReserve": "Vous êtes réserve : ce départ a besoin de vous",
+  "mkcAChoisir": "À choisir",
+  "mkcAllerSimple": "Aller simple",
+  "mkcAnnulerLaDemande": "Annuler la demande",
+  "mkcAnnulerLaDemandeExplication": "Les opérateurs qui ont fait une proposition seront prévenus.",
+  "mkcArrivee": "Arrivée",
+  "mkcAucunDepart": "Aucun départ de ligne ce jour-là pour ce trajet. Demandez des devis : les opérateurs vérifiés vous répondent.",
+  "mkcAucuneDemande": "Vous n’avez pas encore de demande.",
+  "mkcAucunePropositionPourLInstant": "Pas encore de proposition. Vous serez prévenu dès qu’un opérateur répond.",
+  "mkcBagages": "Bagages",
+  "mkcBesoinsExemple": "Ex. : un siège bébé, un fauteuil pliant",
+  "mkcBesoinsParticuliers": "Besoins particuliers (facultatif)",
+  "mkcBudgetFacultatif": "Budget indicatif (facultatif)",
+  "mkcCarteAccueilTexte": "Réservez une place sur une ligne régulière, ou décrivez votre trajet et comparez les prix d’opérateurs vérifiés.",
+  "mkcChoisir": "Choisir",
+  "mkcChoisirCetteProposition": "Choisir cette proposition ?",
+  "mkcChoisirExplication": "{operator} doit encore confirmer sa disponibilité (sous 2 heures). Votre trajet à {price} sera réservé à ce moment-là.",
+  "@mkcChoisirExplication": {
+    "placeholders": {
+      "operator": {
+        "type": "String"
+      },
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "mkcChoisissezDateHeure": "Choisissez la date et l’heure du départ.",
+  "mkcConfirmerPrix": "Confirmer · {price}",
+  "@mkcConfirmerPrix": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "mkcDate": "Date",
+  "mkcDateEtHeure": "Date et heure du départ",
+  "mkcDemandeGratuite": "Publier une demande est gratuit et ne vous engage pas.",
+  "mkcDemandeIntro": "Décrivez votre trajet : les opérateurs vérifiés qui peuvent l’assurer vous proposent un prix. Votre nom et votre adresse exacte ne leur sont communiqués qu’après confirmation.",
+  "mkcDemanderDesDevis": "Demander des devis",
+  "mkcDemanderDesDevisTexte": "Groupe, aéroport, trajet sur mesure : comparez les propositions.",
+  "mkcDepart": "Départ",
+  "mkcDepartsDisponibles": "Départs disponibles",
+  "mkcEnAttenteDeConfirmation": "En attente de confirmation",
+  "mkcExplicationAnnulee": "Cette demande est annulée.",
+  "mkcExplicationAttente": "L’opérateur que vous avez choisi doit confirmer sa disponibilité. S’il ne le fait pas, vous pourrez choisir une autre proposition.",
+  "mkcExplicationConfirmee": "Votre trajet est réservé. Retrouvez le QR d’embarquement et le suivi dans votre réservation.",
+  "mkcExplicationExpiree": "Aucune réservation n’a pu être confirmée à temps. Vous pouvez publier une nouvelle demande.",
+  "mkcExplicationPropositions": "Comparez les propositions et choisissez celle qui vous convient.",
+  "mkcExplicationRecherche": "Les opérateurs compatibles ont été prévenus. Les propositions arrivent ici.",
+  "mkcExplicationTerminee": "Trajet terminé. Merci d’avoir voyagé avec XLCAB.",
+  "mkcHeureExacte": "Heure exacte",
+  "mkcLOperateur": "L’opérateur",
+  "mkcLignesCompatibles": "Lignes régulières disponibles",
+  "mkcLignesCompatiblesTexte": "Ces départs correspondent déjà à votre trajet : réservables tout de suite.",
+  "mkcLignesEtDevis": "Lignes régulières et devis",
+  "mkcLignesRegulieres": "Lignes régulières",
+  "mkcLignesRegulieresTexte": "Une place dans une navette à horaire fixe, au meilleur prix.",
+  "mkcMaDemande": "Ma demande",
+  "mkcMesDemandes": "Mes demandes de devis",
+  "mkcMessageAuChauffeur": "Message au chauffeur (facultatif)",
+  "mkcMessageExemple": "Ex. : vol de 8 h 10",
+  "mkcMoins": "Moins : {label}",
+  "@mkcMoins": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "mkcNote": "{rating} / 5 ({count} avis)",
+  "@mkcNote": {
+    "placeholders": {
+      "rating": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "mkcPaiementPlusTard": "Aucun paiement en ligne pour l’instant : votre place est réservée dès la confirmation.",
+  "mkcPasEncoreNote": "Pas encore de note",
+  "mkcPassagers": "Passagers",
+  "mkcPlaces": "Places",
+  "mkcPlus": "Plus : {label}",
+  "@mkcPlus": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "mkcPoserUneQuestion": "Poser une question",
+  "mkcPriseEnCharge": "Prise en charge : {date}",
+  "@mkcPriseEnCharge": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "mkcPrixParPlace": "{price} par place",
+  "@mkcPrixParPlace": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "mkcPropositionChoisie": "Proposition choisie : l’opérateur doit confirmer.",
+  "mkcPropositionsRecues": "Propositions reçues",
+  "mkcPublierLaDemande": "Publier la demande",
+  "mkcRaisonArrivee": "Arrivée à {km} km",
+  "@mkcRaisonArrivee": {
+    "placeholders": {
+      "km": {
+        "type": "String"
+      }
+    }
+  },
+  "mkcRaisonDepart": "Départ à {km} km",
+  "@mkcRaisonDepart": {
+    "placeholders": {
+      "km": {
+        "type": "String"
+      }
+    }
+  },
+  "mkcRaisonOperateurVerifie": "Opérateur vérifié",
+  "mkcRaisonPlaces": "{count, plural, =1{1 place libre} other{{count} places libres}}",
+  "@mkcRaisonPlaces": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "mkcRaisonVehiculePrive": "Véhicule privatisé",
+  "mkcRechercheEnCours": "Recherche en cours",
+  "mkcRechercher": "Rechercher",
+  "mkcReserver": "Réserver",
+  "mkcReserverCeDepart": "Réserver ce départ",
+  "mkcRetour": "Retour",
+  "mkcSiegesEnfant": "Sièges enfant",
+  "mkcSouplesseHoraire": "Souplesse sur l’horaire",
+  "mkcStatutAnnulee": "Annulée",
+  "mkcStatutAttenteOperateur": "En attente de l’opérateur",
+  "mkcStatutBrouillon": "Brouillon",
+  "mkcStatutConfirmee": "Réservation confirmée",
+  "mkcStatutEnCours": "Trajet en cours",
+  "mkcStatutExpiree": "Expirée",
+  "mkcStatutPropositions": "{count, plural, =1{1 proposition reçue} other{{count} propositions reçues}}",
+  "@mkcStatutPropositions": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "mkcStatutRecherche": "Recherche d’opérateurs",
+  "mkcStatutTerminee": "Terminée",
+  "mkcVehiculeAccessible": "Véhicule accessible aux fauteuils roulants",
+  "mkcVehiculeEntier": "Véhicule entier, prix fixe",
+  "mkcVoirLeRetour": "Voir la réservation du retour",
+  "mkcVoirLignesEtDevis": "Lignes régulières et devis",
+  "mkcVoirMaReservation": "Voir ma réservation"
+}

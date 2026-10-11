@@ -1,0 +1,771 @@
+// Ce fichier contient uniquement le modèle User, nécessaire au Module 2.
+// L'ensemble du schéma (Partie 4 de la spécification maître) sera
+// complété au fil des modules suivants (Trip, Vehicle, Payment, etc.).
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id               String    @id @default(uuid())
+  email            String    @unique
+  phone            String?   @unique
+  passwordHash     String?
+  role             String // passenger|driver|corporate_admin|corporate_member|admin
+  firstName        String?
+  lastName         String?
+  locale           String    @default("fr")
+  jurisdiction     String    @default("FR")
+  emailVerified    Boolean   @default(false)
+  phoneVerified    Boolean   @default(false)
+  stripeCustomerId String?
+  firebaseUid      String?   @unique
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  deletedAt        DateTime?
+
+  // Partie 8 (RGPD) : consentement explicite à l'inscription. Version des
+  // CGU / politique de confidentialité acceptée et date d'acceptation ;
+  // l'IP et l'appareil sont dans AuditLog ("user.consent").
+  termsAcceptedAt DateTime?
+  termsVersion    String?
+}
+
+// ── Module 3 (Tracking) ───────────────────────────────────────────────
+// Trip est nécessaire au contrôle d'ownership des abonnements WebSocket
+// (Partie 8 : "RBAC strict : chaque endpoint vérifie rôle + ownership").
+// Champs repris tels quels de la Partie 4.
+
+model Trip {
+  id                   String    @id @default(uuid())
+  type                 String // passenger|parcel|mixed
+  status               String    @default("pending")
+  passengerId          String?
+  driverId             String?
+  vehicleId            String?
+  shuttleType          String
+  originAddress        String
+  originLat            Float
+  originLng            Float
+  destinationAddress   String
+  destinationLat       Float
+  destinationLng       Float
+  distanceKm           Decimal?
+  durationMin          Int?
+  scheduledAt          DateTime?
+  acceptedAt           DateTime?
+  startedAt            DateTime?
+  completedAt          DateTime?
+  cancelledAt          DateTime?
+  cancellationReason   String?
+  // Frais d'annulation (Partie 13 : 0 % > 24 h, 50 % entre 24 h et 2 h,
+  // 100 % < 2 h). Ajout à la Partie 4, utilisé par le module Payments.
+  cancellationFeeCents Int?
+  totalPriceCents      Int?
+  vatCents             Int       @default(0)
+  jurisdiction         String
+  createdAt            DateTime  @default(now())
+
+  // Module 9 (ajouts à la Partie 4) : entreprise qui paie la course
+  // (facturation mensuelle B2B), centre de coût, auteur de la réservation
+  // (admin corporate qui réserve pour un collaborateur).
+  corporateId String?
+  costCenter  String?
+  bookedById  String?
+
+  // Bourse (étape 2) : instant (réservation classique) | line (place sur un
+  // départ de ligne régulière) | market (demande + proposition). Commission
+  // XLCAB figée à la réservation (taux en vigueur à ce moment).
+  source          String  @default("instant")
+  lineDepartureId String?
+  commissionCents Int?
+
+  passengerBooking PassengerBooking?
+  parcelBooking    ParcelBooking?
+  priceLines       TripPriceLine[]
+
+  @@index([corporateId, scheduledAt])
+  @@index([lineDepartureId])
+}
+
+// Détail du prix par régime de TVA (Partie 11.4) : transport de personnes
+// (0 % en FR) et colis (20 %) doivent apparaître séparément sur les
+// factures et exports. Trip.totalPriceCents/vatCents restent les totaux.
+model TripPriceLine {
+  id          String  @id @default(uuid())
+  tripId      String
+  trip        Trip    @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  regime      String // passenger|parcel
+  baseCents   Int // HT
+  ratePercent Decimal
+  vatCents    Int
+
+  @@index([tripId])
+}
+
+// Historique des positions pendant une course. Conservation 30 jours
+// max (Partie 13 : "géoloc 30 j") — purge à planifier.
+model TrackingPoint {
+  id         BigInt   @id @default(autoincrement())
+  tripId     String
+  driverId   String?
+  lat        Float
+  lng        Float
+  heading    Float?
+  speedKmh   Float?
+  recordedAt DateTime @default(now())
+
+  @@index([tripId, recordedAt(sort: Desc)])
+}
+
+// ── Module 4 (Matching) ───────────────────────────────────────────────
+// Champs repris de la Partie 4, avec deux écarts :
+// - DriverProfile n'a pas de relation Prisma vers User : elle imposerait
+//   d'ajouter un champ au modèle User du Module 2. Le lien reste
+//   id = User.id ; les données User sont lues par une requête séparée.
+// - DriverProfile.roseEligible : habilitation Navette Rose ("conductrice
+//   femme", Partie 1.3), cochée par un admin à la validation du dossier.
+//   On ne stocke pas le genre (minimisation RGPD).
+
+model DriverProfile {
+  id                String    @id // = User.id
+  licenseNumber     String?
+  licenseExpiry     DateTime?
+  vtcCardNumber     String?
+  vtcCardExpiry     DateTime?
+  revtcNumber       String?
+  pmrTrained        Boolean   @default(false)
+  roseEligible      Boolean   @default(false)
+  languages         String[]  @default(["fr"])
+  rating            Decimal   @default(5.00)
+  ratingCount       Int       @default(0) // notes reçues (TripRating) ; 0 = « nouveau chauffeur »
+  totalTrips        Int       @default(0)
+  preferredShuttle  String?
+  isOnline          Boolean   @default(false)
+  documentsVerified Boolean   @default(false)
+  approvedAt        DateTime?
+}
+
+model Vehicle {
+  id                     String    @id @default(uuid())
+  driverId               String?
+  shuttleType            String // rose|bleue|orange|accessibility
+  brand                  String?
+  model                  String?
+  plate                  String    @unique
+  color                  String?
+  capacity               Int
+  pmrEquipped            Boolean   @default(false)
+  dashcamActive          Boolean   @default(false)
+  insuranceExpiry        DateTime?
+  technicalControlExpiry DateTime?
+  isAvailable            Boolean   @default(true)
+  jurisdiction           String
+
+  @@index([driverId])
+}
+
+model PassengerBooking {
+  id            String  @id @default(uuid())
+  tripId        String  @unique
+  trip          Trip    @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  seats         Int
+  childSeats    Int     @default(0)
+  wifiRequested Boolean @default(false)
+  extraLuggage  Boolean @default(false)
+  petsAllowed   Boolean @default(false)
+  qrCode        String  @unique
+  checkedIn     Boolean @default(false)
+  notes         String?
+}
+
+// ── Module 8 (Onboarding chauffeur) ───────────────────────────────────
+// Absent de la Partie 4 : nécessaire pour POST /drivers/me/documents.
+// Le fichier lui-même n'est jamais en base ni servi publiquement : seule
+// une clé de stockage opaque est conservée (S3 privé + URLs signées de
+// 15 min en production, Partie 8).
+model DriverDocument {
+  id         String   @id @default(uuid())
+  userId     String
+  type       String // driving_license|vtc_card|revtc_proof|vehicle_registration|vehicle_insurance|technical_control
+  storageKey String   @unique
+  mimeType   String
+  sizeBytes  Int
+  sha256     String
+  status     String   @default("pending") // pending|approved|rejected (validation admin, Module 10)
+  uploadedAt DateTime @default(now())
+
+  // Un seul document courant par type : un nouvel envoi remplace l'ancien.
+  @@unique([userId, type])
+}
+
+// ── Module 9 (Portail corporate) — Partie 4 ───────────────────────────
+
+model CorporateAccount {
+  id                String   @id @default(uuid())
+  companyName       String
+  vatNumber         String?
+  siret             String?
+  billingEmail      String?
+  billingAddress    String?
+  costCenter        String?
+  monthlyLimitCents Int?
+  jurisdiction      String
+  createdAt         DateTime @default(now())
+}
+
+model CorporateMember {
+  id                String   @id @default(uuid())
+  corporateId       String
+  userId            String
+  role              String // admin|member
+  monthlyLimitCents Int?
+  costCenter        String?
+  isActive          Boolean  @default(true)
+  addedAt           DateTime @default(now())
+
+  @@unique([corporateId, userId])
+  @@index([userId])
+}
+
+// ── Paiements (Partie 4) ──────────────────────────────────────────────
+// Un paiement Stripe par course passager (prépaiement à la réservation).
+// Les courses d'entreprise sont facturées au mois, sans Payment.
+model Payment {
+  id                    String   @id @default(uuid())
+  tripId                String?
+  userId                String?
+  stripePaymentIntentId String?  @unique
+  amountCents           Int
+  currency              String   @default("EUR")
+  status                String // requires_payment|succeeded|failed|canceled
+  method                String?
+  refundedCents         Int      @default(0)
+  createdAt             DateTime @default(now())
+
+  @@index([tripId])
+}
+
+// ── Module 10 (Dashboard admin) ───────────────────────────────────────
+
+// Partie 8 : "2FA obligatoire pour admin + corporate_admin". Absent de la
+// Partie 4. Secret TOTP chiffré (AES-256-GCM) : jamais stocké en clair.
+model TwoFactorAuth {
+  userId    String    @id
+  secretEnc String
+  enabledAt DateTime? // null = activation en cours (code pas encore confirmé)
+  createdAt DateTime  @default(now())
+}
+
+// Alerte SOS persistée (Partie 7, écran 9) : suivie par l'équipe jusqu'à
+// sa clôture. Absent de la Partie 4.
+model Incident {
+  id             String    @id @default(uuid())
+  type           String // sos
+  tripId         String
+  userId         String // émetteur
+  role           String
+  lat            Float
+  lng            Float
+  status         String    @default("open") // open|acknowledged|resolved
+  acknowledgedBy String?
+  acknowledgedAt DateTime?
+  resolvedBy     String?
+  resolvedAt     DateTime?
+  notes          String?
+  createdAt      DateTime  @default(now())
+
+  @@index([status, createdAt])
+}
+
+// Partie 4.
+model AuditLog {
+  id        BigInt   @id @default(autoincrement())
+  userId    String?
+  action    String
+  entity    String?
+  entityId  String?
+  metadata  Json?
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+}
+
+// Partie 4. Notifications in-app ; l'envoi push (FCM) s'y branchera avec
+// Firebase.
+model Notification {
+  id        String    @id @default(uuid())
+  userId    String
+  type      String
+  title     String
+  body      String
+  data      Json?
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId, createdAt])
+}
+
+model JurisdictionConfig {
+  code                              String  @id
+  name                              String
+  vatPassengerRate                  Decimal @default(0)
+  vatParcelRate                     Decimal @default(20)
+  requiresRevtc                     Boolean @default(false)
+  requiresVtcCard                   Boolean @default(false)
+  minTripKm                         Int     @default(0)
+  financialGuaranteePerVehicleCents Int?
+  currency                          String  @default("EUR")
+  leadDpa                           String?
+  legalTexts                        Json?
+}
+
+// ── Module Colis (Partie 4 : ParcelBooking, avec ajouts) ──────────────
+// Chaque colis a sa propre course (Trip type "parcel") : adresses
+// d'enlèvement/livraison, prix, paiement Stripe, expéditeur = passengerId.
+// Deux modes :
+// - colis greffé : carrierTripId = course passager qui le transporte
+//   (même trajet, prix forfaitaire) ; sa course reste "attached" ;
+// - colis au retour : carrierTripId + onReturnLeg, transporté sur le trajet
+//   retour (à vide) du chauffeur de la course porteuse ;
+// - course dédiée : carrierTripId null, la course est dispatchée.
+model ParcelBooking {
+  id                  String    @id @default(uuid())
+  tripId              String    @unique
+  trip                Trip      @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  senderId            String?
+  carrierTripId       String?
+  // Colis transporté au RETOUR de la course porteuse (B → A) : le chauffeur
+  // le récupère à l'arrivée de sa course et le ramène, au lieu de rentrer à vide.
+  onReturnLeg         Boolean   @default(false)
+  description         String
+  recipientName       String?
+  recipientPhone      String?
+  weightKg            Decimal?
+  lengthCm            Int?
+  widthCm             Int?
+  heightCm            Int?
+  isFragile           Boolean   @default(false)
+  // Photos : clés opaques du stockage privé (jamais d'URL publique).
+  photoKey            String?
+  proofOfDeliveryKey  String?
+  // QR présenté par l'expéditeur à l'enlèvement ; code à 4 chiffres que
+  // le destinataire donne au chauffeur à la remise (preuve de livraison).
+  qrCode              String    @unique
+  deliveryCode        String
+  // Partie 4 (non utilisés pour l'instant : pas d'assureur ni de signature).
+  requiresSignature   Boolean   @default(false)
+  insured             Boolean   @default(false)
+  insuranceValueCents Int?
+  // pending | picked_up | in_transit | delivered | failed | cancelled
+  status              String    @default("pending")
+  failureReason       String?
+  pickedUpAt          DateTime?
+  deliveredAt         DateTime?
+  createdAt           DateTime  @default(now())
+
+  @@index([carrierTripId])
+  @@index([senderId])
+}
+
+// ── Tarifs réglables (dashboard admin) ────────────────────────────────
+// Versionnés : un tarif n'est jamais modifié, on en crée un nouveau avec
+// sa date d'effet (immédiate ou programmée). Le prix d'une course est figé
+// à la réservation : un changement de tarif ne touche pas les courses déjà
+// réservées. Sans tarif en base, PricingService applique DEFAULT_TARIFF.
+model Tariff {
+  id                String   @id @default(uuid())
+  jurisdiction      String
+  // Centimes HT par km, par navette : { rose, bleue, orange, accessibility }.
+  ratesPerKm        Json
+  childSeatCents    Int
+  wifiCents         Int
+  extraLuggageCents Int
+  // Supplément colis d'une course mixte, et colis en navette dédiée.
+  parcelFeeCents    Int
+  // Colis en navette partagée (aller avec des passagers, ou trajet retour).
+  sharedParcelCents Int
+  effectiveFrom     DateTime
+  // Motif obligatoire (ex. « hausse du carburant ») : visible dans l'historique.
+  reason            String
+  createdBy         String
+  createdAt         DateTime @default(now())
+
+  @@index([jurisdiction, effectiveFrom])
+}
+
+// ── Factures légales ──────────────────────────────────────────────────
+// Une facture n'est jamais modifiée ni supprimée (conservation 10 ans) :
+// une correction ou un remboursement donne lieu à un avoir (credit_note)
+// qui référence la facture d'origine. Vendeur et acheteur sont copiés au
+// moment de l'émission (un changement d'adresse ultérieur ne la modifie pas).
+model Invoice {
+  id                String    @id @default(uuid())
+  // Numéro continu, sans trou, par série et par année : FA-2026-000001 (facture), AV-2026-000001 (avoir).
+  number            String    @unique
+  kind              String // invoice | credit_note
+  jurisdiction      String
+  tripId            String?
+  // Facture mensuelle d'entreprise : courses de la période, payable à 30 jours.
+  corporateId       String?
+  periodStart       DateTime?
+  periodEnd         DateTime?
+  tripIds           String[]  @default([])
+  customerUserId    String?
+  seller            Json
+  buyer             Json
+  // [{ description, quantity, unitCents, regime, vatRate, vatCents, totalCents }]
+  lines             Json
+  subtotalCents     Int
+  vatCents          Int
+  totalCents        Int
+  currency          String    @default("EUR")
+  paymentStatus     String // paid | due
+  dueDate           DateTime?
+  creditedInvoiceId String?
+  pdfKey            String?
+  issuedAt          DateTime  @default(now())
+
+  @@index([customerUserId, issuedAt])
+  @@index([corporateId, periodStart])
+  @@index([tripId])
+}
+
+// Dernier numéro attribué par série (ex. « FA-2026 »).
+model InvoiceCounter {
+  key  String @id
+  last Int
+}
+
+// ── Conservation des données (RGPD, Partie 8 : « 3 ans inactif → anonymisation
+// auto ») ─────────────────────────────────────────────────────────────
+// Dernière activité authentifiée, mise à jour au plus une fois par jour.
+// Table séparée : le modèle User (Module 2) n'est pas modifié.
+model UserActivity {
+  userId     String   @id
+  lastSeenAt DateTime
+}
+
+// Adresses favorites d'un utilisateur (Partie 6 : /users/me/addresses), 10 au plus.
+model SavedAddress {
+  id        String   @id @default(uuid())
+  userId    String
+  label     String // « Maison », « Bureau »…
+  address   String
+  lat       Float
+  lng       Float
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+// Préférences de notification (Partie 6 : /users/me/preferences). Table séparée :
+// le modèle User (Module 2) n'est pas modifié. Absence de ligne = valeurs par défaut.
+model UserPreference {
+  userId      String   @id
+  notifyPush  Boolean  @default(true)
+  notifyEmail Boolean  @default(true)
+  notifySms   Boolean  @default(false)
+  // Prospection commerciale : consentement explicite, jamais coché par défaut (RGPD).
+  marketing   Boolean  @default(false)
+  updatedAt   DateTime @updatedAt
+}
+
+// Note donnée par le passager après un trajet terminé (écran 10). Une par course.
+model TripRating {
+  id          String   @id @default(uuid())
+  tripId      String   @unique
+  passengerId String
+  driverId    String
+  stars       Int // 1 à 5
+  comment     String? // visible de l'équipe XLCAB seulement
+  createdAt   DateTime @default(now())
+
+  @@index([driverId])
+}
+
+// ── Bourse de transport, étape 1 : opérateurs et lignes régulières ────
+// (AUDIT_BOURSE_TRANSPORT.md, validé le 2026-10-09). Un opérateur est un
+// compte chauffeur (DriverProfile) qui présente son activité et publie des
+// lignes ; sociétés et flottes viendront en phase 2.
+
+model OperatorProfile {
+  id               String    @id // = User.id (rôle driver)
+  kind             String    @default("independent") // independent|vtc_company|fleet|collective
+  legalName        String? // nom commercial ou raison sociale
+  siret            String?
+  // N° de licence LOTI / inscription au registre des transporteurs de
+  // personnes : seule base de la vente à la place (vérifiée par l'admin).
+  transportLicense String?
+  cities           String[]  @default([])
+  services         String[]  @default([]) // airport|station|intercity|group|business|tourism|disposal
+  description      String?
+  status           String    @default("pending") // pending|verified|suspended
+  // Vente à la place autorisée : licence de transport collectif vérifiée.
+  // Jamais modifiable par l'opérateur lui-même.
+  perSeatAllowed   Boolean   @default(false)
+  verifiedAt       DateTime?
+  // Conditions générales opérateur (protocole d'annulation, pénalités) :
+  // acceptées avant la première ligne, condition de toute pénalité.
+  termsAcceptedAt  DateTime?
+  termsVersion     String?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+}
+
+// Ligne régulière : trajet type + calendrier. Le trajet (origine,
+// destination) ne se modifie pas : on ferme la ligne et on en crée une
+// autre, les départs déjà réservés gardent ainsi leur historique.
+model RecurringLine {
+  id                 String    @id @default(uuid())
+  operatorId         String
+  vehicleId          String
+  originAddress      String
+  originLat          Float
+  originLng          Float
+  destinationAddress String
+  destinationLat     Float
+  destinationLng     Float
+  pickupRadiusKm     Int       @default(5) // tolérance autour du départ et de l'arrivée
+  departureTime      String // "05:00", heure locale du fuseau
+  returnTime         String? // départ du retour le même jour ; null = pas de retour
+  timezone           String    @default("Europe/Paris")
+  jurisdiction       String    @default("FR")
+  daysOfWeek         Int[] // 1 = lundi … 7 = dimanche
+  startDate          String // "AAAA-MM-JJ", date locale
+  endDate            String?
+  seats              Int // places passagers par départ (≤ capacité du véhicule)
+  luggage            Int // bagages par départ
+  pricingMode        String // per_vehicle|per_seat
+  priceCents         Int // TTC : par place ou pour le véhicule
+  durationMin        Int?
+  conditions         String?
+  status             String    @default("active") // active|paused|closed
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  closedAt           DateTime?
+
+  @@index([operatorId])
+}
+
+// Jour sans départ (seats null) ou à capacité réduite.
+model LineException {
+  id     String  @id @default(uuid())
+  lineId String
+  date   String // "AAAA-MM-JJ"
+  seats  Int?
+  reason String?
+
+  @@unique([lineId, date])
+}
+
+// Départ réel d'une ligne (un par jour et par sens), généré 30 jours à
+// l'avance. Réservable seulement une fois confirmé par l'opérateur
+// (status open). Heure, places et prix sont figés sur le départ : modifier
+// la ligne ne touche pas un départ déjà réservé.
+model LineDeparture {
+  id          String    @id @default(uuid())
+  lineId      String
+  direction   String    @default("outbound") // outbound|return
+  localDate   String // "AAAA-MM-JJ"
+  departureAt DateTime
+  seatsTotal  Int
+  seatsBooked Int       @default(0)
+  priceCents  Int
+  pricingMode String
+  status      String    @default("to_confirm") // to_confirm|open|closed
+  confirmedAt DateTime?
+  createdAt   DateTime  @default(now())
+
+  // Chauffeur et véhicule qui assurent ce départ (null = titulaire de la
+  // ligne) ; changent quand un secours reprend le départ.
+  driverId      String?
+  vehicleId     String?
+  // « Je suis en route » (protocole d'annulation, contrôle à T−60 min).
+  driverReadyAt DateTime?
+  // Secours : none|searching|rescued|failed ; étape : backup2|backup3|open.
+  rescueStatus  String    @default("none")
+  rescueStage   String?
+
+  @@unique([lineId, direction, localDate])
+  @@index([localDate, status])
+}
+
+// ── Bourse, étape 2 : protocole d'annulation chauffeur ────────────────
+// (PROTOCOLE_ANNULATION_CHAUFFEUR.md, validé le 2026-10-09)
+
+// Chauffeur de réserve d'une ligne : n° 2 puis n° 3, sollicités dans cet
+// ordre si le chauffeur du départ fait défaut. Il accepte son rôle.
+model LineBackup {
+  id          String    @id @default(uuid())
+  lineId      String
+  driverId    String
+  vehicleId   String? // choisi par la réserve quand elle accepte
+  rank        Int // 2 | 3
+  status      String    @default("invited") // invited|accepted|declined|removed
+  createdAt   DateTime  @default(now())
+  respondedAt DateTime?
+
+  @@unique([lineId, rank])
+  @@index([driverId])
+}
+
+// Offre de reprise d'un départ abandonné (une par chauffeur sollicité).
+model RescueOffer {
+  id          String    @id @default(uuid())
+  departureId String
+  driverId    String
+  vehicleId   String?
+  stage       String // backup2|backup3|open
+  status      String    @default("pending") // pending|accepted|declined|expired|cancelled
+  expiresAt   DateTime
+  respondedAt DateTime?
+  createdAt   DateTime  @default(now())
+
+  @@index([departureId])
+  @@index([driverId, status])
+}
+
+// Annulation (ou absence) d'un chauffeur sur un départ réservé.
+model DriverCancellation {
+  id            String    @id @default(uuid())
+  driverId      String
+  departureId   String
+  trigger       String // driver_cancel|not_ready|no_position|documents
+  reason        String?
+  minutesBefore Int
+  // Dernière minute : le jour même du départ ou moins de 12 h avant.
+  lastMinute    Boolean
+  // counted|not_counted (prévenu à temps)|justification_pending|justified|waived
+  status        String
+  justification String?
+  reviewedBy    String?
+  reviewedAt    DateTime?
+  createdAt     DateTime  @default(now())
+
+  @@index([driverId, createdAt])
+}
+
+// Pénalité de 260 € (3e annulation comptée et suivantes, 12 mois glissants).
+model DriverPenalty {
+  id             String    @id @default(uuid())
+  driverId       String
+  cancellationId String    @unique
+  amountCents    Int
+  // pending (délai de contestation)|contested|applied|cancelled
+  status         String    @default("pending")
+  contestUntil   DateTime
+  contestReason  String?
+  decidedBy      String?
+  decisionReason String?
+  decidedAt      DateTime?
+  createdAt      DateTime  @default(now())
+
+  @@index([status, contestUntil])
+}
+
+// Bonus de reprise versé au chauffeur de secours (financé par la pénalité).
+model DriverBonus {
+  id          String   @id @default(uuid())
+  driverId    String
+  departureId String
+  penaltyId   String?
+  amountCents Int
+  createdAt   DateTime @default(now())
+
+  @@index([driverId])
+}
+
+// Avoir d'un passager (départ sans secours, part de la pénalité).
+model PassengerCredit {
+  id          String    @id @default(uuid())
+  userId      String
+  tripId      String?
+  amountCents Int
+  reason      String // rescue_failed|driver_penalty
+  expiresAt   DateTime
+  usedAt      DateTime?
+  createdAt   DateTime  @default(now())
+
+  @@index([userId])
+}
+
+// ── Bourse, étape 2c : demandes de transport et propositions ──────────
+// Un client publie une demande ; les opérateurs compatibles proposent un
+// prix ; le client choisit ; l'opérateur reconfirme sa disponibilité, et
+// seulement alors une course XLCAB (Trip source "market") est créée.
+
+model TransportRequest {
+  id                 String    @id @default(uuid())
+  requesterId        String
+  // Agences / OTA (phase 3) : référence du dossier chez le partenaire.
+  partnerRef         String?
+  originAddress      String
+  originLat          Float
+  originLng          Float
+  destinationAddress String
+  destinationLat     Float
+  destinationLng     Float
+  departureAt        DateTime
+  flexMin            Int       @default(0) // souplesse sur l'horaire, en minutes
+  returnAt           DateTime? // aller-retour : départ du retour
+  passengers         Int
+  luggage            Int       @default(0)
+  accessible         Boolean   @default(false) // véhicule PMR nécessaire
+  recurring          Boolean   @default(false) // besoin régulier (information pour l'opérateur)
+  frequency          String? // ex. « du lundi au vendredi »
+  budgetCents        Int? // budget indicatif, facultatif
+  needs              String?
+  comment            String?
+  // draft|published|offers_received|accepted|confirmed|cancelled|expired
+  // (en cours / terminée : lus sur la course créée)
+  status             String    @default("draft")
+  publishedAt        DateTime?
+  expiresAt          DateTime
+  acceptedOfferId    String?
+  tripId             String?
+  returnTripId       String? // aller-retour : course du retour
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  @@index([status, departureAt])
+  @@index([requesterId])
+}
+
+model TransportOffer {
+  id              String    @id @default(uuid())
+  requestId       String
+  operatorId      String
+  vehicleId       String
+  priceCents      Int // TTC, aller (et retour si includesReturn)
+  pickupAt        DateTime // horaire de prise en charge proposé
+  includesReturn  Boolean   @default(false)
+  conditions      String?
+  // pending|accepted (par le client, à reconfirmer)|confirmed|declined|withdrawn|rejected|expired
+  status          String    @default("pending")
+  validUntil      DateTime
+  confirmDeadline DateTime?
+  respondedAt     DateTime?
+  createdAt       DateTime  @default(now())
+
+  @@unique([requestId, operatorId])
+  @@index([operatorId, status])
+}
+
+// Questions / réponses avant confirmation : jamais de coordonnées (filtrées).
+model OfferMessage {
+  id        String   @id @default(uuid())
+  offerId   String
+  authorId  String
+  body      String
+  createdAt DateTime @default(now())
+
+  @@index([offerId, createdAt])
+}

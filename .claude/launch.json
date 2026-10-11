@@ -1,0 +1,24 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "xlcab-api",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["--prefix", "xlcab_backend", "run", "start:dev"],
+      "port": 3000,
+      "url": "http://localhost:3000"
+    },
+    {
+      "name": "xlcab-corporate",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["--prefix", "xlcab_corporate", "run", "dev"],
+      "port": 5173
+    },
+    {
+      "name": "xlcab-admin",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["--prefix", "xlcab_admin", "run", "dev"],
+      "port": 5174
+    }
+  ]
+}

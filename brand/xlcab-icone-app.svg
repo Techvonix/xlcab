@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-label="XLCAB">
+  <!-- Icône d’application 1024 × 1024 : carré plein nuit (l’OS arrondit), symbole à 62 %. -->
+  <rect width="1024" height="1024" fill="#070B1A"/>
+  <g transform="translate(194.56 194.56) scale(5.2907)">
+  <circle cx="60" cy="60" r="53" fill="none" stroke="#22D3EE" stroke-width="4"/>
+  <path fill="none" stroke="#22D3EE" stroke-width="10.5" stroke-linecap="round" d="M32 32 L88 88 M88 32 L69 51 M32 88 L51 69"/>
+  <circle cx="104" cy="30.5" r="8.5" fill="#F0ABFC"/>
+  </g>
+</svg>
