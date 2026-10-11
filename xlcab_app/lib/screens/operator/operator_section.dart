@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:xlcab_core/models/operator.dart';
 import '../../providers/operator_provider.dart';
-import '../../router.dart';
+import 'package:xlcab_core/routes.dart';
 import '../../services/operator_service.dart';
 import 'package:xlcab_ui/theme/app_spacing.dart';
 import 'package:xlcab_ui/theme/app_typography.dart';

@@ -6,7 +6,7 @@ import 'package:qr_flutter/qr_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:xlcab_core/models/trip.dart';
 import 'package:xlcab_core/models/trip_detail.dart';
-import '../../router.dart';
+import 'package:xlcab_core/routes.dart';
 import 'package:xlcab_core/services/api_service.dart';
 import 'package:xlcab_core/services/trip_service.dart';
 import 'package:xlcab_ui/theme/app_colors.dart';

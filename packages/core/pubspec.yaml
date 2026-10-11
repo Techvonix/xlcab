@@ -20,6 +20,9 @@ dependencies:
   flutter_secure_storage: ^9.2.2
   geolocator: ^12.0.0
   intl: ^0.20.2
+  # Photo (colis, documents) compressée sous 2 Mo
+  image_picker: ^1.2.3
+  flutter_image_compress: ^2.5.1
 
 dev_dependencies:
   flutter_test:

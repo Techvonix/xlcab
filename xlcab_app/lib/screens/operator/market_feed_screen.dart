@@ -9,7 +9,7 @@ import 'package:xlcab_core/services/market_service.dart';
 import 'package:xlcab_ui/theme/app_spacing.dart';
 import 'package:xlcab_ui/theme/app_typography.dart';
 import 'package:xlcab_core/utils/formatters.dart';
-import 'offer_messages_sheet.dart';
+import 'package:xlcab_ui/widgets/offer_messages_sheet.dart';
 import 'package:xlcab_ui/widgets/async_widgets.dart';
 import 'package:xlcab_core/l10n/l10n.dart';
 

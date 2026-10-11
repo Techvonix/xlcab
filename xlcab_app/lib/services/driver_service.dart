@@ -2,7 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:xlcab_core/models/driver_application.dart';
 import 'package:xlcab_core/services/api_service.dart';
-import 'document_picker.dart';
+import 'package:xlcab_core/services/document_picker.dart';
 import 'package:xlcab_core/l10n/l10n.dart';
 
 /// Endpoints "Drivers" de la Partie 6 (xlcab_backend/src/drivers).

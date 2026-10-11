@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:xlcab_core/models/driver_public_profile.dart';
 import 'package:xlcab_core/services/api_service.dart';
-import '../../services/feedback_service.dart';
+import 'package:xlcab_core/services/feedback_service.dart';
 import 'package:xlcab_ui/theme/app_colors.dart';
 import 'package:xlcab_ui/theme/app_spacing.dart';
 import 'package:xlcab_ui/theme/app_typography.dart';

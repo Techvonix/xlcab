@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:xlcab_core/models/shuttle.dart';
 import 'package:xlcab_core/models/trip.dart';
 import '../../providers/home_provider.dart';
-import '../../router.dart';
+import 'package:xlcab_core/routes.dart';
 import 'package:xlcab_core/services/api_service.dart';
 import 'package:xlcab_ui/theme/app_colors.dart';
 import 'package:xlcab_ui/theme/app_spacing.dart';

@@ -3,10 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:xlcab_core/models/driver_application.dart';
 import 'package:xlcab_core/models/shuttle.dart';
 import 'package:xlcab_core/services/api_service.dart';
-import '../services/document_picker.dart';
+import 'package:xlcab_core/services/document_picker.dart';
 import '../services/driver_service.dart';
 import 'package:xlcab_core/utils/validators.dart';
-import 'booking_provider.dart' show clockProvider;
+import 'package:xlcab_core/providers/clock_provider.dart';
 import 'package:xlcab_core/l10n/l10n.dart';
 
 /// Nombre d'étapes du parcours (Partie 9, Module 8).

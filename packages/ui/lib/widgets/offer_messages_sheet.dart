@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../providers/operator_provider.dart';
+import 'package:xlcab_core/providers/market_provider.dart';
 import 'package:xlcab_core/services/api_service.dart';
 import 'package:xlcab_core/services/market_service.dart';
 import 'package:xlcab_ui/theme/app_spacing.dart';

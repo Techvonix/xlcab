@@ -7,9 +7,9 @@ import 'package:xlcab_core/models/trip.dart';
 import 'package:xlcab_core/services/api_service.dart';
 import '../services/driver_channel.dart';
 import '../services/driver_device.dart';
-import '../services/document_picker.dart';
+import 'package:xlcab_core/services/document_picker.dart';
 import '../services/driver_mode_service.dart';
-import '../services/parcel_service.dart';
+import 'package:xlcab_core/services/parcel_service.dart';
 import 'package:xlcab_core/providers/auth_provider.dart';
 import 'package:xlcab_core/l10n/l10n.dart';
 

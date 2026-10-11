@@ -9,7 +9,7 @@ import '../../services/operator_service.dart';
 import 'package:xlcab_ui/theme/app_spacing.dart';
 import 'package:xlcab_ui/theme/app_typography.dart';
 import 'package:xlcab_ui/widgets/primary_button.dart';
-import '../profile/profile_screen.dart' show legalLinkOpenerProvider;
+import 'package:xlcab_ui/widgets/legal_links.dart';
 import 'package:xlcab_ui/widgets/async_widgets.dart';
 import 'package:xlcab_core/l10n/l10n.dart';
 

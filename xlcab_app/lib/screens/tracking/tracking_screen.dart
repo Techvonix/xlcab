@@ -6,7 +6,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:xlcab_core/models/tracking.dart';
 import 'package:xlcab_core/models/trip.dart';
 import '../../providers/tracking_provider.dart';
-import '../../router.dart';
+import 'package:xlcab_core/routes.dart';
 import 'package:xlcab_ui/theme/app_colors.dart';
 import 'package:xlcab_ui/theme/app_spacing.dart';
 import 'package:xlcab_ui/theme/app_typography.dart';

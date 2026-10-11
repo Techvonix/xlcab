@@ -2,7 +2,7 @@ import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:xlcab_core/services/api_service.dart';
-import 'package:xlcab_app/services/document_picker.dart';
+import 'package:xlcab_core/services/document_picker.dart';
 import 'package:xlcab_core/utils/validators.dart';
 
 void main() {

@@ -1,26 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:xlcab_core/config/legal.dart';
 import 'package:xlcab_core/models/account.dart';
 import 'package:xlcab_core/providers/auth_provider.dart';
 import 'package:xlcab_core/providers/theme_provider.dart';
 import 'package:xlcab_core/providers/locale_provider.dart';
-import '../../router.dart';
+import 'package:xlcab_core/routes.dart';
 import 'package:xlcab_core/services/account_service.dart';
 import 'package:xlcab_core/services/api_service.dart';
+import 'package:xlcab_ui/widgets/legal_links.dart';
 import 'package:xlcab_ui/theme/app_colors.dart';
+
+export 'package:xlcab_ui/widgets/legal_links.dart';
 import 'package:xlcab_ui/theme/app_spacing.dart';
 import 'package:xlcab_ui/theme/app_typography.dart';
 import 'package:xlcab_core/l10n/l10n.dart';
 
 final profileProvider = FutureProvider.autoDispose<UserProfile>((ref) => ref.watch(accountServiceProvider).me());
-
-/// Ouverture des liens légaux (injectable pour les tests).
-final legalLinkOpenerProvider = Provider<Future<bool> Function(Uri)>(
-  (ref) => (uri) => launchUrl(uri, mode: LaunchMode.externalApplication),
-);
 
 /// Écran 13 — Profil (Partie 7) : identité, historique, moyens de
 /// paiement, préférences, liens légaux, version, déconnexion et

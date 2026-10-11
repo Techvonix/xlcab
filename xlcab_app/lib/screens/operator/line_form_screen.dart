@@ -4,14 +4,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:xlcab_core/models/operator.dart';
 import 'package:xlcab_core/models/place.dart';
-import '../../providers/booking_provider.dart' show clockProvider;
+import 'package:xlcab_core/providers/clock_provider.dart';
 import '../../providers/operator_provider.dart';
 import 'package:xlcab_core/services/api_service.dart';
 import '../../services/operator_service.dart';
 import 'package:xlcab_ui/theme/app_spacing.dart';
 import 'package:xlcab_ui/theme/app_typography.dart';
 import 'package:xlcab_ui/widgets/primary_button.dart';
-import '../booking/parcel_creation_screen.dart' show addressPickerProvider;
+import 'package:xlcab_ui/screens/address_search_screen.dart' show addressPickerProvider;
 import 'package:xlcab_ui/widgets/async_widgets.dart';
 import 'package:xlcab_core/l10n/l10n.dart';
 

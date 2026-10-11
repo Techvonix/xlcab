@@ -5,7 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:xlcab_core/models/place.dart';
 import 'package:xlcab_core/models/driver_public_profile.dart';
 import 'package:xlcab_core/services/api_service.dart';
-import '../../services/feedback_service.dart';
+import 'package:xlcab_core/services/feedback_service.dart';
 import 'package:xlcab_core/services/places_service.dart';
 import 'package:xlcab_ui/theme/app_spacing.dart';
 import 'package:xlcab_ui/theme/app_typography.dart';
@@ -180,3 +180,8 @@ class _AddressSearchScreenState extends ConsumerState<AddressSearchScreen> {
     );
   }
 }
+
+/// Choix d'une adresse (injectable pour les tests : pas d'appel Google).
+final addressPickerProvider = Provider<Future<Place?> Function(BuildContext, String)>(
+  (ref) => (context, title) => AddressSearchScreen.open(context, title: title),
+);

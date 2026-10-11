@@ -8,7 +8,7 @@ import 'package:xlcab_app/providers/booking_provider.dart';
 import 'package:xlcab_app/providers/driver_onboarding_provider.dart';
 import 'package:xlcab_app/screens/driver/driver_onboarding_screen.dart';
 import 'package:xlcab_core/services/api_service.dart';
-import 'package:xlcab_app/services/document_picker.dart';
+import 'package:xlcab_core/services/document_picker.dart';
 import 'package:xlcab_app/services/driver_service.dart';
 import 'package:xlcab_ui/theme/app_theme.dart';
 

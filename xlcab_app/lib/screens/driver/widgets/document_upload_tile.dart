@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:xlcab_core/models/driver_application.dart';
 import '../../../providers/driver_onboarding_provider.dart';
-import '../../../services/document_picker.dart';
+import 'package:xlcab_core/services/document_picker.dart';
 import 'package:xlcab_ui/theme/app_colors.dart';
 import 'package:xlcab_ui/theme/app_spacing.dart';
 import 'package:xlcab_ui/theme/app_typography.dart';

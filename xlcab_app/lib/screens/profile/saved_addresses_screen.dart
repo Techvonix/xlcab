@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:xlcab_core/models/driver_public_profile.dart';
 import 'package:xlcab_core/services/api_service.dart';
-import '../../services/feedback_service.dart';
+import 'package:xlcab_core/services/feedback_service.dart';
 import 'package:xlcab_ui/theme/app_spacing.dart';
 import 'package:xlcab_ui/theme/app_typography.dart';
 import 'package:xlcab_ui/widgets/primary_button.dart';
-import '../booking/parcel_creation_screen.dart' show addressPickerProvider;
+import 'package:xlcab_ui/screens/address_search_screen.dart' show addressPickerProvider;
 import 'package:xlcab_core/l10n/l10n.dart';
 
 /// Écran 13 — Adresses favorites (10 au plus), proposées en tête de la

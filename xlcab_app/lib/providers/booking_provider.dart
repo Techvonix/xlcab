@@ -6,15 +6,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:xlcab_core/models/place.dart';
 import 'package:xlcab_core/models/quote.dart';
 import 'package:xlcab_core/models/shuttle.dart';
+import 'package:xlcab_core/providers/clock_provider.dart';
 import '../services/booking_service.dart';
+
+export 'package:xlcab_core/providers/clock_provider.dart';
 
 // Règles de l'écran 6 (Partie 7). Le serveur les revérifie : elles ne
 // servent ici qu'à guider l'utilisateur sans aller-retour réseau.
 const int maxSeats = 7; // "passagers 1-7"
 const Duration minLeadTime = Duration(hours: 2); // "Minimum 2h dans le futur"
-
-/// Horloge injectable : les tests fixent "maintenant".
-final clockProvider = Provider<DateTime Function()>((ref) => DateTime.now);
 
 /// Délai d'anti-rebond avant de demander un devis (0 dans les tests).
 final quoteDebounceProvider = Provider<Duration>((ref) => const Duration(milliseconds: 500));

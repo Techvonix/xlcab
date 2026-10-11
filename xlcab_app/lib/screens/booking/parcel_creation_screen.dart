@@ -5,23 +5,20 @@ import 'package:go_router/go_router.dart';
 import 'package:xlcab_core/models/parcel.dart';
 import 'package:xlcab_core/models/payment.dart';
 import 'package:xlcab_core/models/place.dart';
-import '../../providers/booking_provider.dart' show clockProvider;
-import '../../router.dart';
+import 'package:xlcab_core/providers/clock_provider.dart';
+import 'package:xlcab_core/routes.dart';
 import 'package:xlcab_core/services/api_service.dart';
-import '../../services/parcel_service.dart';
+import 'package:xlcab_core/services/parcel_service.dart';
 import '../../services/payment_service.dart';
 import 'package:xlcab_ui/theme/app_colors.dart';
 import 'package:xlcab_ui/theme/app_spacing.dart';
 import 'package:xlcab_ui/theme/app_typography.dart';
 import 'package:xlcab_core/utils/formatters.dart';
 import 'package:xlcab_ui/widgets/primary_button.dart';
-import 'address_search_screen.dart';
-import 'package:xlcab_core/l10n/l10n.dart';
+import 'package:xlcab_ui/screens/address_search_screen.dart';
 
-/// Choix d'une adresse (injectable pour les tests : pas d'appel Google).
-final addressPickerProvider = Provider<Future<Place?> Function(BuildContext, String)>(
-  (ref) => (context, title) => AddressSearchScreen.open(context, title: title),
-);
+export 'package:xlcab_ui/screens/address_search_screen.dart' show addressPickerProvider;
+import 'package:xlcab_core/l10n/l10n.dart';
 
 /// Choix de la date puis de l'heure d'enlèvement (sélecteurs natifs ;
 /// injectable pour les tests).

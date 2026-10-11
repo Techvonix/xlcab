@@ -5,7 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:xlcab_core/models/market.dart';
-import 'package:xlcab_app/providers/booking_provider.dart' show clockProvider;
+import 'package:xlcab_core/providers/clock_provider.dart';
 import 'package:xlcab_app/providers/operator_provider.dart';
 import 'package:xlcab_app/screens/booking/parcel_creation_screen.dart' show addressPickerProvider, pickupDateTimePickerProvider;
 import 'package:xlcab_app/screens/market/line_search_screen.dart';

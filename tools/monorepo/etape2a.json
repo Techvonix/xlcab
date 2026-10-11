@@ -1,0 +1,13 @@
+{
+  "packages": { "xlcab_app": "xlcab_app", "xlcab_core": "packages/core", "xlcab_ui": "packages/ui" },
+  "moves": [
+    { "from": "xlcab_app", "to": "xlcab_core",
+      "paths": ["services/document_picker.dart", "services/parcel_service.dart", "services/feedback_service.dart"] },
+    { "from": "xlcab_app", "to": "xlcab_ui",
+      "paths": ["screens/booking/address_search_screen.dart", "screens/operator/offer_messages_sheet.dart"],
+      "rename": {
+        "screens/booking/address_search_screen.dart": "screens/address_search_screen.dart",
+        "screens/operator/offer_messages_sheet.dart": "widgets/offer_messages_sheet.dart"
+      } }
+  ]
+}

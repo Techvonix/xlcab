@@ -10,7 +10,7 @@ import 'package:xlcab_app/screens/driver/driver_mode_screen.dart';
 import 'package:xlcab_app/screens/driver/widgets/offer_card.dart';
 import 'package:xlcab_core/services/api_service.dart';
 import 'package:xlcab_app/services/driver_channel.dart';
-import 'package:xlcab_app/services/document_picker.dart';
+import 'package:xlcab_core/services/document_picker.dart';
 import 'package:xlcab_app/services/driver_device.dart';
 import 'package:xlcab_app/services/operator_service.dart';
 import 'package:xlcab_core/models/parcel.dart';

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:xlcab_core/models/trip.dart';
-import '../../router.dart';
+import 'package:xlcab_core/routes.dart';
 import 'package:xlcab_core/services/api_service.dart';
 import '../../services/booking_service.dart';
 import 'package:xlcab_ui/theme/shuttle_colors.dart';
