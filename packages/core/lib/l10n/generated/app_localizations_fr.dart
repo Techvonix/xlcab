@@ -3319,4 +3319,52 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get mkcVoirMaReservation => 'Voir ma réservation';
+
+  @override
+  String get tabTrajets => 'Trajets';
+
+  @override
+  String get tabColis => 'Colis';
+
+  @override
+  String get tabImpact => 'Impact';
+
+  @override
+  String get tabCompte => 'Compte';
+
+  @override
+  String get colisMesColis => 'Mes colis';
+
+  @override
+  String get colisIntro =>
+      'Votre colis voyage dans une navette XLCAB : suivi en direct, photo à la remise, code de remise connu de vous seul.';
+
+  @override
+  String get colisAucun => 'Aucun colis parmi vos dernières réservations.';
+
+  @override
+  String get colisIndisponible => 'Impossible de charger vos colis.';
+
+  @override
+  String get colisChargement => 'Chargement de vos colis';
+
+  @override
+  String get impactTitre => 'Mon impact';
+
+  @override
+  String get impactBientotTitre => 'Bientôt disponible';
+
+  @override
+  String get impactBientotTexte =>
+      'Vous verrez ici le CO₂ économisé en partageant vos trajets et en confiant vos colis à une navette déjà en route. Le mode de calcul est en préparation.';
+
+  @override
+  String get appliChauffeurTitre => 'Application XLCAB Driver';
+
+  @override
+  String get appliChauffeurTexte =>
+      'L’espace chauffeur (candidature, missions, lignes, revenus) se trouve dans l’application XLCAB Driver. Connectez-vous-y avec ce même compte.';
+
+  @override
+  String get compris => 'Compris';
 }

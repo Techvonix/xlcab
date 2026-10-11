@@ -5738,6 +5738,96 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Voir ma réservation'**
   String get mkcVoirMaReservation;
+
+  /// No description provided for @tabTrajets.
+  ///
+  /// In fr, this message translates to:
+  /// **'Trajets'**
+  String get tabTrajets;
+
+  /// No description provided for @tabColis.
+  ///
+  /// In fr, this message translates to:
+  /// **'Colis'**
+  String get tabColis;
+
+  /// No description provided for @tabImpact.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impact'**
+  String get tabImpact;
+
+  /// No description provided for @tabCompte.
+  ///
+  /// In fr, this message translates to:
+  /// **'Compte'**
+  String get tabCompte;
+
+  /// No description provided for @colisMesColis.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mes colis'**
+  String get colisMesColis;
+
+  /// No description provided for @colisIntro.
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre colis voyage dans une navette XLCAB : suivi en direct, photo à la remise, code de remise connu de vous seul.'**
+  String get colisIntro;
+
+  /// No description provided for @colisAucun.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun colis parmi vos dernières réservations.'**
+  String get colisAucun;
+
+  /// No description provided for @colisIndisponible.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible de charger vos colis.'**
+  String get colisIndisponible;
+
+  /// No description provided for @colisChargement.
+  ///
+  /// In fr, this message translates to:
+  /// **'Chargement de vos colis'**
+  String get colisChargement;
+
+  /// No description provided for @impactTitre.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mon impact'**
+  String get impactTitre;
+
+  /// No description provided for @impactBientotTitre.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bientôt disponible'**
+  String get impactBientotTitre;
+
+  /// No description provided for @impactBientotTexte.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vous verrez ici le CO₂ économisé en partageant vos trajets et en confiant vos colis à une navette déjà en route. Le mode de calcul est en préparation.'**
+  String get impactBientotTexte;
+
+  /// No description provided for @appliChauffeurTitre.
+  ///
+  /// In fr, this message translates to:
+  /// **'Application XLCAB Driver'**
+  String get appliChauffeurTitre;
+
+  /// No description provided for @appliChauffeurTexte.
+  ///
+  /// In fr, this message translates to:
+  /// **'L’espace chauffeur (candidature, missions, lignes, revenus) se trouve dans l’application XLCAB Driver. Connectez-vous-y avec ce même compte.'**
+  String get appliChauffeurTexte;
+
+  /// No description provided for @compris.
+  ///
+  /// In fr, this message translates to:
+  /// **'Compris'**
+  String get compris;
 }
 
 class _AppLocalizationsDelegate

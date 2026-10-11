@@ -13,6 +13,8 @@ dependencies:
     sdk: flutter
   flutter_riverpod: ^2.5.1
   intl: ^0.20.2
+  flutter_localizations:
+    sdk: flutter
   url_launcher: ^6.3.0
   xlcab_core:
     path: ../core

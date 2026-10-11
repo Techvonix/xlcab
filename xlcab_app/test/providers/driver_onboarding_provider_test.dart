@@ -2,7 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:xlcab_core/models/driver_application.dart';
 import 'package:xlcab_core/models/shuttle.dart';
-import 'package:xlcab_app/providers/booking_provider.dart';
+import 'package:xlcab_core/providers/clock_provider.dart';
 import 'package:xlcab_app/providers/driver_onboarding_provider.dart';
 import 'package:xlcab_core/services/api_service.dart';
 import 'package:xlcab_core/services/document_picker.dart';

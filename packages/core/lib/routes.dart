@@ -44,3 +44,12 @@ class AppRoutes {
   static const requestDetail = '/market/requests/:requestId';
   static String requestDetailFor(String requestId) => '/market/requests/$requestId';
 }
+
+/// Onglets de l'application passager (barre du bas) qui n'avaient pas de route.
+class PassengerTabs {
+  PassengerTabs._();
+
+  static const trips = '/trips';
+  static const parcels = '/parcels';
+  static const impact = '/impact';
+}

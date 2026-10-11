@@ -1,0 +1,13 @@
+{
+  "packages": { "xlcab_app": "xlcab_app", "xlcab_core": "packages/core", "xlcab_ui": "packages/ui", "xlcab_passenger": "apps/passenger" },
+  "moves": [
+    { "from": "xlcab_app", "to": "xlcab_ui", "paths": ["app.dart"], "rename": { "app.dart": "xlcab_app.dart" } },
+    { "from": "xlcab_app", "to": "xlcab_passenger",
+      "paths": [
+        "screens/home/", "screens/onboarding/", "screens/booking/", "screens/market/", "screens/tracking/",
+        "screens/profile/", "screens/corporate/", "screens/accessibility/",
+        "services/booking_service.dart", "services/payment_service.dart", "services/tracking_channel.dart",
+        "providers/booking_provider.dart", "providers/home_provider.dart", "providers/tracking_provider.dart"
+      ] }
+  ]
+}

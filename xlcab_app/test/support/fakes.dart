@@ -19,13 +19,10 @@ import 'package:xlcab_app/services/driver_device.dart';
 import 'package:xlcab_app/services/driver_mode_service.dart';
 import 'package:xlcab_core/models/payment.dart';
 import 'package:xlcab_core/models/trip_detail.dart';
-import 'package:xlcab_app/services/payment_service.dart';
-import 'package:xlcab_app/services/booking_service.dart';
 import 'package:xlcab_core/services/document_picker.dart';
 import 'package:xlcab_app/services/driver_service.dart';
 import 'package:xlcab_core/services/location_service.dart';
 import 'package:xlcab_core/services/places_service.dart';
-import 'package:xlcab_app/services/tracking_channel.dart';
 import 'package:xlcab_core/services/trip_service.dart';
 
 // Doubles de test partagés : aucun appel réseau réel.
@@ -57,22 +54,6 @@ const parcelQuote = PassengerQuote(
     VatLine(regime: 'parcel', baseCents: 800, ratePercent: 20, vatCents: 160),
   ],
 );
-
-class FakeBookingService extends BookingService {
-  FakeBookingService() : super(Dio());
-
-  final List<PassengerQuoteRequest> quoteRequests = [];
-
-  /// Erreur à renvoyer au lieu d'un devis (ex. règle des 60 km).
-  ApiException? quoteError;
-
-  @override
-  Future<PassengerQuote> quotePassenger(PassengerQuoteRequest request, {CancelToken? cancelToken}) async {
-    quoteRequests.add(request);
-    if (quoteError != null) throw quoteError!;
-    return request.withParcel ? parcelQuote : baseQuote;
-  }
-}
 
 class FakePlacesService extends PlacesService {
   FakePlacesService() : super(Dio(), 'test-key', 'fr');
@@ -159,100 +140,6 @@ class FakeTripService extends TripService {
   Future<CancelResult> cancel(String tripId, String reason) async {
     cancelled.add(tripId);
     return cancelResult;
-  }
-}
-
-// ── Paiement (Stripe) ─────────────────────────────────────────────────────
-
-PaymentSheetParams sheetFor({String tripId = 'trip-paid', int amountCents = 12186}) => PaymentSheetParams(
-      tripId: tripId,
-      paymentIntentClientSecret: 'pi_1_secret_x',
-      customerId: 'cus_1',
-      ephemeralKeySecret: 'ek_1',
-      amountCents: amountCents,
-      currency: 'EUR',
-    );
-
-class FakePaymentService extends PaymentService {
-  FakePaymentService() : super(Dio());
-
-  final List<String> calls = [];
-  int amountCents = 12186;
-  ApiException? error;
-
-  @override
-  Future<PaymentSheetParams> createBooking(PassengerQuoteRequest request) async {
-    calls.add('book');
-    if (error != null) throw error!;
-    return sheetFor(amountCents: amountCents);
-  }
-
-  @override
-  Future<PaymentSheetParams> resume(String tripId) async {
-    calls.add('resume:$tripId');
-    return sheetFor(tripId: tripId, amountCents: amountCents);
-  }
-
-  @override
-  Future<String> confirm(String tripId) async {
-    calls.add('confirm:$tripId');
-    return 'succeeded';
-  }
-}
-
-class FakePresenter implements PaymentSheetPresenter {
-  bool available = true;
-  final List<PaymentSheetResult> results = [];
-  final List<PaymentSheetParams> presented = [];
-
-  @override
-  bool get isAvailable => available;
-
-  @override
-  Future<PaymentSheetResult> present(PaymentSheetParams params) async {
-    presented.add(params);
-    return results.isEmpty ? const PaymentSheetResult(PaymentSheetOutcome.completed) : results.removeAt(0);
-  }
-
-  final List<SetupSheetParams> setups = [];
-
-  @override
-  Future<PaymentSheetResult> presentSetup(SetupSheetParams params) async {
-    setups.add(params);
-    return results.isEmpty ? const PaymentSheetResult(PaymentSheetOutcome.completed) : results.removeAt(0);
-  }
-}
-
-/// Canal temps réel piloté par le test : il pousse lui-même les événements.
-class FakeTrackingChannel implements TrackingChannel {
-  final _events = StreamController<TrackingEvent>.broadcast();
-  String? startedTripId;
-  final List<String> sentMessages = [];
-  final List<({double lat, double lng})> sosSent = [];
-  bool sosAcknowledged = true;
-  bool disposed = false;
-
-  void push(TrackingEvent e) => _events.add(e);
-
-  @override
-  Stream<TrackingEvent> get events => _events.stream;
-
-  @override
-  void start(String tripId) => startedTripId = tripId;
-
-  @override
-  void sendMessage(String tripId, String text) => sentMessages.add(text);
-
-  @override
-  Future<bool> sendSos({required String tripId, required double lat, required double lng}) async {
-    sosSent.add((lat: lat, lng: lng));
-    return sosAcknowledged;
-  }
-
-  @override
-  void dispose() {
-    disposed = true;
-    _events.close();
   }
 }
 
@@ -555,6 +442,15 @@ class FakeLocationService extends LocationService {
   @override
   Future<({double lat, double lng})?> currentPosition() async => position;
 }
+
+PaymentSheetParams sheetFor({String tripId = 'trip-paid', int amountCents = 12186}) => PaymentSheetParams(
+      tripId: tripId,
+      paymentIntentClientSecret: 'pi_1_secret_x',
+      customerId: 'cus_1',
+      ephemeralKeySecret: 'ek_1',
+      amountCents: amountCents,
+      currency: 'EUR',
+    );
 
 // ── Colis (écrans 11, 12 et checklist chauffeur) ──────────────────────────
 

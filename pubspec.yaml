@@ -8,5 +8,6 @@ environment:
 
 workspace:
   - xlcab_app
+  - apps/passenger
   - packages/core
   - packages/ui

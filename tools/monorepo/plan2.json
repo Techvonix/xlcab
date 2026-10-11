@@ -1,0 +1,16 @@
+{
+  "__order": ["passenger", "driver"],
+  "__allowed": { "passenger": [], "driver": [], "app": ["passenger", "driver"] },
+  "passenger": [
+    "screens/home/", "screens/onboarding/", "screens/booking/", "screens/market/", "screens/tracking/",
+    "screens/profile/", "screens/corporate/", "screens/accessibility/",
+    "services/booking_service.dart", "services/payment_service.dart", "services/tracking_channel.dart",
+    "providers/booking_provider.dart", "providers/home_provider.dart", "providers/tracking_provider.dart"
+  ],
+  "driver": [
+    "screens/driver/", "screens/operator/",
+    "services/driver_channel.dart", "services/driver_device.dart", "services/driver_mode_service.dart",
+    "services/driver_service.dart", "services/operator_service.dart",
+    "providers/driver_mode_provider.dart", "providers/driver_onboarding_provider.dart", "providers/operator_provider.dart"
+  ]
+}

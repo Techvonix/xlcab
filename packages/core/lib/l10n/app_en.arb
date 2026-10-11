@@ -939,5 +939,20 @@
   "mkcVehiculeEntier": "Whole vehicle, fixed price",
   "mkcVoirLeRetour": "View the return booking",
   "mkcVoirLignesEtDevis": "Scheduled lines and quotes",
-  "mkcVoirMaReservation": "View my booking"
+  "mkcVoirMaReservation": "View my booking",
+  "tabTrajets": "Trips",
+  "tabColis": "Parcels",
+  "tabImpact": "Impact",
+  "tabCompte": "Account",
+  "colisMesColis": "My parcels",
+  "colisIntro": "Your parcel travels in an XLCAB shuttle: live tracking, photo at hand-over, delivery code known only to you.",
+  "colisAucun": "No parcel among your latest bookings.",
+  "colisIndisponible": "Unable to load your parcels.",
+  "colisChargement": "Loading your parcels",
+  "impactTitre": "My impact",
+  "impactBientotTitre": "Coming soon",
+  "impactBientotTexte": "You will see here the CO₂ saved by sharing your trips and sending your parcels on a shuttle that is already on the road. The calculation method is being prepared.",
+  "appliChauffeurTitre": "XLCAB Driver app",
+  "appliChauffeurTexte": "The driver area (application, missions, lines, earnings) is in the XLCAB Driver app. Sign in there with this same account.",
+  "compris": "Got it"
 }

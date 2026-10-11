@@ -1909,5 +1909,20 @@
   "mkcVehiculeEntier": "Véhicule entier, prix fixe",
   "mkcVoirLeRetour": "Voir la réservation du retour",
   "mkcVoirLignesEtDevis": "Lignes régulières et devis",
-  "mkcVoirMaReservation": "Voir ma réservation"
+  "mkcVoirMaReservation": "Voir ma réservation",
+  "tabTrajets": "Trajets",
+  "tabColis": "Colis",
+  "tabImpact": "Impact",
+  "tabCompte": "Compte",
+  "colisMesColis": "Mes colis",
+  "colisIntro": "Votre colis voyage dans une navette XLCAB : suivi en direct, photo à la remise, code de remise connu de vous seul.",
+  "colisAucun": "Aucun colis parmi vos dernières réservations.",
+  "colisIndisponible": "Impossible de charger vos colis.",
+  "colisChargement": "Chargement de vos colis",
+  "impactTitre": "Mon impact",
+  "impactBientotTitre": "Bientôt disponible",
+  "impactBientotTexte": "Vous verrez ici le CO₂ économisé en partageant vos trajets et en confiant vos colis à une navette déjà en route. Le mode de calcul est en préparation.",
+  "appliChauffeurTitre": "Application XLCAB Driver",
+  "appliChauffeurTexte": "L’espace chauffeur (candidature, missions, lignes, revenus) se trouve dans l’application XLCAB Driver. Connectez-vous-y avec ce même compte.",
+  "compris": "Compris"
 }

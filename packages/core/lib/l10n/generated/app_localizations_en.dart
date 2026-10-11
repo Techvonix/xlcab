@@ -3298,4 +3298,52 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get mkcVoirMaReservation => 'View my booking';
+
+  @override
+  String get tabTrajets => 'Trips';
+
+  @override
+  String get tabColis => 'Parcels';
+
+  @override
+  String get tabImpact => 'Impact';
+
+  @override
+  String get tabCompte => 'Account';
+
+  @override
+  String get colisMesColis => 'My parcels';
+
+  @override
+  String get colisIntro =>
+      'Your parcel travels in an XLCAB shuttle: live tracking, photo at hand-over, delivery code known only to you.';
+
+  @override
+  String get colisAucun => 'No parcel among your latest bookings.';
+
+  @override
+  String get colisIndisponible => 'Unable to load your parcels.';
+
+  @override
+  String get colisChargement => 'Loading your parcels';
+
+  @override
+  String get impactTitre => 'My impact';
+
+  @override
+  String get impactBientotTitre => 'Coming soon';
+
+  @override
+  String get impactBientotTexte =>
+      'You will see here the CO₂ saved by sharing your trips and sending your parcels on a shuttle that is already on the road. The calculation method is being prepared.';
+
+  @override
+  String get appliChauffeurTitre => 'XLCAB Driver app';
+
+  @override
+  String get appliChauffeurTexte =>
+      'The driver area (application, missions, lines, earnings) is in the XLCAB Driver app. Sign in there with this same account.';
+
+  @override
+  String get compris => 'Got it';
 }

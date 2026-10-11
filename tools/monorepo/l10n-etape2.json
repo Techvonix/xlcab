@@ -1,0 +1,17 @@
+{
+  "tabTrajets": { "fr": "Trajets", "en": "Trips" },
+  "tabColis": { "fr": "Colis", "en": "Parcels" },
+  "tabImpact": { "fr": "Impact", "en": "Impact" },
+  "tabCompte": { "fr": "Compte", "en": "Account" },
+  "colisMesColis": { "fr": "Mes colis", "en": "My parcels" },
+  "colisIntro": { "fr": "Votre colis voyage dans une navette XLCAB : suivi en direct, photo à la remise, code de remise connu de vous seul.", "en": "Your parcel travels in an XLCAB shuttle: live tracking, photo at hand-over, delivery code known only to you." },
+  "colisAucun": { "fr": "Aucun colis parmi vos dernières réservations.", "en": "No parcel among your latest bookings." },
+  "colisIndisponible": { "fr": "Impossible de charger vos colis.", "en": "Unable to load your parcels." },
+  "colisChargement": { "fr": "Chargement de vos colis", "en": "Loading your parcels" },
+  "impactTitre": { "fr": "Mon impact", "en": "My impact" },
+  "impactBientotTitre": { "fr": "Bientôt disponible", "en": "Coming soon" },
+  "impactBientotTexte": { "fr": "Vous verrez ici le CO₂ économisé en partageant vos trajets et en confiant vos colis à une navette déjà en route. Le mode de calcul est en préparation.", "en": "You will see here the CO₂ saved by sharing your trips and sending your parcels on a shuttle that is already on the road. The calculation method is being prepared." },
+  "appliChauffeurTitre": { "fr": "Application XLCAB Driver", "en": "XLCAB Driver app" },
+  "appliChauffeurTexte": { "fr": "L’espace chauffeur (candidature, missions, lignes, revenus) se trouve dans l’application XLCAB Driver. Connectez-vous-y avec ce même compte.", "en": "The driver area (application, missions, lines, earnings) is in the XLCAB Driver app. Sign in there with this same account." },
+  "compris": { "fr": "Compris", "en": "Got it" }
+}
