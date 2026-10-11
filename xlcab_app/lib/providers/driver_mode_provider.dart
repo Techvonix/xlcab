@@ -1,17 +1,17 @@
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../models/driver_mode.dart';
-import '../models/parcel.dart';
-import '../models/trip.dart';
-import '../services/api_service.dart';
+import 'package:xlcab_core/models/driver_mode.dart';
+import 'package:xlcab_core/models/parcel.dart';
+import 'package:xlcab_core/models/trip.dart';
+import 'package:xlcab_core/services/api_service.dart';
 import '../services/driver_channel.dart';
 import '../services/driver_device.dart';
 import '../services/document_picker.dart';
 import '../services/driver_mode_service.dart';
 import '../services/parcel_service.dart';
-import 'auth_provider.dart';
-import 'package:xlcab_app/l10n/l10n.dart';
+import 'package:xlcab_core/providers/auth_provider.dart';
+import 'package:xlcab_core/l10n/l10n.dart';
 
 /// Partie 7 (écran 15) : position toutes les 10 s sans course, 3 s en course.
 const idleLocationInterval = Duration(seconds: 10);

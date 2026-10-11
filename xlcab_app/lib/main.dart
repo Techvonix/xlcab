@@ -6,7 +6,7 @@ import 'package:intl/date_symbol_data_local.dart';
 // import 'firebase_options.dart'; // Généré par `flutterfire configure`.
 import 'app.dart';
 import 'services/payment_service.dart';
-import 'services/preferences_store.dart';
+import 'package:xlcab_core/services/preferences_store.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();

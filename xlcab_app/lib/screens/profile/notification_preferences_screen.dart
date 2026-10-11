@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../models/driver_public_profile.dart';
-import '../../services/api_service.dart';
+import 'package:xlcab_core/models/driver_public_profile.dart';
+import 'package:xlcab_core/services/api_service.dart';
 import '../../services/feedback_service.dart';
-import '../../theme/app_spacing.dart';
-import '../../theme/app_typography.dart';
-import 'package:xlcab_app/l10n/l10n.dart';
+import 'package:xlcab_ui/theme/app_spacing.dart';
+import 'package:xlcab_ui/theme/app_typography.dart';
+import 'package:xlcab_core/l10n/l10n.dart';
 
 /// Écran 13 — Préférences de notification. Les messages liés à une course en
 /// cours (chauffeur en route, SOS…) restent envoyés : ils font partie du

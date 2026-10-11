@@ -4,18 +4,18 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/date_symbol_data_local.dart';
-import 'package:xlcab_app/models/payment.dart';
-import 'package:xlcab_app/models/quote.dart';
-import 'package:xlcab_app/models/shuttle.dart';
-import 'package:xlcab_app/models/trip.dart';
-import 'package:xlcab_app/models/trip_detail.dart';
+import 'package:xlcab_core/models/payment.dart';
+import 'package:xlcab_core/models/quote.dart';
+import 'package:xlcab_core/models/shuttle.dart';
+import 'package:xlcab_core/models/trip.dart';
+import 'package:xlcab_core/models/trip_detail.dart';
 import 'package:xlcab_app/router.dart';
 import 'package:xlcab_app/screens/booking/confirmation_screen.dart';
 import 'package:xlcab_app/screens/booking/payment_screen.dart';
-import 'package:xlcab_app/services/api_service.dart';
+import 'package:xlcab_core/services/api_service.dart';
 import 'package:xlcab_app/services/payment_service.dart';
-import 'package:xlcab_app/services/trip_service.dart';
-import 'package:xlcab_app/theme/app_theme.dart';
+import 'package:xlcab_core/services/trip_service.dart';
+import 'package:xlcab_ui/theme/app_theme.dart';
 
 import '../support/fakes.dart';
 

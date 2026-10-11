@@ -1,12 +1,12 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:xlcab_app/models/tracking.dart';
-import 'package:xlcab_app/models/trip.dart';
+import 'package:xlcab_core/models/tracking.dart';
+import 'package:xlcab_core/models/trip.dart';
 import 'package:xlcab_app/providers/tracking_provider.dart';
-import 'package:xlcab_app/services/api_service.dart';
-import 'package:xlcab_app/services/location_service.dart';
+import 'package:xlcab_core/services/api_service.dart';
+import 'package:xlcab_core/services/location_service.dart';
 import 'package:xlcab_app/services/tracking_channel.dart';
-import 'package:xlcab_app/services/trip_service.dart';
+import 'package:xlcab_core/services/trip_service.dart';
 
 import '../support/fakes.dart';
 

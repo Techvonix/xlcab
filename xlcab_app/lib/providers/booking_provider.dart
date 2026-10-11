@@ -3,9 +3,9 @@ import 'dart:math';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../models/place.dart';
-import '../models/quote.dart';
-import '../models/shuttle.dart';
+import 'package:xlcab_core/models/place.dart';
+import 'package:xlcab_core/models/quote.dart';
+import 'package:xlcab_core/models/shuttle.dart';
 import '../services/booking_service.dart';
 
 // Règles de l'écran 6 (Partie 7). Le serveur les revérifie : elles ne

@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../models/market.dart';
+import 'package:xlcab_core/models/market.dart';
 import '../../providers/operator_provider.dart';
 import '../../router.dart';
-import '../../services/market_service.dart';
-import '../../theme/app_spacing.dart';
-import '../../theme/app_typography.dart';
-import '../../utils/formatters.dart';
-import '../../widgets/primary_button.dart';
+import 'package:xlcab_core/services/market_service.dart';
+import 'package:xlcab_ui/theme/app_spacing.dart';
+import 'package:xlcab_ui/theme/app_typography.dart';
+import 'package:xlcab_core/utils/formatters.dart';
+import 'package:xlcab_ui/widgets/primary_button.dart';
 import '../operator/offer_messages_sheet.dart';
-import '../operator/widgets.dart';
+import 'package:xlcab_ui/widgets/async_widgets.dart';
 import 'line_search_screen.dart' show LineResultCard;
 import 'market_home_screen.dart' show requestStatusLabel;
-import 'package:xlcab_app/l10n/l10n.dart';
+import 'package:xlcab_core/l10n/l10n.dart';
 
 const _open = [RequestStatus.published, RequestStatus.offersReceived];
 const _cancellable = [RequestStatus.draft, RequestStatus.published, RequestStatus.offersReceived, RequestStatus.accepted];

@@ -3,8 +3,8 @@ import 'dart:typed_data';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
-import 'api_service.dart';
-import 'package:xlcab_app/l10n/l10n.dart';
+import 'package:xlcab_core/services/api_service.dart';
+import 'package:xlcab_core/l10n/l10n.dart';
 
 /// Partie 9 : "Upload avec compression 2MB max". Marge sous la limite
 /// serveur (2 Mo) pour l'enveloppe multipart.

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../models/market.dart';
-import '../models/operator.dart';
-import '../services/market_service.dart';
+import 'package:xlcab_core/models/market.dart';
+import 'package:xlcab_core/models/operator.dart';
+import 'package:xlcab_core/services/market_service.dart';
 import '../services/operator_service.dart';
 
 // Données de l'espace opérateur. Les écrans les lisent ici et les tests

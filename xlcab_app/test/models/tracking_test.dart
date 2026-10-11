@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:xlcab_app/models/tracking.dart';
-import 'package:xlcab_app/models/trip.dart';
+import 'package:xlcab_core/models/tracking.dart';
+import 'package:xlcab_core/models/trip.dart';
 
 void main() {
   group('TrackingSnapshot.fromJson (GET /trips/:id/tracking)', () {

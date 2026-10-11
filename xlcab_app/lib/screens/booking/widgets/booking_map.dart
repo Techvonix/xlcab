@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import '../../../models/place.dart';
-import '../../../theme/app_colors.dart';
-import 'package:xlcab_app/l10n/l10n.dart';
+import 'package:xlcab_core/models/place.dart';
+import 'package:xlcab_ui/theme/app_colors.dart';
+import 'package:xlcab_core/l10n/l10n.dart';
 
 typedef BookingMapBuilder = Widget Function(Place? origin, Place? destination);
 

@@ -4,10 +4,10 @@ import 'dart:typed_data';
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:xlcab_app/providers/auth_provider.dart';
-import 'package:xlcab_app/services/api_service.dart';
-import 'package:xlcab_app/services/auth_service.dart';
-import 'package:xlcab_app/services/token_storage.dart';
+import 'package:xlcab_core/providers/auth_provider.dart';
+import 'package:xlcab_core/services/api_service.dart';
+import 'package:xlcab_core/services/auth_service.dart';
+import 'package:xlcab_core/services/token_storage.dart';
 
 import '../support/auth_fakes.dart';
 

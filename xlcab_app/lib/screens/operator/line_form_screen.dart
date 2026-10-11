@@ -2,18 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../models/operator.dart';
-import '../../models/place.dart';
+import 'package:xlcab_core/models/operator.dart';
+import 'package:xlcab_core/models/place.dart';
 import '../../providers/booking_provider.dart' show clockProvider;
 import '../../providers/operator_provider.dart';
-import '../../services/api_service.dart';
+import 'package:xlcab_core/services/api_service.dart';
 import '../../services/operator_service.dart';
-import '../../theme/app_spacing.dart';
-import '../../theme/app_typography.dart';
-import '../../widgets/primary_button.dart';
+import 'package:xlcab_ui/theme/app_spacing.dart';
+import 'package:xlcab_ui/theme/app_typography.dart';
+import 'package:xlcab_ui/widgets/primary_button.dart';
 import '../booking/parcel_creation_screen.dart' show addressPickerProvider;
-import 'widgets.dart';
-import 'package:xlcab_app/l10n/l10n.dart';
+import 'package:xlcab_ui/widgets/async_widgets.dart';
+import 'package:xlcab_core/l10n/l10n.dart';
 
 /// Nouvelle ligne régulière : trajet (non modifiable ensuite), véhicule,
 /// horaires, jours, capacité, prix. Les départs sont créés « à confirmer ».

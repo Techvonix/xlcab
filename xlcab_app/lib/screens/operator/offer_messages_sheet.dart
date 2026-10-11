@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/operator_provider.dart';
-import '../../services/api_service.dart';
-import '../../services/market_service.dart';
-import '../../theme/app_spacing.dart';
-import '../../theme/app_typography.dart';
-import 'widgets.dart';
-import 'package:xlcab_app/l10n/l10n.dart';
+import 'package:xlcab_core/services/api_service.dart';
+import 'package:xlcab_core/services/market_service.dart';
+import 'package:xlcab_ui/theme/app_spacing.dart';
+import 'package:xlcab_ui/theme/app_typography.dart';
+import 'package:xlcab_ui/widgets/async_widgets.dart';
+import 'package:xlcab_core/l10n/l10n.dart';
 
 /// Messagerie d'une proposition (client ↔ opérateur). Avant la
 /// confirmation, le serveur refuse téléphone, e-mail et applis de messagerie.

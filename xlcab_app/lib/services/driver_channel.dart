@@ -2,10 +2,10 @@ import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:socket_io_client/socket_io_client.dart' as io;
-import '../models/driver_mode.dart';
-import 'api_service.dart';
-import 'token_storage.dart';
-import 'package:xlcab_app/l10n/l10n.dart';
+import 'package:xlcab_core/models/driver_mode.dart';
+import 'package:xlcab_core/services/api_service.dart';
+import 'package:xlcab_core/services/token_storage.dart';
+import 'package:xlcab_core/l10n/l10n.dart';
 
 /// Événements reçus par le chauffeur (salle driver:{id}, Partie 7 écran 15).
 sealed class DriverEvent {

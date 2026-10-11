@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../models/operator.dart';
+import 'package:xlcab_core/models/operator.dart';
 import '../../providers/operator_provider.dart';
 import '../../services/driver_device.dart';
 import '../../services/operator_service.dart';
-import '../../theme/app_colors.dart';
-import '../../theme/app_spacing.dart';
-import '../../theme/app_typography.dart';
-import '../../utils/formatters.dart';
-import '../../widgets/primary_button.dart';
-import 'widgets.dart';
-import 'package:xlcab_app/l10n/l10n.dart';
+import 'package:xlcab_ui/theme/app_colors.dart';
+import 'package:xlcab_ui/theme/app_spacing.dart';
+import 'package:xlcab_ui/theme/app_typography.dart';
+import 'package:xlcab_core/utils/formatters.dart';
+import 'package:xlcab_ui/widgets/primary_button.dart';
+import 'package:xlcab_ui/widgets/async_widgets.dart';
+import 'package:xlcab_core/l10n/l10n.dart';
 
 /// Un départ de ligne que j'assure : liste d'embarquement, « Je suis en
 /// route », scan des QR, démarrage et fin pour tous les passagers, ou

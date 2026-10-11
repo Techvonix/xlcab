@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../models/driver_application.dart';
-import '../../models/shuttle.dart';
+import 'package:xlcab_core/models/driver_application.dart';
+import 'package:xlcab_core/models/shuttle.dart';
 import '../../providers/booking_provider.dart' show clockProvider;
 import '../../providers/driver_onboarding_provider.dart';
 import '../../router.dart';
-import '../../theme/app_colors.dart';
-import '../../theme/app_spacing.dart';
-import '../../theme/app_typography.dart';
-import '../../utils/validators.dart';
-import '../../widgets/date_field.dart';
-import '../../widgets/primary_button.dart';
+import 'package:xlcab_ui/theme/app_colors.dart';
+import 'package:xlcab_ui/theme/app_spacing.dart';
+import 'package:xlcab_ui/theme/app_typography.dart';
+import 'package:xlcab_core/utils/validators.dart';
+import 'package:xlcab_ui/widgets/date_field.dart';
+import 'package:xlcab_ui/widgets/primary_button.dart';
 import 'widgets/document_upload_tile.dart';
-import 'package:xlcab_app/l10n/l10n.dart';
+import 'package:xlcab_core/l10n/l10n.dart';
 
 /// Module 8 — Onboarding chauffeur (Partie 9) : parcours en 5 étapes,
 /// infos perso → docs véhicule → docs perso (VTC, REVTC) → infos

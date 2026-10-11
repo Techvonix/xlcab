@@ -2,12 +2,12 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../models/tracking.dart';
-import '../models/trip.dart';
-import '../services/api_service.dart';
-import '../services/location_service.dart';
+import 'package:xlcab_core/models/tracking.dart';
+import 'package:xlcab_core/models/trip.dart';
+import 'package:xlcab_core/services/api_service.dart';
+import 'package:xlcab_core/services/location_service.dart';
 import '../services/tracking_channel.dart';
-import '../services/trip_service.dart';
+import 'package:xlcab_core/services/trip_service.dart';
 
 /// Intervalle du mode dégradé (Partie 7 : "fallback polling 10s").
 final trackingPollIntervalProvider = Provider<Duration>((ref) => const Duration(seconds: 10));

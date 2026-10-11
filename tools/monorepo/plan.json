@@ -1,0 +1,28 @@
+{
+  "__order": ["core", "ui", "passenger", "driver"],
+  "__allowed": { "core": [], "ui": ["core"], "passenger": ["core", "ui"], "driver": ["core", "ui"], "app": ["core", "ui", "passenger", "driver"] },
+  "core": [
+    "models/", "config/", "utils/", "l10n/",
+    "services/api_service.dart", "services/auth_service.dart", "services/token_storage.dart",
+    "services/preferences_store.dart", "services/location_service.dart", "services/places_service.dart",
+    "services/trip_service.dart", "services/account_service.dart", "services/market_service.dart",
+    "providers/auth_provider.dart", "providers/locale_provider.dart", "providers/theme_provider.dart",
+    "providers/jurisdiction_provider.dart"
+  ],
+  "ui": [
+    "theme/", "widgets/", "screens/operator/widgets.dart", "screens/auth/", "screens/splash/"
+  ],
+  "passenger": [
+    "screens/home/", "screens/onboarding/", "screens/booking/", "screens/market/", "screens/tracking/",
+    "screens/profile/", "screens/corporate/", "screens/accessibility/",
+    "services/booking_service.dart", "services/parcel_service.dart", "services/payment_service.dart",
+    "services/feedback_service.dart", "services/tracking_channel.dart",
+    "providers/booking_provider.dart", "providers/home_provider.dart", "providers/tracking_provider.dart"
+  ],
+  "driver": [
+    "screens/driver/", "screens/operator/",
+    "services/driver_channel.dart", "services/driver_device.dart", "services/driver_mode_service.dart",
+    "services/driver_service.dart", "services/operator_service.dart", "services/document_picker.dart",
+    "providers/driver_mode_provider.dart", "providers/driver_onboarding_provider.dart", "providers/operator_provider.dart"
+  ]
+}

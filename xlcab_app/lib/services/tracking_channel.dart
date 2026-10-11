@@ -2,11 +2,11 @@ import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:socket_io_client/socket_io_client.dart' as io;
-import '../models/tracking.dart';
-import '../models/trip.dart';
-import 'api_service.dart';
-import 'token_storage.dart';
-import 'package:xlcab_app/l10n/l10n.dart';
+import 'package:xlcab_core/models/tracking.dart';
+import 'package:xlcab_core/models/trip.dart';
+import 'package:xlcab_core/services/api_service.dart';
+import 'package:xlcab_core/services/token_storage.dart';
+import 'package:xlcab_core/l10n/l10n.dart';
 
 /// Événements du canal de suivi (contrat WebSocket de la Partie 6).
 sealed class TrackingEvent {

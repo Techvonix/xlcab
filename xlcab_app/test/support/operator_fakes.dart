@@ -1,9 +1,9 @@
 import 'package:dio/dio.dart';
-import 'package:xlcab_app/models/market.dart';
-import 'package:xlcab_app/models/operator.dart';
-import 'package:xlcab_app/models/place.dart';
-import 'package:xlcab_app/services/api_service.dart';
-import 'package:xlcab_app/services/market_service.dart';
+import 'package:xlcab_core/models/market.dart';
+import 'package:xlcab_core/models/operator.dart';
+import 'package:xlcab_core/models/place.dart';
+import 'package:xlcab_core/services/api_service.dart';
+import 'package:xlcab_core/services/market_service.dart';
 import 'package:xlcab_app/services/operator_service.dart';
 
 // Doubles de l'espace opérateur (lignes, départs, réserves, bourse) pour

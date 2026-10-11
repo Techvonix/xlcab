@@ -239,9 +239,22 @@ référence — les exigences de la Partie 8 priment.
   Démo (`seed-demo.ts`) : Djamel (Paris–Beauvais 5 h, 25 €/place, réserves Chris n° 2 et Nadia n° 3 invitée),
   Chris (Paris–Orléans 19 h, retour 22 h 30, 390 € le véhicule), 3 places réservées par Léa demain, une demande
   de Léa sur la bourse avec une proposition de Djamel.
-- Deux applis (2026-10-11) : plan `PLAN_DEUX_APPLIS.md` (monorepo apps/passenger + apps/driver + packages/core +
-  packages/ui, maquette claude.ai « XLCAB — App design ») EN ATTENTE D'APPROBATION : ne rien déplacer avant
-  l'accord du porteur de projet.
+- Deux applis (plan `PLAN_DEUX_APPLIS.md` approuvé le 2026-10-11, identité Orbite gardée ; une étape à la fois,
+  validation du porteur de projet entre chaque). Dépôt Git local à la racine `C:\xlcab` (branche `main`).
+  Étape 1 faite : espace de travail Dart (`C:\xlcab\pubspec.yaml`, `resolution: workspace` dans chaque membre,
+  un seul `pubspec.lock` à la racine ; `flutter pub get` depuis la racine). `packages/core` (`xlcab_core` : modèles,
+  config, utils, l10n — ARB, `l10n.yaml`, `flutter gen-l10n` à lancer DANS packages/core —, services api / auth /
+  token / preferences / location / places / trip / account / market, providers auth / locale / theme / jurisdiction).
+  `packages/ui` (`xlcab_ui`, dépend de core : theme, widgets, `widgets/async_widgets.dart` = ex
+  `screens/operator/widgets.dart`, `screens/login_screen.dart`, `screens/splash_screen.dart`, polices dans
+  `lib/fonts/` déclarées par l'appli sous `packages/xlcab_ui/fonts/…`). core ne dépend JAMAIS de ui :
+  `ShuttleType.color` est une extension de `xlcab_ui/theme/shuttle_colors.dart` (réexportée par `app_colors.dart`).
+  `guardOperatorCall` vit dans `api_service.dart`. Imports entre paquets en `package:xlcab_core/…` /
+  `package:xlcab_ui/…`. `xlcab_app` (écrans et services passager + chauffeur) reste l'appli unique jusqu'aux
+  étapes 2 (apps/passenger) et 3 (apps/driver). Dépendances croisées à dénouer alors : pickers d'adresse / date
+  (`booking_provider`, `operator_provider`), `parcel_service`, `document_picker`, `offer_messages_sheet`,
+  constantes de routes de `router.dart`. Outils de déplacement : scripts Node de `tools/monorepo/` (`graph.js` vérifie un découpage, `move.js` déplace et réécrit les imports).
+  Dans les chemins ci-dessous, `lib/…` de l'ancienne appli peut donc désigner `packages/core/lib/…` ou `packages/ui/lib/…`.
 - Migrations : `init_xlcab` appliquée sur la base locale ; toute modification de
   `prisma/schema.prisma` demande désormais `npx prisma migrate dev --name <nom>`. Référentiel :
   `npx prisma db seed` (config FR uniquement).

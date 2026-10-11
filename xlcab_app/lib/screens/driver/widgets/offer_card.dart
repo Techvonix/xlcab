@@ -1,12 +1,12 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import '../../../models/driver_mode.dart';
-import '../../../theme/app_colors.dart';
-import '../../../theme/app_spacing.dart';
-import '../../../theme/app_typography.dart';
-import '../../../utils/formatters.dart';
-import 'package:xlcab_app/l10n/l10n.dart';
+import 'package:xlcab_core/models/driver_mode.dart';
+import 'package:xlcab_ui/theme/app_colors.dart';
+import 'package:xlcab_ui/theme/app_spacing.dart';
+import 'package:xlcab_ui/theme/app_typography.dart';
+import 'package:xlcab_core/utils/formatters.dart';
+import 'package:xlcab_core/l10n/l10n.dart';
 
 /// Offre de mission (écran 15) : 30 s pour accepter ou refuser, puis
 /// auto-refus côté serveur. Affichée en bas de l'écran, par-dessus le reste.

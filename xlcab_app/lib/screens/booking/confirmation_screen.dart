@@ -4,17 +4,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../../models/trip.dart';
-import '../../models/trip_detail.dart';
+import 'package:xlcab_core/models/trip.dart';
+import 'package:xlcab_core/models/trip_detail.dart';
 import '../../router.dart';
-import '../../services/api_service.dart';
-import '../../services/trip_service.dart';
-import '../../theme/app_colors.dart';
-import '../../theme/app_spacing.dart';
-import '../../theme/app_typography.dart';
-import '../../utils/formatters.dart';
-import '../../widgets/primary_button.dart';
-import 'package:xlcab_app/l10n/l10n.dart';
+import 'package:xlcab_core/services/api_service.dart';
+import 'package:xlcab_core/services/trip_service.dart';
+import 'package:xlcab_ui/theme/app_colors.dart';
+import 'package:xlcab_ui/theme/app_spacing.dart';
+import 'package:xlcab_ui/theme/app_typography.dart';
+import 'package:xlcab_core/utils/formatters.dart';
+import 'package:xlcab_ui/widgets/primary_button.dart';
+import 'package:xlcab_core/l10n/l10n.dart';
 
 /// Ouverture d'un lien externe (PDF de facture) — injectable pour les tests.
 final externalLinkOpenerProvider = Provider<Future<bool> Function(Uri)>(

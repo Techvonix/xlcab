@@ -4,13 +4,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/date_symbol_data_local.dart';
-import 'package:xlcab_app/models/shuttle.dart';
+import 'package:xlcab_core/models/shuttle.dart';
 import 'package:xlcab_app/router.dart';
 import 'package:xlcab_app/screens/booking/shuttle_selection_screen.dart';
-import 'package:xlcab_app/services/api_service.dart';
+import 'package:xlcab_core/services/api_service.dart';
 import 'package:xlcab_app/services/booking_service.dart';
-import 'package:xlcab_app/theme/app_theme.dart';
-import 'package:xlcab_app/utils/formatters.dart';
+import 'package:xlcab_ui/theme/app_theme.dart';
+import 'package:xlcab_core/utils/formatters.dart';
 
 // Écran 5 — choix de la navette : cartes, prix « à partir de », disponibilité.
 

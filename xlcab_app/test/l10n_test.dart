@@ -5,16 +5,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:xlcab_app/l10n/l10n.dart';
-import 'package:xlcab_app/models/shuttle.dart';
+import 'package:xlcab_core/l10n/l10n.dart';
+import 'package:xlcab_core/models/shuttle.dart';
 import 'package:xlcab_app/screens/onboarding/onboarding_screen.dart';
-import 'package:xlcab_app/services/preferences_store.dart';
-import 'package:xlcab_app/theme/app_theme.dart';
+import 'package:xlcab_core/services/preferences_store.dart';
+import 'package:xlcab_ui/theme/app_theme.dart';
 
 // Traductions : fichiers ARB complets et cohérents, choix de la langue,
 // interface réellement affichée en anglais.
 
-Map<String, dynamic> arb(String locale) => jsonDecode(File('lib/l10n/app_$locale.arb').readAsStringSync()) as Map<String, dynamic>;
+Map<String, dynamic> arb(String locale) => jsonDecode(File('../packages/core/lib/l10n/app_$locale.arb').readAsStringSync()) as Map<String, dynamic>;
 
 Set<String> placeholders(String message) => RegExp(r'\{(\w+)\}').allMatches(message).map((m) => m.group(1)!).toSet();
 

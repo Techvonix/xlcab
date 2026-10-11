@@ -3,14 +3,14 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
-import 'package:xlcab_app/models/driver_application.dart';
+import 'package:xlcab_core/models/driver_application.dart';
 import 'package:xlcab_app/providers/booking_provider.dart';
 import 'package:xlcab_app/providers/driver_onboarding_provider.dart';
 import 'package:xlcab_app/screens/driver/driver_onboarding_screen.dart';
-import 'package:xlcab_app/services/api_service.dart';
+import 'package:xlcab_core/services/api_service.dart';
 import 'package:xlcab_app/services/document_picker.dart';
 import 'package:xlcab_app/services/driver_service.dart';
-import 'package:xlcab_app/theme/app_theme.dart';
+import 'package:xlcab_ui/theme/app_theme.dart';
 
 import '../support/fakes.dart';
 

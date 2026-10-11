@@ -1,19 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../models/place.dart';
-import '../../models/quote.dart';
-import '../../models/shuttle.dart';
+import 'package:xlcab_core/models/place.dart';
+import 'package:xlcab_core/models/quote.dart';
+import 'package:xlcab_core/models/shuttle.dart';
 import '../../providers/booking_provider.dart';
 import '../../router.dart';
-import '../../theme/app_spacing.dart';
-import '../../theme/app_typography.dart';
-import '../../utils/formatters.dart';
-import '../../widgets/primary_button.dart';
+import 'package:xlcab_ui/theme/shuttle_colors.dart';
+import 'package:xlcab_ui/theme/app_spacing.dart';
+import 'package:xlcab_ui/theme/app_typography.dart';
+import 'package:xlcab_core/utils/formatters.dart';
+import 'package:xlcab_ui/widgets/primary_button.dart';
 import 'address_search_screen.dart';
 import 'widgets/booking_map.dart';
 import 'widgets/price_summary.dart';
-import 'package:xlcab_app/l10n/l10n.dart';
+import 'package:xlcab_core/l10n/l10n.dart';
 
 /// Écran 6 — Réservation passager (Partie 7) :
 /// carte 30 %, départ/arrivée avec autocomplétion, date et heure (au

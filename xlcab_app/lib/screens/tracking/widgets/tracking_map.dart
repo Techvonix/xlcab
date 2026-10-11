@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import '../../../models/place.dart';
-import '../../../models/tracking.dart';
-import '../../../utils/geo.dart';
-import 'package:xlcab_app/l10n/l10n.dart';
+import 'package:xlcab_core/models/place.dart';
+import 'package:xlcab_core/models/tracking.dart';
+import 'package:xlcab_core/utils/geo.dart';
+import 'package:xlcab_core/l10n/l10n.dart';
 
 typedef TrackingMapBuilder = Widget Function(Place origin, Place destination, LivePosition? driver);
 

@@ -1,9 +1,9 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../models/parcel.dart';
-import 'api_service.dart';
+import 'package:xlcab_core/models/parcel.dart';
+import 'package:xlcab_core/services/api_service.dart';
 import 'document_picker.dart';
-import 'package:xlcab_app/l10n/l10n.dart';
+import 'package:xlcab_core/l10n/l10n.dart';
 
 /// Endpoints "Bookings colis" (xlcab_backend/src/parcels).
 class ParcelService {

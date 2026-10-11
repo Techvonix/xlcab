@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:xlcab_app/utils/geo.dart';
+import 'package:xlcab_core/utils/geo.dart';
 
 void main() {
   test('haversine : Paris Gare de Lyon → Rouen ≈ 115 km à vol d’oiseau', () {

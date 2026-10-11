@@ -1,13 +1,13 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../models/driver_application.dart';
-import '../models/shuttle.dart';
-import '../services/api_service.dart';
+import 'package:xlcab_core/models/driver_application.dart';
+import 'package:xlcab_core/models/shuttle.dart';
+import 'package:xlcab_core/services/api_service.dart';
 import '../services/document_picker.dart';
 import '../services/driver_service.dart';
-import '../utils/validators.dart';
+import 'package:xlcab_core/utils/validators.dart';
 import 'booking_provider.dart' show clockProvider;
-import 'package:xlcab_app/l10n/l10n.dart';
+import 'package:xlcab_core/l10n/l10n.dart';
 
 /// Nombre d'étapes du parcours (Partie 9, Module 8).
 const int onboardingStepCount = 5;

@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../models/account.dart';
-import '../../models/payment.dart';
-import '../../services/account_service.dart';
-import '../../services/api_service.dart';
+import 'package:xlcab_core/models/account.dart';
+import 'package:xlcab_core/models/payment.dart';
+import 'package:xlcab_core/services/account_service.dart';
+import 'package:xlcab_core/services/api_service.dart';
 import '../../services/payment_service.dart';
-import '../../theme/app_spacing.dart';
-import '../../theme/app_typography.dart';
-import '../../widgets/primary_button.dart';
-import 'package:xlcab_app/l10n/l10n.dart';
+import 'package:xlcab_ui/theme/app_spacing.dart';
+import 'package:xlcab_ui/theme/app_typography.dart';
+import 'package:xlcab_ui/widgets/primary_button.dart';
+import 'package:xlcab_core/l10n/l10n.dart';
 
 final savedCardsProvider = FutureProvider.autoDispose<List<SavedCard>>((ref) => ref.watch(accountServiceProvider).cards());
 

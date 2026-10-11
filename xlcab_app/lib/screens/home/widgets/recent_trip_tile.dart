@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../../../models/trip.dart';
-import '../../../theme/app_spacing.dart';
-import '../../../theme/app_typography.dart';
-import '../../../utils/formatters.dart';
-import '../../../widgets/price_display.dart';
-import 'package:xlcab_app/l10n/l10n.dart';
+import 'package:xlcab_core/models/trip.dart';
+import 'package:xlcab_ui/theme/shuttle_colors.dart';
+import 'package:xlcab_ui/theme/app_spacing.dart';
+import 'package:xlcab_ui/theme/app_typography.dart';
+import 'package:xlcab_core/utils/formatters.dart';
+import 'package:xlcab_ui/widgets/price_display.dart';
+import 'package:xlcab_core/l10n/l10n.dart';
 
 /// Une ligne de la section "Derniers trajets". Ouvre le suivi temps réel
 /// quand un chauffeur est attribué (statuts accepted / started).

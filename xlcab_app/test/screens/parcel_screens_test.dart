@@ -4,19 +4,19 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/date_symbol_data_local.dart';
-import 'package:xlcab_app/models/parcel.dart';
-import 'package:xlcab_app/models/payment.dart';
-import 'package:xlcab_app/models/place.dart';
+import 'package:xlcab_core/models/parcel.dart';
+import 'package:xlcab_core/models/payment.dart';
+import 'package:xlcab_core/models/place.dart';
 import 'package:xlcab_app/providers/booking_provider.dart' show clockProvider;
 import 'package:xlcab_app/router.dart';
 import 'package:xlcab_app/screens/booking/parcel_creation_screen.dart';
 import 'package:xlcab_app/screens/booking/parcel_tracking_screen.dart';
-import 'package:xlcab_app/services/api_service.dart';
+import 'package:xlcab_core/services/api_service.dart';
 import 'package:xlcab_app/services/document_picker.dart';
 import 'package:xlcab_app/services/parcel_service.dart';
 import 'package:xlcab_app/services/payment_service.dart';
-import 'package:xlcab_app/services/trip_service.dart';
-import 'package:xlcab_app/theme/app_theme.dart';
+import 'package:xlcab_core/services/trip_service.dart';
+import 'package:xlcab_ui/theme/app_theme.dart';
 
 import '../support/fakes.dart';
 

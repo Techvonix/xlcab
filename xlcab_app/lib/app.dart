@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'l10n/l10n.dart';
-import 'providers/locale_provider.dart';
-import 'providers/theme_provider.dart';
+import 'package:xlcab_core/l10n/l10n.dart';
+import 'package:xlcab_core/providers/locale_provider.dart';
+import 'package:xlcab_core/providers/theme_provider.dart';
 import 'router.dart';
-import 'services/preferences_store.dart';
-import 'theme/app_theme.dart';
+import 'package:xlcab_core/services/preferences_store.dart';
+import 'package:xlcab_ui/theme/app_theme.dart';
 
 /// Widget racine de XLCAB. Branche le routeur (go_router), les thèmes
 /// clair/sombre/système et la langue (fr/en) sur les providers Riverpod.

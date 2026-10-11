@@ -1,11 +1,11 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../models/quote.dart';
-import '../models/shuttle.dart';
-import '../models/trip.dart';
-import 'api_service.dart';
-import 'location_service.dart';
-import 'package:xlcab_app/l10n/l10n.dart';
+import 'package:xlcab_core/models/quote.dart';
+import 'package:xlcab_core/models/shuttle.dart';
+import 'package:xlcab_core/models/trip.dart';
+import 'package:xlcab_core/services/api_service.dart';
+import 'package:xlcab_core/services/location_service.dart';
+import 'package:xlcab_core/l10n/l10n.dart';
 
 class BookingService {
   BookingService(this._dio);

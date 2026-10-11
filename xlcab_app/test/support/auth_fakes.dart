@@ -2,9 +2,9 @@ import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:xlcab_app/services/api_service.dart';
-import 'package:xlcab_app/services/auth_service.dart';
-import 'package:xlcab_app/services/token_storage.dart';
+import 'package:xlcab_core/services/api_service.dart';
+import 'package:xlcab_core/services/auth_service.dart';
+import 'package:xlcab_core/services/token_storage.dart';
 
 /// JWT factice (seul le contenu est lu par l'app).
 String fakeJwt(Map<String, Object?> claims) {

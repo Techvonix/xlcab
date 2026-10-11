@@ -1,8 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../models/operator.dart';
-import 'api_service.dart';
-import 'package:xlcab_app/l10n/l10n.dart';
+import 'package:xlcab_core/models/operator.dart';
+import 'package:xlcab_core/services/api_service.dart';
 
 /// Espace opérateur (xlcab_backend/src/operators et src/line-bookings) :
 /// profil, véhicules, lignes régulières, départs, réserves, reprises de
@@ -166,22 +165,6 @@ class OperatorService {
       _guard(() => _dio.post<void>('$_me/penalties/${_id(penaltyId)}/contest', data: {'reason': reason}));
 
   Future<T> _guard<T>(Future<T> Function() call) => guardOperatorCall(call);
-}
-
-/// Erreurs serveur → message affichable : 403 / 404 portent un message
-/// destiné à l'utilisateur (compte non validé, ligne introuvable…).
-Future<T> guardOperatorCall<T>(Future<T> Function() call) async {
-  try {
-    return await call();
-  } on DioException catch (e) {
-    final data = e.response?.data;
-    if (const {403, 404}.contains(e.response?.statusCode) && data is Map && data['message'] is String) {
-      throw ApiException(data['message'] as String);
-    }
-    throw ApiException.fromDio(e);
-  } on FormatException {
-    throw ApiException(l10n.reponseInattendueDuServeurReessayez);
-  }
 }
 
 final operatorServiceProvider = Provider<OperatorService>((ref) => OperatorService(ref.watch(dioProvider)));

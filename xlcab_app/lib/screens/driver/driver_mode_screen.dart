@@ -1,23 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../models/driver_mode.dart';
-import '../../models/parcel.dart';
-import '../../models/place.dart';
-import '../../models/trip.dart';
+import 'package:xlcab_core/models/driver_mode.dart';
+import 'package:xlcab_core/models/parcel.dart';
+import 'package:xlcab_core/models/place.dart';
+import 'package:xlcab_core/models/trip.dart';
 import '../../providers/driver_mode_provider.dart';
 import '../../router.dart';
 import '../../services/document_picker.dart';
 import '../../services/driver_device.dart';
-import '../../theme/app_colors.dart';
-import '../../theme/app_spacing.dart';
-import '../../theme/app_typography.dart';
-import '../../utils/formatters.dart';
+import 'package:xlcab_ui/theme/app_colors.dart';
+import 'package:xlcab_ui/theme/app_spacing.dart';
+import 'package:xlcab_ui/theme/app_typography.dart';
+import 'package:xlcab_core/utils/formatters.dart';
 import 'widgets/mission_card.dart';
 import 'widgets/offer_card.dart';
 import 'widgets/parcel_checklist.dart';
 import '../operator/operator_section.dart';
-import 'package:xlcab_app/l10n/l10n.dart';
+import 'package:xlcab_core/l10n/l10n.dart';
 
 final _uuid = RegExp(r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$', caseSensitive: false);
 

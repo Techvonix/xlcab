@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import '../../../providers/auth_provider.dart';
+import 'package:xlcab_core/providers/auth_provider.dart';
 import '../../../providers/tracking_provider.dart';
-import '../../../theme/app_colors.dart';
-import '../../../theme/app_spacing.dart';
-import '../../../theme/app_typography.dart';
-import 'package:xlcab_app/l10n/l10n.dart';
+import 'package:xlcab_ui/theme/app_colors.dart';
+import 'package:xlcab_ui/theme/app_spacing.dart';
+import 'package:xlcab_ui/theme/app_typography.dart';
+import 'package:xlcab_core/l10n/l10n.dart';
 
 /// Ouvre le chat avec le chauffeur (bouton "Message", Partie 7 écran 9).
 Future<void> showChatSheet(BuildContext context, String tripId) {

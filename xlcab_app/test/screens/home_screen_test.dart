@@ -6,13 +6,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/date_symbol_data_local.dart';
-import 'package:xlcab_app/models/shuttle.dart';
-import 'package:xlcab_app/models/trip.dart';
+import 'package:xlcab_core/models/shuttle.dart';
+import 'package:xlcab_core/models/trip.dart';
 import 'package:xlcab_app/providers/home_provider.dart';
 import 'package:xlcab_app/router.dart';
 import 'package:xlcab_app/screens/home/home_screen.dart';
-import 'package:xlcab_app/services/api_service.dart';
-import 'package:xlcab_app/theme/app_theme.dart';
+import 'package:xlcab_core/services/api_service.dart';
+import 'package:xlcab_ui/theme/app_theme.dart';
 
 // Tests de l'écran 4 (Accueil passager). Les données viennent d'un
 // override de recentTripsProvider : ni réseau ni backend nécessaires.

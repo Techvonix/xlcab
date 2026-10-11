@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import '../../../models/parcel.dart';
-import '../../../theme/app_colors.dart';
-import '../../../theme/app_spacing.dart';
-import '../../../theme/app_typography.dart';
-import 'package:xlcab_app/l10n/l10n.dart';
-import '../../../utils/formatters.dart';
+import 'package:xlcab_core/models/parcel.dart';
+import 'package:xlcab_ui/theme/app_colors.dart';
+import 'package:xlcab_ui/theme/app_spacing.dart';
+import 'package:xlcab_ui/theme/app_typography.dart';
+import 'package:xlcab_core/l10n/l10n.dart';
+import 'package:xlcab_core/utils/formatters.dart';
 
 /// Actions du chauffeur sur un colis.
 class ParcelActions {

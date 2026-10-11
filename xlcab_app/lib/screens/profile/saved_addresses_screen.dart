@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../models/driver_public_profile.dart';
-import '../../services/api_service.dart';
+import 'package:xlcab_core/models/driver_public_profile.dart';
+import 'package:xlcab_core/services/api_service.dart';
 import '../../services/feedback_service.dart';
-import '../../theme/app_spacing.dart';
-import '../../theme/app_typography.dart';
-import '../../widgets/primary_button.dart';
+import 'package:xlcab_ui/theme/app_spacing.dart';
+import 'package:xlcab_ui/theme/app_typography.dart';
+import 'package:xlcab_ui/widgets/primary_button.dart';
 import '../booking/parcel_creation_screen.dart' show addressPickerProvider;
-import 'package:xlcab_app/l10n/l10n.dart';
+import 'package:xlcab_core/l10n/l10n.dart';
 
 /// Écran 13 — Adresses favorites (10 au plus), proposées en tête de la
 /// recherche d'adresse lors d'une réservation.

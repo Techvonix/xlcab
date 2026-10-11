@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import '../../../models/driver_application.dart';
+import 'package:xlcab_core/models/driver_application.dart';
 import '../../../providers/driver_onboarding_provider.dart';
 import '../../../services/document_picker.dart';
-import '../../../theme/app_colors.dart';
-import '../../../theme/app_spacing.dart';
-import '../../../theme/app_typography.dart';
-import 'package:xlcab_app/l10n/l10n.dart';
+import 'package:xlcab_ui/theme/app_colors.dart';
+import 'package:xlcab_ui/theme/app_spacing.dart';
+import 'package:xlcab_ui/theme/app_typography.dart';
+import 'package:xlcab_core/l10n/l10n.dart';
 
 /// Envoi d'un document : état (icône + texte, jamais la couleur seule) et
 /// deux sources, appareil photo ou galerie.

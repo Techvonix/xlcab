@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../models/operator.dart';
+import 'package:xlcab_core/models/operator.dart';
 import '../../providers/booking_provider.dart' show clockProvider;
 import '../../providers/operator_provider.dart';
 import '../../services/operator_service.dart';
-import '../../theme/app_spacing.dart';
-import '../../theme/app_typography.dart';
-import '../../utils/formatters.dart';
+import 'package:xlcab_ui/theme/app_spacing.dart';
+import 'package:xlcab_ui/theme/app_typography.dart';
+import 'package:xlcab_core/utils/formatters.dart';
 import 'my_lines_screen.dart' show lineStatusLabel;
-import 'widgets.dart';
-import 'package:xlcab_app/l10n/l10n.dart';
+import 'package:xlcab_ui/widgets/async_widgets.dart';
+import 'package:xlcab_core/l10n/l10n.dart';
 
 /// Détail d'une de mes lignes : départs à venir (confirmer, arrêter ou
 /// rouvrir la vente), jours sans départ, chauffeurs de réserve, pause et

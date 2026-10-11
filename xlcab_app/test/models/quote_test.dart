@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:xlcab_app/models/quote.dart';
-import 'package:xlcab_app/services/api_service.dart';
+import 'package:xlcab_core/models/quote.dart';
+import 'package:xlcab_core/services/api_service.dart';
 
 DioException _httpError(int status, Object? body) {
   final options = RequestOptions(path: '/x');

@@ -2,14 +2,14 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../models/place.dart';
-import '../../models/driver_public_profile.dart';
-import '../../services/api_service.dart';
+import 'package:xlcab_core/models/place.dart';
+import 'package:xlcab_core/models/driver_public_profile.dart';
+import 'package:xlcab_core/services/api_service.dart';
 import '../../services/feedback_service.dart';
-import '../../services/places_service.dart';
-import '../../theme/app_spacing.dart';
-import '../../theme/app_typography.dart';
-import 'package:xlcab_app/l10n/l10n.dart';
+import 'package:xlcab_core/services/places_service.dart';
+import 'package:xlcab_ui/theme/app_spacing.dart';
+import 'package:xlcab_ui/theme/app_typography.dart';
+import 'package:xlcab_core/l10n/l10n.dart';
 
 /// Recherche d'adresse avec autocomplétion Google Places (Partie 7,
 /// écran 6). Renvoie la [Place] choisie via Navigator.pop, ou null.

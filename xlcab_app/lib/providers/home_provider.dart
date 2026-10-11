@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../models/trip.dart';
+import 'package:xlcab_core/models/trip.dart';
 import '../services/booking_service.dart';
 
 /// Nombre de trajets affichés dans la section "Derniers trajets".

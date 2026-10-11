@@ -1,0 +1,27 @@
+name: xlcab_ui
+description: "XLCAB — design system commun : couleurs, typographie, boutons, cartes, logo."
+publish_to: "none"
+version: 1.0.0
+resolution: workspace
+
+environment:
+  sdk: ">=3.6.0 <4.0.0"
+  flutter: ">=3.27.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_riverpod: ^2.5.1
+  intl: ^0.20.2
+  xlcab_core:
+    path: ../core
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+
+flutter:
+  uses-material-design: true
+  # Polices Poppins et Inter (OFL) : dans lib/fonts/, déclarées par chaque
+  # application sous « packages/xlcab_ui/fonts/… ».

@@ -1,14 +1,14 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'models/quote.dart';
-import 'models/shuttle.dart';
-import 'providers/auth_provider.dart';
-import 'services/preferences_store.dart';
+import 'package:xlcab_core/models/quote.dart';
+import 'package:xlcab_core/models/shuttle.dart';
+import 'package:xlcab_core/providers/auth_provider.dart';
+import 'package:xlcab_core/services/preferences_store.dart';
 
 // Écrans — placeholders, à remplacer module par module (Partie 7).
-import 'screens/splash/splash_screen.dart';
+import 'package:xlcab_ui/screens/splash_screen.dart';
 import 'screens/onboarding/onboarding_screen.dart';
-import 'screens/auth/login_screen.dart';
+import 'package:xlcab_ui/screens/login_screen.dart';
 import 'screens/home/home_screen.dart';
 import 'screens/booking/shuttle_selection_screen.dart';
 import 'screens/booking/passenger_booking_screen.dart';

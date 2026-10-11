@@ -2,6 +2,7 @@ name: xlcab_app
 description: "XLCAB — Navettes 7+ places. Trajets 60 km+. Colis inclus."
 publish_to: "none"
 version: 1.0.0+1
+resolution: workspace
 
 environment:
   # 3.27 minimum : le thème utilise Color.withValues et CardThemeData,
@@ -14,6 +15,12 @@ dependencies:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
+
+  # Paquets communs du monorepo
+  xlcab_core:
+    path: ../packages/core
+  xlcab_ui:
+    path: ../packages/ui
 
   # State management & routing
   flutter_riverpod: ^2.5.1
@@ -71,26 +78,24 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
-  # Traductions générées depuis lib/l10n/*.arb (voir l10n.yaml).
-  generate: true
 
   # Polices — Poppins (titres) + Inter (corps), voir Partie 5 design system
   fonts:
     - family: Poppins
       fonts:
-        - asset: assets/fonts/Poppins-Regular.ttf
+        - asset: packages/xlcab_ui/fonts/Poppins-Regular.ttf
           weight: 400
-        - asset: assets/fonts/Poppins-SemiBold.ttf
+        - asset: packages/xlcab_ui/fonts/Poppins-SemiBold.ttf
           weight: 600
-        - asset: assets/fonts/Poppins-Bold.ttf
+        - asset: packages/xlcab_ui/fonts/Poppins-Bold.ttf
           weight: 700
     - family: Inter
       fonts:
-        - asset: assets/fonts/Inter-Regular.ttf
+        - asset: packages/xlcab_ui/fonts/Inter-Regular.ttf
           weight: 400
-        - asset: assets/fonts/Inter-SemiBold.ttf
+        - asset: packages/xlcab_ui/fonts/Inter-SemiBold.ttf
           weight: 600
-        - asset: assets/fonts/Inter-Bold.ttf
+        - asset: packages/xlcab_ui/fonts/Inter-Bold.ttf
           weight: 700
 
   assets:

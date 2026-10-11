@@ -3,11 +3,11 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' show ThemeMode;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
-import '../models/account.dart';
-import '../models/payment.dart';
-import '../models/quote.dart';
-import 'api_service.dart';
-import 'package:xlcab_app/l10n/l10n.dart';
+import 'package:xlcab_core/models/account.dart';
+import 'package:xlcab_core/models/payment.dart';
+import 'package:xlcab_core/models/quote.dart';
+import 'package:xlcab_core/services/api_service.dart';
+import 'package:xlcab_core/l10n/l10n.dart';
 
 /// Clé PUBLIABLE Stripe (pk_test_… / pk_live_…), fournie à la compilation :
 ///   --dart-define=STRIPE_PUBLISHABLE_KEY=pk_test_...

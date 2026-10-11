@@ -3,21 +3,21 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../../models/tracking.dart';
-import '../../models/trip.dart';
+import 'package:xlcab_core/models/tracking.dart';
+import 'package:xlcab_core/models/trip.dart';
 import '../../providers/tracking_provider.dart';
 import '../../router.dart';
-import '../../theme/app_colors.dart';
-import '../../theme/app_spacing.dart';
-import '../../theme/app_typography.dart';
-import '../../utils/geo.dart';
-import '../../widgets/driver_avatar.dart';
-import '../../widgets/eta_progress.dart';
+import 'package:xlcab_ui/theme/app_colors.dart';
+import 'package:xlcab_ui/theme/app_spacing.dart';
+import 'package:xlcab_ui/theme/app_typography.dart';
+import 'package:xlcab_core/utils/geo.dart';
+import 'package:xlcab_ui/widgets/driver_avatar.dart';
+import 'package:xlcab_ui/widgets/eta_progress.dart';
 import 'widgets/chat_sheet.dart';
 import 'widgets/sos_button.dart';
 import 'widgets/tracking_map.dart';
-import 'package:xlcab_app/l10n/l10n.dart';
-import '../../utils/formatters.dart';
+import 'package:xlcab_core/l10n/l10n.dart';
+import 'package:xlcab_core/utils/formatters.dart';
 
 /// Écran 9 — Suivi temps réel (Partie 7) : carte plein écran, marqueur
 /// chauffeur animé, bottom sheet déplaçable avec ETA, boutons

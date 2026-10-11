@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../models/quote.dart';
-import '../../../services/api_service.dart';
-import '../../../theme/app_colors.dart';
-import '../../../theme/app_spacing.dart';
-import '../../../theme/app_typography.dart';
-import '../../../utils/formatters.dart';
-import '../../../widgets/price_display.dart';
-import 'package:xlcab_app/l10n/l10n.dart';
+import 'package:xlcab_core/models/quote.dart';
+import 'package:xlcab_core/services/api_service.dart';
+import 'package:xlcab_ui/theme/app_colors.dart';
+import 'package:xlcab_ui/theme/app_spacing.dart';
+import 'package:xlcab_ui/theme/app_typography.dart';
+import 'package:xlcab_core/utils/formatters.dart';
+import 'package:xlcab_ui/widgets/price_display.dart';
+import 'package:xlcab_core/l10n/l10n.dart';
 
 /// Récapitulatif du prix (Partie 7, écran 6). Affiche séparément la part
 /// transport de personnes et la part colis, chacune avec son taux de TVA

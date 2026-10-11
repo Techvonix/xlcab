@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:xlcab_app/models/shuttle.dart';
+import 'package:xlcab_core/models/shuttle.dart';
 import 'package:xlcab_app/providers/booking_provider.dart';
 import 'package:xlcab_app/services/booking_service.dart';
 

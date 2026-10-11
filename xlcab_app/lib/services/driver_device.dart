@@ -6,8 +6,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../models/place.dart';
-import 'package:xlcab_app/l10n/l10n.dart';
+import 'package:xlcab_core/models/place.dart';
+import 'package:xlcab_core/l10n/l10n.dart';
 
 // Accès matériel du mode chauffeur (GPS, caméra, applis externes),
 // derrière des interfaces remplacées dans les tests.

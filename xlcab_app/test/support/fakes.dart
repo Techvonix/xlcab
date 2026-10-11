@@ -2,31 +2,31 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
-import 'package:xlcab_app/models/place.dart';
-import 'package:xlcab_app/models/quote.dart';
-import 'package:xlcab_app/models/shuttle.dart';
-import 'package:xlcab_app/models/tracking.dart';
-import 'package:xlcab_app/models/trip.dart';
-import 'package:xlcab_app/services/api_service.dart';
-import 'package:xlcab_app/models/driver_application.dart';
-import 'package:xlcab_app/models/account.dart';
-import 'package:xlcab_app/models/driver_mode.dart';
-import 'package:xlcab_app/models/parcel.dart';
+import 'package:xlcab_core/models/place.dart';
+import 'package:xlcab_core/models/quote.dart';
+import 'package:xlcab_core/models/shuttle.dart';
+import 'package:xlcab_core/models/tracking.dart';
+import 'package:xlcab_core/models/trip.dart';
+import 'package:xlcab_core/services/api_service.dart';
+import 'package:xlcab_core/models/driver_application.dart';
+import 'package:xlcab_core/models/account.dart';
+import 'package:xlcab_core/models/driver_mode.dart';
+import 'package:xlcab_core/models/parcel.dart';
 import 'package:xlcab_app/services/parcel_service.dart';
-import 'package:xlcab_app/services/account_service.dart';
+import 'package:xlcab_core/services/account_service.dart';
 import 'package:xlcab_app/services/driver_channel.dart';
 import 'package:xlcab_app/services/driver_device.dart';
 import 'package:xlcab_app/services/driver_mode_service.dart';
-import 'package:xlcab_app/models/payment.dart';
-import 'package:xlcab_app/models/trip_detail.dart';
+import 'package:xlcab_core/models/payment.dart';
+import 'package:xlcab_core/models/trip_detail.dart';
 import 'package:xlcab_app/services/payment_service.dart';
 import 'package:xlcab_app/services/booking_service.dart';
 import 'package:xlcab_app/services/document_picker.dart';
 import 'package:xlcab_app/services/driver_service.dart';
-import 'package:xlcab_app/services/location_service.dart';
-import 'package:xlcab_app/services/places_service.dart';
+import 'package:xlcab_core/services/location_service.dart';
+import 'package:xlcab_core/services/places_service.dart';
 import 'package:xlcab_app/services/tracking_channel.dart';
-import 'package:xlcab_app/services/trip_service.dart';
+import 'package:xlcab_core/services/trip_service.dart';
 
 // Doubles de test partagés : aucun appel réseau réel.
 

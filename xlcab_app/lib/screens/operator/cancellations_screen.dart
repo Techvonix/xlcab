@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../models/operator.dart';
+import 'package:xlcab_core/models/operator.dart';
 import '../../providers/operator_provider.dart';
 import '../../services/operator_service.dart';
-import '../../theme/app_spacing.dart';
-import '../../theme/app_typography.dart';
-import '../../utils/formatters.dart';
-import 'widgets.dart';
-import 'package:xlcab_app/l10n/l10n.dart';
+import 'package:xlcab_ui/theme/app_spacing.dart';
+import 'package:xlcab_ui/theme/app_typography.dart';
+import 'package:xlcab_core/utils/formatters.dart';
+import 'package:xlcab_ui/widgets/async_widgets.dart';
+import 'package:xlcab_core/l10n/l10n.dart';
 
 /// Mes annulations de départ et pénalités (protocole d'annulation) :
 /// justificatif de force majeure ou contestation dans les 7 jours.

@@ -4,15 +4,15 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
-import 'package:xlcab_app/models/tracking.dart';
-import 'package:xlcab_app/models/trip.dart';
+import 'package:xlcab_core/models/tracking.dart';
+import 'package:xlcab_core/models/trip.dart';
 import 'package:xlcab_app/screens/tracking/tracking_screen.dart';
 import 'package:xlcab_app/screens/tracking/widgets/tracking_map.dart';
-import 'package:xlcab_app/services/api_service.dart';
-import 'package:xlcab_app/services/location_service.dart';
+import 'package:xlcab_core/services/api_service.dart';
+import 'package:xlcab_core/services/location_service.dart';
 import 'package:xlcab_app/services/tracking_channel.dart';
-import 'package:xlcab_app/services/trip_service.dart';
-import 'package:xlcab_app/theme/app_theme.dart';
+import 'package:xlcab_core/services/trip_service.dart';
+import 'package:xlcab_ui/theme/app_theme.dart';
 
 import '../support/fakes.dart';
 

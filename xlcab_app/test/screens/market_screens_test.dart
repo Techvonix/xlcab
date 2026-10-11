@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/date_symbol_data_local.dart';
-import 'package:xlcab_app/models/market.dart';
+import 'package:xlcab_core/models/market.dart';
 import 'package:xlcab_app/providers/booking_provider.dart' show clockProvider;
 import 'package:xlcab_app/providers/operator_provider.dart';
 import 'package:xlcab_app/screens/booking/parcel_creation_screen.dart' show addressPickerProvider, pickupDateTimePickerProvider;
@@ -12,9 +12,9 @@ import 'package:xlcab_app/screens/market/line_search_screen.dart';
 import 'package:xlcab_app/screens/market/market_home_screen.dart';
 import 'package:xlcab_app/screens/market/request_detail_screen.dart';
 import 'package:xlcab_app/screens/market/request_form_screen.dart';
-import 'package:xlcab_app/services/api_service.dart';
-import 'package:xlcab_app/services/market_service.dart';
-import 'package:xlcab_app/theme/app_theme.dart';
+import 'package:xlcab_core/services/api_service.dart';
+import 'package:xlcab_core/services/market_service.dart';
+import 'package:xlcab_ui/theme/app_theme.dart';
 
 import '../support/operator_fakes.dart';
 

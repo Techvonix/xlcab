@@ -1,0 +1,12 @@
+# Espace de travail Dart : une seule résolution de paquets pour les applications
+# et les paquets communs. Lancer `flutter pub get` depuis ce dossier.
+name: xlcab_workspace
+publish_to: "none"
+
+environment:
+  sdk: ">=3.6.0 <4.0.0"
+
+workspace:
+  - xlcab_app
+  - packages/core
+  - packages/ui

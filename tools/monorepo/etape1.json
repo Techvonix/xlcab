@@ -1,0 +1,25 @@
+{
+  "packages": { "xlcab_app": "xlcab_app", "xlcab_core": "packages/core", "xlcab_ui": "packages/ui" },
+  "moves": [
+    {
+      "from": "xlcab_app", "to": "xlcab_core",
+      "paths": [
+        "models/", "config/", "utils/", "l10n/",
+        "services/api_service.dart", "services/auth_service.dart", "services/token_storage.dart",
+        "services/preferences_store.dart", "services/location_service.dart", "services/places_service.dart",
+        "services/trip_service.dart", "services/account_service.dart", "services/market_service.dart",
+        "providers/auth_provider.dart", "providers/locale_provider.dart", "providers/theme_provider.dart",
+        "providers/jurisdiction_provider.dart"
+      ]
+    },
+    {
+      "from": "xlcab_app", "to": "xlcab_ui",
+      "paths": ["theme/", "widgets/", "screens/operator/widgets.dart", "screens/auth/", "screens/splash/"],
+      "rename": {
+        "screens/operator/widgets.dart": "widgets/async_widgets.dart",
+        "screens/auth/login_screen.dart": "screens/login_screen.dart",
+        "screens/splash/splash_screen.dart": "screens/splash_screen.dart"
+      }
+    }
+  ]
+}

@@ -3,12 +3,12 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:xlcab_app/router.dart';
-import 'package:xlcab_app/services/auth_service.dart';
-import 'package:xlcab_app/services/preferences_store.dart';
-import 'package:xlcab_app/services/token_storage.dart';
-import 'package:xlcab_app/theme/app_theme.dart';
-import 'package:xlcab_app/widgets/primary_button.dart';
-import 'package:xlcab_app/widgets/xlcab_logo.dart';
+import 'package:xlcab_core/services/auth_service.dart';
+import 'package:xlcab_core/services/preferences_store.dart';
+import 'package:xlcab_core/services/token_storage.dart';
+import 'package:xlcab_ui/theme/app_theme.dart';
+import 'package:xlcab_ui/widgets/primary_button.dart';
+import 'package:xlcab_ui/widgets/xlcab_logo.dart';
 
 import '../support/auth_fakes.dart';
 

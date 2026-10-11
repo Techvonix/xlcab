@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:xlcab_app/models/driver_mode.dart';
-import 'package:xlcab_app/models/trip.dart';
-import 'package:xlcab_app/models/trip_detail.dart';
+import 'package:xlcab_core/models/driver_mode.dart';
+import 'package:xlcab_core/models/trip.dart';
+import 'package:xlcab_core/models/trip_detail.dart';
 
 import '../support/fakes.dart';
 

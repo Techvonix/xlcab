@@ -1,8 +1,8 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../models/driver_mode.dart';
-import 'api_service.dart';
-import 'package:xlcab_app/l10n/l10n.dart';
+import 'package:xlcab_core/models/driver_mode.dart';
+import 'package:xlcab_core/services/api_service.dart';
+import 'package:xlcab_core/l10n/l10n.dart';
 
 /// Endpoints du mode chauffeur (xlcab_backend/src/driver-mode) et actions
 /// sur les missions (src/matching : accept/refuse ; src/trips : start,

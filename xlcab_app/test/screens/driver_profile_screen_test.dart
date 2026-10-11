@@ -3,17 +3,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:xlcab_app/models/driver_public_profile.dart';
-import 'package:xlcab_app/models/place.dart';
-import 'package:xlcab_app/models/shuttle.dart';
+import 'package:xlcab_core/models/driver_public_profile.dart';
+import 'package:xlcab_core/models/place.dart';
+import 'package:xlcab_core/models/shuttle.dart';
 import 'package:xlcab_app/screens/booking/driver_profile_screen.dart';
 import 'package:xlcab_app/screens/booking/parcel_creation_screen.dart' show addressPickerProvider;
 import 'package:xlcab_app/screens/profile/notification_preferences_screen.dart';
 import 'package:xlcab_app/screens/profile/saved_addresses_screen.dart';
-import 'package:xlcab_app/services/api_service.dart';
+import 'package:xlcab_core/services/api_service.dart';
 import 'package:xlcab_app/services/feedback_service.dart';
-import 'package:xlcab_app/theme/app_theme.dart';
-import 'package:xlcab_app/widgets/primary_button.dart';
+import 'package:xlcab_ui/theme/app_theme.dart';
+import 'package:xlcab_ui/widgets/primary_button.dart';
 
 // Écran 10 (profil chauffeur, note, signalement) et écran 13 (adresses
 // favorites, notifications). Serveur simulé.

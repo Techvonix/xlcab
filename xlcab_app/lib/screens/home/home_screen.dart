@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../models/shuttle.dart';
-import '../../models/trip.dart';
+import 'package:xlcab_core/models/shuttle.dart';
+import 'package:xlcab_core/models/trip.dart';
 import '../../providers/home_provider.dart';
 import '../../router.dart';
-import '../../services/api_service.dart';
-import '../../theme/app_colors.dart';
-import '../../theme/app_spacing.dart';
-import '../../theme/app_typography.dart';
-import '../../widgets/primary_button.dart';
-import '../../widgets/shuttle_card.dart';
-import '../../widgets/xlcab_logo.dart';
+import 'package:xlcab_core/services/api_service.dart';
+import 'package:xlcab_ui/theme/app_colors.dart';
+import 'package:xlcab_ui/theme/app_spacing.dart';
+import 'package:xlcab_ui/theme/app_typography.dart';
+import 'package:xlcab_ui/widgets/primary_button.dart';
+import 'package:xlcab_ui/widgets/shuttle_card.dart';
+import 'package:xlcab_ui/widgets/xlcab_logo.dart';
 import '../accessibility/accessibility_sheet.dart';
 import 'widgets/recent_trip_tile.dart';
-import 'package:xlcab_app/l10n/l10n.dart';
+import 'package:xlcab_core/l10n/l10n.dart';
 
 /// Écran 4 — Accueil passager (Partie 7) :
 /// header avatar + cloche, carte "hero" avec les 2 gros boutons
