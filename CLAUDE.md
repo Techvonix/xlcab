@@ -287,6 +287,18 @@ référence — les exigences de la Partie 8 priment.
   l'appli ; première compilation d'une nouvelle appli ≈ 10 min, lancer en arrière-plan et attendre l'APK.
   Dans les chemins ci-dessous, `lib/…` de l'ancienne appli désigne donc `packages/core/lib/…`,
   `packages/ui/lib/…`, `apps/passenger/lib/…` ou `apps/driver/lib/…`.
+- Espace sécurité, partie serveur (2026-10-12, `src/trip-sharing/trip-sharing.ts`, migration `trip_sharing`) :
+  `/users/me/contacts` (`TrustedContact`, nom + téléphone nettoyé, 5 max, ownership par deleteMany), préférence
+  `autoShareTrips` (`/users/me/preferences`), `GET|POST|DELETE /trips/:id/share` (passager de la course seulement,
+  sinon 404 ; le même lien tant qu'il est actif ; 409 si trajet terminé). Lien = `PUBLIC_API_URL/suivi/{id}.{HMAC}`
+  (clé dérivée de JWT_SECRET, rien de secret en base ; `TripShare.expiresAt` = départ + 24 h, `revokedAt`).
+  Page publique `GET /suivi/:token` (HTML SANS script — CSP de Helmet —, meta refresh 20 s, fr/en selon
+  Accept-Language ou `?lang=`, no-store, noindex) et `GET /api/v1/shared-trips/:token` : statut, prénom du
+  voyageur, villes (`coarseAddress`, jamais l'adresse), prénom du chauffeur + véhicule + plaque + dernière
+  position seulement si `accepted|started`, lien Google Maps (pas de carte intégrée, pas de clé). « Terminé »
+  pendant 30 min puis 404 ; lien inconnu / falsifié / coupé / expiré = même 404. Le serveur n'envoie RIEN aux
+  contacts (ni SMS ni e-mail branchés) : le passager transmet le lien. Contacts dans l'export RGPD, effacés à
+  l'anonymisation avec les partages. Côté app passager : À FAIRE (écran des contacts, feuille de partage du suivi).
 - Migrations : `init_xlcab` appliquée sur la base locale ; toute modification de
   `prisma/schema.prisma` demande désormais `npx prisma migrate dev --name <nom>`. Référentiel :
   `npx prisma db seed` (config FR uniquement).
