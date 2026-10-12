@@ -59,10 +59,11 @@ Rose #E91E63, Bleue #2196F3, Orange #FF9800, PMR #607D8B (textes sur fond clair 
 ## Où le logo est défini (à mettre à jour après une retouche)
 
 1. Les SVG de ce dossier.
-2. **App Flutter** : `xlcab_app/lib/widgets/xlcab_logo.dart` (`XlcabSymbolPainter`,
+2. **Applications Flutter** (passager et chauffeur) : `packages/ui/lib/widgets/xlcab_logo.dart` (`XlcabSymbolPainter`,
    `XlcabWordmarkPainter`) — splash, onboarding, connexion, accueil. Couleurs :
    `lib/theme/app_colors.dart` ; thème sombre par défaut (`PreferencesStore.readTheme`).
-3. **Android** : `xlcab_app/android/app/src/main/res/drawable/ic_launcher_foreground.xml`
+3. **Android**, dans CHACUNE des deux applis (`apps/passenger`, `apps/driver`) :
+   `android/app/src/main/res/drawable/ic_launcher_foreground.xml`
    (icône adaptative, écran de démarrage Android 12+, et celui des versions antérieures via
    `launch_background.xml`). Couleur de fond : `values/colors.xml`.
 4. **Portails web** : `src/components/brand/XlcabLogo.tsx` dans `xlcab_corporate` et

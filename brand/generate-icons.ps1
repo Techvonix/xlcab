@@ -118,14 +118,16 @@ function Render-Symbol([int]$size, [string]$path, $tone) {
   $g.Dispose(); $bmp.Dispose()
 }
 
-Write-Host 'Android (versions < 8 ; les autres utilisent l''icone adaptative vectorielle) :'
-$android = "$root\xlcab_app\android\app\src\main\res"
+# Les deux applications (passager et chauffeur) portent le même symbole.
+foreach ($app in 'apps\passenger', 'apps\driver') {
+Write-Host "$app - Android (versions < 8 ; les autres utilisent l'icone adaptative vectorielle) :"
+$android = "$root\$app\android\app\src\main\res"
 @{ mdpi = 48; hdpi = 72; xhdpi = 96; xxhdpi = 144; xxxhdpi = 192 }.GetEnumerator() | ForEach-Object {
   Render-Icon $_.Value "$android\mipmap-$($_.Key)\ic_launcher.png" 0.18
 }
 
-Write-Host 'iOS (opaques : l''App Store refuse la transparence) :'
-$ios = "$root\xlcab_app\ios\Runner\Assets.xcassets"
+Write-Host "$app - iOS (opaques : l'App Store refuse la transparence) :"
+$ios = "$root\$app\ios\Runner\Assets.xcassets"
 $iosIcons = [ordered]@{
   'Icon-App-20x20@1x' = 20; 'Icon-App-20x20@2x' = 40; 'Icon-App-20x20@3x' = 60
   'Icon-App-29x29@1x' = 29; 'Icon-App-29x29@2x' = 58; 'Icon-App-29x29@3x' = 87
@@ -139,6 +141,7 @@ foreach ($k in $iosIcons.Keys) { Render-Icon $iosIcons[$k] "$ios\AppIcon.appicon
 Render-Symbol 120 "$ios\LaunchImage.imageset\LaunchImage.png" $tones.night
 Render-Symbol 240 "$ios\LaunchImage.imageset\LaunchImage@2x.png" $tones.night
 Render-Symbol 360 "$ios\LaunchImage.imageset\LaunchImage@3x.png" $tones.night
+}
 
 Write-Host 'Portails web (favicon PNG de secours et icone d''ecran d''accueil iOS) :'
 foreach ($portal in 'xlcab_corporate', 'xlcab_admin') {

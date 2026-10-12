@@ -269,7 +269,7 @@ référence — les exigences de la Partie 8 priment.
   (+ `addressPickerProvider`), `widgets/offer_messages_sheet.dart`, `widgets/legal_links.dart`.
   Étape 3 faite (2026-10-12) : `apps/driver` (`xlcab_driver`, « XLCAB Driver », `com.xlcab.driver`) = ex
   `xlcab_app` (screens driver + operator, services driver_* / operator, providers driver_* / operator).
-  `xlcab_app/` N'EXISTE PLUS. Barre à 4 onglets (`screens/shell/` : `driver_shell.dart`) : Aujourd'hui
+  L'ancien dossier de l'appli unique N'EXISTE PLUS. Barre à 4 onglets (`screens/shell/` : `driver_shell.dart`) : Aujourd'hui
   `AppRoutes.driverMode` (= `DriverModeScreen` : en ligne, offres, reprises urgentes, missions), Départ
   `DriverTabs.departure` (`departure_tab.dart` : `AssignmentTile` des départs que j'assure, mes lignes, bourse),
   Revenus `DriverTabs.earnings` (`EarningsCard`, courses récentes, mes annulations), Profil `DriverTabs.profile`
@@ -304,8 +304,8 @@ référence — les exigences de la Partie 8 priment.
   Création (`POST /bookings/passenger`, module Paiements), historique et annulation (`/trips/:id/cancel`)
   sont faits. Les alias de la Partie 6 `GET /bookings/passenger/:id`, `…/cancel`, `…/checkin` et
   `PATCH /bookings/parcel/:id/cancel` ne sont pas créés : couverts par `/trips/:id` (décision).
-- `xlcab_app/` : app Flutter (projet complété par `flutter create`, polices Poppins/Inter OFL dans
-  `assets/fonts/`). Modules 5 (Home), 6 (Réservation passager) et 7 (Suivi temps réel) en relecture.
+- Applications Flutter : `apps/passenger` et `apps/driver` (voir « Deux applis » ci-dessus ; polices
+  Poppins/Inter OFL dans `packages/ui/lib/fonts/`). Modules 5 (Home), 6 (Réservation passager) et 7 (Suivi temps réel) en relecture.
 - Module 7 : `GET /trips/:id/tracking` (backend, `tracking.controller.ts`) sert au chargement et au
   polling 10 s. Position chauffeur seulement si `accepted|started` ; téléphone chauffeur seulement au
   passager pendant la course. Côté app : `TrackingController` (temps réel + polling automatique dès
@@ -345,7 +345,7 @@ référence — les exigences de la Partie 8 priment.
   récapitulatif — bouton « Noter le trajet » si terminée), `saved_addresses_screen.dart`,
   `notification_preferences_screen.dart` ; favoris en tête de `AddressSearchScreen` (champ vide).
   Service `FeedbackService` (`feedbackServiceProvider`, `driverPublicProfileProvider`).
-- Traductions (2026-10-07) : gen-l10n, `xlcab_app/l10n.yaml`, ARB `lib/l10n/app_fr.arb` (référence, avec les
+- Traductions (2026-10-07) : gen-l10n, `packages/core/l10n.yaml`, ARB `packages/core/lib/l10n/app_fr.arb` (référence, avec les
   métadonnées des paramètres) et `app_en.arb` ; classes générées dans `lib/l10n/generated/` (`flutter gen-l10n`,
   aussi lancé par pub get/build). Accès UNIQUE : `l10n.cle` (getter global de `lib/l10n/l10n.dart`, utilisable
   dans les écrans, services et modèles) ; `app.dart` (`_XlcabAppState`, observateur de la langue du téléphone)
@@ -382,7 +382,7 @@ référence — les exigences de la Partie 8 priment.
   `available` (oui/non via `findEligibleDrivers`, jamais de nombre ni position ; null sans lat/lng ou si Redis
   tombe). Position prise seulement si déjà autorisée (`LocationService.currentPositionIfAllowed`, aucune demande).
 - Clés Google mobiles : `android/local.properties` (`MAPS_API_KEY`), `ios/Flutter/Secrets.xcconfig`
-  (`GOOGLE_MAPS_API_KEY`), `--dart-define=GOOGLE_MAPS_API_KEY` pour Places. Voir SETUP_INSTRUCTIONS.md.
+  (`GOOGLE_MAPS_API_KEY`), `--dart-define=GOOGLE_MAPS_API_KEY` pour Places. Voir APPLICATIONS_MOBILES.md.
   Le projet Google Cloud sera créé par le porteur de projet sur le compte TechvonixDigital@gmail.com
   (date à annoncer) : ne rien créer ni configurer sur ce compte depuis Claude Code.
 - Module 8 (onboarding chauffeur) en relecture. Backend `src/drivers/` : `POST /drivers/me/documents`
@@ -484,7 +484,8 @@ référence — les exigences de la Partie 8 priment.
   appeler Google avec `dioProvider`.
 - Tests d'accessibilité : `meetsGuideline(iOSTapTargetGuideline | androidTapTargetGuideline |
   labeledTapTargetGuideline | textContrastGuideline)`, appliqués à chaque écran.
-- Lancer `flutter analyze lib test` depuis `xlcab_app/` (lancé ailleurs, il peut répondre « No issues »
+- Lancer `flutter analyze .` DANS chaque paquet (`packages/core`, `packages/ui`, `apps/passenger`, `apps/driver` ;
+  lancé ailleurs, il peut répondre « No issues »
   à tort).
 - `flutter analyze lib test` : aucune remarque (2026-10-07).
 - Tests widget avec un compte à rebours ou un timer périodique à l'écran : pas de `pumpAndSettle`
@@ -507,7 +508,8 @@ npm run build                       # nest build (vérifie aussi le typage)
 npm run start:dev
 ```
 
-App Flutter (depuis `xlcab_app/`) : `flutter pub get`, `flutter analyze`, `flutter test`,
+Applications Flutter : `flutter pub get` depuis la racine `C:\xlcab` ; `flutter analyze .`, `flutter test` et
+`flutter build apk` dans `apps/passenger` ou `apps/driver` (guide : `APPLICATIONS_MOBILES.md`). Exemple :
 `flutter test test/screens/home_screen_test.dart`.
 
 Les tests unitaires du backend mockent Prisma, Redis et JwtService via `Test.createTestingModule` + `useValue` :
