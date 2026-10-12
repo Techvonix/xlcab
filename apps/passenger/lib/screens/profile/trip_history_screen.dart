@@ -13,6 +13,10 @@ import 'package:xlcab_core/l10n/l10n.dart';
 
 const historyPageSize = 20;
 
+/// Incrémenté quand l'onglet Trajets est rouvert : la liste se recharge (une
+/// réservation faite entre-temps doit y apparaître, l'onglet restant en mémoire).
+final tripsRefreshProvider = StateProvider<int>((ref) => 0);
+
 /// Historique des trajets du passager (écran 13), page par page.
 /// Un appui ouvre le détail de la course (écran 8 : récapitulatif, QR,
 /// annulation si encore possible).
@@ -33,6 +37,18 @@ class _TripHistoryScreenState extends ConsumerState<TripHistoryScreen> {
   @override
   void initState() {
     super.initState();
+    _loadMore();
+  }
+
+  /// Repart de la première page.
+  void _reload() {
+    if (_loading) return;
+    setState(() {
+      _trips.clear();
+      _page = 0;
+      _hasMore = true;
+      _error = null;
+    });
     _loadMore();
   }
 
@@ -59,6 +75,7 @@ class _TripHistoryScreenState extends ConsumerState<TripHistoryScreen> {
 
   @override
   Widget build(BuildContext context) {
+    ref.listen(tripsRefreshProvider, (_, __) => _reload());
     final scheme = Theme.of(context).colorScheme;
     final locale = Localizations.localeOf(context).languageCode;
     final muted = scheme.onSurface.withValues(alpha: 0.75);

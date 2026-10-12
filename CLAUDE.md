@@ -327,6 +327,18 @@ référence — les exigences de la Partie 8 priment.
   ponctuel, vehicule_propre, accueil, colis_soigne ; liste fermée, 400 sinon), `TripRating.tags`, `POST
   /trips/:id/rating { tags }` ; app : `ratingTags()` + `FilterChip` proposés à partir de 4 étoiles seulement (jamais
   envoyées pour une note plus basse) ; admin : étiquettes affichées avec la note (`ratingTagLabel`).
+- Onglets en mémoire (`StatefulShellRoute.indexedStack`) : un onglet déjà ouvert ne se recharge pas seul. Passager :
+  `PassengerShell` incrémente `tripsRefreshProvider` (Trajets) et invalide `myParcelsProvider` (Colis) à chaque
+  retour sur l'onglet — sans cela une réservation toute fraîche manquait dans « Trajets ». Tout nouvel onglet à
+  données doit prévoir ce rechargement.
+- Vidéo de démo des deux applis (2026-10-12, `demo/videos/xlcab-1-passager-reservation.mp4`,
+  `xlcab-2-passager-securite-retour-note.mp4`, `xlcab-3-chauffeur.mp4`) : un chapitre = un enregistrement
+  `scratchpad/demo/rec.sh start|stop NOM` (170 s max, `GUARD` obligatoire, supprimé si l'appli quitte le premier
+  plan) ; connexions TOUJOURS hors enregistrement (`login.sh N paquet`, puis `dismiss.sh` = « Pas maintenant ») ;
+  relancer `seed-demo.ts` avant (Thomas a les sièges 1-3 de Paris–Beauvais, Léa a un trajet d'hier à noter, le
+  contact « Maman » et le partage automatique). Un balayage `input swipe` de durée différente ne défile pas de la
+  même distance : garder 400 ms entre répétition et prise. Pas de ffmpeg sur ce PC : pas de montage, et les
+  vidéos ne peuvent pas être relues image par image (vérifier par la base et les écrans de fin).
 - Migrations : `init_xlcab` appliquée sur la base locale ; toute modification de
   `prisma/schema.prisma` demande désormais `npx prisma migrate dev --name <nom>`. Référentiel :
   `npx prisma db seed` (config FR uniquement).
