@@ -1986,5 +1986,59 @@
   "secSmsImpossible": "Impossible d’ouvrir la messagerie. Le lien a été copié.",
   "secPartageIndisponible": "Partage indisponible pour le moment.",
   "secAucunContactFeuille": "Ajoutez des contacts de confiance pour leur envoyer le lien en un geste.",
-  "secPreparation": "Préparation du lien de suivi"
+  "secPreparation": "Préparation du lien de suivi",
+  "sgTitre": "Choisir mes sièges (facultatif)",
+  "sgAide": "{count, plural, =1{Touchez un siège, ou laissez XLCAB l’attribuer.} other{Touchez {count} sièges, ou laissez XLCAB les attribuer.}}",
+  "@sgAide": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "sgReste": "{count, plural, =1{Encore 1 siège à choisir} other{Encore {count} sièges à choisir}}",
+  "@sgReste": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "sgSiegeLibre": "Siège {number}, libre",
+  "@sgSiegeLibre": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "sgSiegePris": "Siège {number}, déjà pris",
+  "@sgSiegePris": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "sgSiegeChoisi": "Siège {number}, sélectionné",
+  "@sgSiegeChoisi": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "sgNumeros": "{count, plural, =1{Siège {list}} other{Sièges {list}}}",
+  "@sgNumeros": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "list": {
+        "type": "String"
+      }
+    }
+  },
+  "sgPlanIndisponible": "Plan des sièges indisponible : ils seront attribués automatiquement.",
+  "sgDisposition": "Sièges présentés par numéro : la disposition dépend du véhicule."
 }

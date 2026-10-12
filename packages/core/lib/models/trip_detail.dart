@@ -14,6 +14,7 @@ class TripDetail {
     required this.qrCode,
     required this.totalCents,
     this.dispatchAt,
+    this.seatNumbers = const [],
     this.invoiceId,
     this.invoiceNumber,
   });
@@ -33,6 +34,9 @@ class TripDetail {
   final String destinationAddress;
   final DateTime? scheduledAt;
   final int? seats;
+
+  /// Sièges numérotés (ligne régulière vendue à la place), sinon vide.
+  final List<int> seatNumbers;
 
   /// QR d'embarquement : fourni par le serveur au seul passager.
   final String? qrCode;
@@ -70,6 +74,9 @@ class TripDetail {
       destinationAddress: destination['address'] is String ? destination['address'] as String : '',
       scheduledAt: scheduled is String ? DateTime.tryParse(scheduled)?.toLocal() : null,
       seats: booking is Map && booking['seats'] is int ? booking['seats'] as int : null,
+      seatNumbers: booking is Map && booking['seatNumbers'] is List
+          ? (booking['seatNumbers'] as List).whereType<num>().map((n) => n.toInt()).toList()
+          : const [],
       qrCode: booking is Map && booking['qrCode'] is String ? booking['qrCode'] as String : null,
       totalCents: price is Map && price['totalCents'] is int ? price['totalCents'] as int : null,
     );

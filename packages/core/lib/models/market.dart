@@ -400,3 +400,22 @@ class RequestDraft {
         'publish': true,
       };
 }
+
+/// Plan des sièges d'un départ de ligne : numéros de 1 à [seatsTotal], dont
+/// ceux déjà pris. Aucune identité : on ne sait pas qui occupe quoi.
+class SeatMap {
+  const SeatMap({required this.seatsTotal, required this.taken, required this.choosable});
+
+  final int seatsTotal;
+  final Set<int> taken;
+
+  /// false pour un départ privatisé (prix au véhicule) : pas de choix de siège.
+  final bool choosable;
+
+  factory SeatMap.fromJson(Map<String, dynamic>? json) {
+    final total = json?['seatsTotal'];
+    final taken = json?['taken'];
+    if (total is! int || taken is! List) throw const FormatException('plan des sièges');
+    return SeatMap(seatsTotal: total, taken: taken.whereType<num>().map((n) => n.toInt()).toSet(), choosable: json?['choosable'] == true);
+  }
+}

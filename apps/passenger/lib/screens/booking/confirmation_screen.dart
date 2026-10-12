@@ -265,6 +265,8 @@ class _Recap extends StatelessWidget {
           line(Icons.place, trip.destinationAddress),
           if (trip.scheduledAt != null) line(Icons.event, formatTripDate(trip.scheduledAt!, locale: locale)),
           if (trip.seats != null) line(Icons.groups_outlined, l10n.passager(trip.seats!, trip.seats! > 1 ? 's' : '')),
+          if (trip.seatNumbers.isNotEmpty)
+            line(Icons.event_seat_outlined, l10n.sgNumeros(trip.seatNumbers.length, trip.seatNumbers.join(', '))),
           if (trip.totalCents != null) line(Icons.receipt_long_outlined, l10n.montant(formatPrice(trip.totalCents!, locale: locale))),
         ],
       ),

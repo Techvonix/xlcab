@@ -3462,4 +3462,63 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get secPreparation => 'Preparing the tracking link';
+
+  @override
+  String get sgTitre => 'Choose my seats (optional)';
+
+  @override
+  String sgAide(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Tap $count seats, or let XLCAB assign them.',
+      one: 'Tap a seat, or let XLCAB assign one.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String sgReste(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count more seats to choose',
+      one: '1 more seat to choose',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String sgSiegeLibre(int number) {
+    return 'Seat $number, free';
+  }
+
+  @override
+  String sgSiegePris(int number) {
+    return 'Seat $number, taken';
+  }
+
+  @override
+  String sgSiegeChoisi(int number) {
+    return 'Seat $number, selected';
+  }
+
+  @override
+  String sgNumeros(int count, String list) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Seats $list',
+      one: 'Seat $list',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get sgPlanIndisponible =>
+      'Seat plan unavailable: seats will be assigned automatically.';
+
+  @override
+  String get sgDisposition =>
+      'Seats are shown by number: the layout depends on the vehicle.';
 }

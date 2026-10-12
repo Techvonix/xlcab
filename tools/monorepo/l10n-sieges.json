@@ -1,0 +1,11 @@
+{
+  "sgTitre": { "fr": "Choisir mes sièges (facultatif)", "en": "Choose my seats (optional)" },
+  "sgAide": { "fr": "{count, plural, =1{Touchez un siège, ou laissez XLCAB l’attribuer.} other{Touchez {count} sièges, ou laissez XLCAB les attribuer.}}", "en": "{count, plural, =1{Tap a seat, or let XLCAB assign one.} other{Tap {count} seats, or let XLCAB assign them.}}", "p": { "count": "int" } },
+  "sgReste": { "fr": "{count, plural, =1{Encore 1 siège à choisir} other{Encore {count} sièges à choisir}}", "en": "{count, plural, =1{1 more seat to choose} other{{count} more seats to choose}}", "p": { "count": "int" } },
+  "sgSiegeLibre": { "fr": "Siège {number}, libre", "en": "Seat {number}, free", "p": { "number": "int" } },
+  "sgSiegePris": { "fr": "Siège {number}, déjà pris", "en": "Seat {number}, taken", "p": { "number": "int" } },
+  "sgSiegeChoisi": { "fr": "Siège {number}, sélectionné", "en": "Seat {number}, selected", "p": { "number": "int" } },
+  "sgNumeros": { "fr": "{count, plural, =1{Siège {list}} other{Sièges {list}}}", "en": "{count, plural, =1{Seat {list}} other{Seats {list}}}", "p": { "count": "int", "list": "String" } },
+  "sgPlanIndisponible": { "fr": "Plan des sièges indisponible : ils seront attribués automatiquement.", "en": "Seat plan unavailable: seats will be assigned automatically." },
+  "sgDisposition": { "fr": "Sièges présentés par numéro : la disposition dépend du véhicule.", "en": "Seats are shown by number: the layout depends on the vehicle." }
+}

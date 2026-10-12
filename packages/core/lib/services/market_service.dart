@@ -112,7 +112,14 @@ class MarketService {
       });
 
   /// Réserve des places sur un départ ; renvoie l'identifiant de la course créée.
-  Future<String> bookLine(String departureId, {required int seats, int childSeats = 0, int luggage = 0, String? notes}) =>
+  Future<String> bookLine(
+    String departureId, {
+    required int seats,
+    int childSeats = 0,
+    int luggage = 0,
+    String? notes,
+    List<int>? seatNumbers,
+  }) =>
       guardOperatorCall(() async {
         final res = await _dio.post<Map<String, dynamic>>('/api/v1/lines/bookings', data: {
           'departureId': departureId,
@@ -120,10 +127,18 @@ class MarketService {
           'childSeats': childSeats,
           'luggage': luggage,
           if (notes != null && notes.isNotEmpty) 'notes': notes,
+          // Sièges choisis ; absents : le serveur attribue les premiers libres.
+          if (seatNumbers != null && seatNumbers.isNotEmpty) 'seatNumbers': seatNumbers,
         });
         final id = res.data?['tripId'];
         if (id is! String) throw const FormatException('Réservation sans identifiant');
         return id;
+      });
+
+  /// Sièges déjà pris sur un départ (choix du siège à la réservation).
+  Future<SeatMap> seatMap(String departureId) => guardOperatorCall(() async {
+        final res = await _dio.get<Map<String, dynamic>>('/api/v1/lines/bookings/seats/${Uri.encodeComponent(departureId)}');
+        return SeatMap.fromJson(res.data);
       });
 
   // ── Messagerie (client ou opérateur) ──

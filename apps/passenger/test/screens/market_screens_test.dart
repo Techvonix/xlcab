@@ -143,7 +143,44 @@ void main() {
       await tester.tap(find.textContaining('Confirmer ·'));
       await tester.pumpAndSettle();
       expect(market.calls.last, 'bookLine:d1:3:1:0');
+      expect(market.bookedSeatNumbers, isNull); // aucun siège choisi : attribution automatique
       expect(find.text('réservation trip-1'), findsOneWidget); // récapitulatif et QR
+    });
+
+    testWidgets('choix du siège : sièges pris désactivés, choix complet exigé, sièges transmis', (tester) async {
+      market.lineResults = [departure()];
+      final handle = tester.ensureSemantics();
+      await pump(tester, const LineSearchScreen());
+      await tester.tap(find.text('Départ'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Arrivée'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Rechercher'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Réserver'));
+      await tester.pumpAndSettle();
+
+      // Sièges 2 et 5 déjà vendus : annoncés et non sélectionnables.
+      expect(find.bySemanticsLabel('Siège 2, déjà pris'), findsOneWidget);
+      expect(tester.widget<OutlinedButton>(find.widgetWithText(OutlinedButton, '2')).onPressed, isNull);
+
+      await tester.tap(find.byTooltip('Plus : Places').last); // 2 places
+      await tester.pump();
+      await tester.tap(find.widgetWithText(OutlinedButton, '3'));
+      await tester.pump();
+      expect(find.bySemanticsLabel('Siège 3, sélectionné'), findsOneWidget);
+      // Choix partiel : la confirmation attend le second siège.
+      expect(find.text('Encore 1 siège à choisir'), findsOneWidget);
+      expect(tester.widget<FilledButton>(find.widgetWithText(FilledButton, '3')).onPressed, isNotNull);
+
+      await tester.tap(find.widgetWithText(OutlinedButton, '4'));
+      await tester.pump();
+      expect(find.textContaining('à choisir'), findsNothing);
+      await tester.tap(find.textContaining('Confirmer ·'));
+      await tester.pumpAndSettle();
+      expect(market.calls.last, 'bookLine:d1:2:0:0');
+      expect(market.bookedSeatNumbers, [3, 4]);
+      handle.dispose();
     });
 
     testWidgets('aucun départ : la demande de devis est proposée ; plus de places : message du serveur', (tester) async {

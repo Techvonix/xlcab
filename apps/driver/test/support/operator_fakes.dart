@@ -257,10 +257,25 @@ class FakeMarketService extends MarketService {
   }
 
   @override
-  Future<String> bookLine(String departureId, {required int seats, int childSeats = 0, int luggage = 0, String? notes}) async {
+  Future<String> bookLine(
+    String departureId, {
+    required int seats,
+    int childSeats = 0,
+    int luggage = 0,
+    String? notes,
+    List<int>? seatNumbers,
+  }) async {
     _act('bookLine:$departureId:$seats:$childSeats:$luggage');
+    bookedSeatNumbers = seatNumbers;
     return 'trip-1';
   }
+
+  /// Sièges demandés à la dernière réservation (null = attribution automatique).
+  List<int>? bookedSeatNumbers;
+  SeatMap seats = const SeatMap(seatsTotal: 8, taken: {2, 5}, choosable: true);
+
+  @override
+  Future<SeatMap> seatMap(String departureId) async => seats;
 
   @override
   Future<List<OfferMessage>> messages(String offerId) async => thread;

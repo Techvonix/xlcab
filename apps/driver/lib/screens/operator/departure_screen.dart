@@ -157,6 +157,7 @@ class _PassengerTile extends ConsumerWidget {
     final p = passenger;
     final details = [
       l10n.opPlaces(p.seats),
+      if (p.seatNumbers.isNotEmpty) l10n.sgNumeros(p.seatNumbers.length, p.seatNumbers.join(', ')),
       if (p.childSeats > 0) l10n.opSiegesEnfant(p.childSeats),
       if (p.notes != null) p.notes!,
     ].join(' · ');

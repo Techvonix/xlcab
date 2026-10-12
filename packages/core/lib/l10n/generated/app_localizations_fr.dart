@@ -3485,4 +3485,63 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get secPreparation => 'Préparation du lien de suivi';
+
+  @override
+  String get sgTitre => 'Choisir mes sièges (facultatif)';
+
+  @override
+  String sgAide(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Touchez $count sièges, ou laissez XLCAB les attribuer.',
+      one: 'Touchez un siège, ou laissez XLCAB l’attribuer.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String sgReste(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Encore $count sièges à choisir',
+      one: 'Encore 1 siège à choisir',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String sgSiegeLibre(int number) {
+    return 'Siège $number, libre';
+  }
+
+  @override
+  String sgSiegePris(int number) {
+    return 'Siège $number, déjà pris';
+  }
+
+  @override
+  String sgSiegeChoisi(int number) {
+    return 'Siège $number, sélectionné';
+  }
+
+  @override
+  String sgNumeros(int count, String list) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Sièges $list',
+      one: 'Siège $list',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get sgPlanIndisponible =>
+      'Plan des sièges indisponible : ils seront attribués automatiquement.';
+
+  @override
+  String get sgDisposition =>
+      'Sièges présentés par numéro : la disposition dépend du véhicule.';
 }

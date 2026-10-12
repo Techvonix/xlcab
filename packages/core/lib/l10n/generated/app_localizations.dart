@@ -6032,6 +6032,60 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Préparation du lien de suivi'**
   String get secPreparation;
+
+  /// No description provided for @sgTitre.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisir mes sièges (facultatif)'**
+  String get sgTitre;
+
+  /// No description provided for @sgAide.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{Touchez un siège, ou laissez XLCAB l’attribuer.} other{Touchez {count} sièges, ou laissez XLCAB les attribuer.}}'**
+  String sgAide(int count);
+
+  /// No description provided for @sgReste.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{Encore 1 siège à choisir} other{Encore {count} sièges à choisir}}'**
+  String sgReste(int count);
+
+  /// No description provided for @sgSiegeLibre.
+  ///
+  /// In fr, this message translates to:
+  /// **'Siège {number}, libre'**
+  String sgSiegeLibre(int number);
+
+  /// No description provided for @sgSiegePris.
+  ///
+  /// In fr, this message translates to:
+  /// **'Siège {number}, déjà pris'**
+  String sgSiegePris(int number);
+
+  /// No description provided for @sgSiegeChoisi.
+  ///
+  /// In fr, this message translates to:
+  /// **'Siège {number}, sélectionné'**
+  String sgSiegeChoisi(int number);
+
+  /// No description provided for @sgNumeros.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{Siège {list}} other{Sièges {list}}}'**
+  String sgNumeros(int count, String list);
+
+  /// No description provided for @sgPlanIndisponible.
+  ///
+  /// In fr, this message translates to:
+  /// **'Plan des sièges indisponible : ils seront attribués automatiquement.'**
+  String get sgPlanIndisponible;
+
+  /// No description provided for @sgDisposition.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sièges présentés par numéro : la disposition dépend du véhicule.'**
+  String get sgDisposition;
 }
 
 class _AppLocalizationsDelegate

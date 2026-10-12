@@ -435,6 +435,7 @@ class ManifestPassenger {
     this.firstName,
     this.phone,
     this.notes,
+    this.seatNumbers = const [],
   });
 
   final String tripId;
@@ -442,6 +443,9 @@ class ManifestPassenger {
   /// Visible seulement dans l'heure qui précède le départ.
   final String? phone;
   final int seats;
+
+  /// Sièges numérotés de la réservation (ligne vendue à la place), sinon vide.
+  final List<int> seatNumbers;
   final int childSeats;
   final bool checkedIn;
   final bool started;
@@ -490,6 +494,7 @@ class Manifest {
                     firstName: _str(p['firstName']),
                     phone: _str(p['phone']),
                     seats: _int(p['seats']) ?? 0,
+                    seatNumbers: (p['seatNumbers'] is List ? (p['seatNumbers'] as List).whereType<num>().map((n) => n.toInt()).toList() : const <int>[]),
                     childSeats: _int(p['childSeats']) ?? 0,
                     checkedIn: p['checkedIn'] == true,
                     started: p['status'] == 'started',

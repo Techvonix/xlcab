@@ -17,6 +17,8 @@ import 'package:xlcab_ui/screens/address_search_screen.dart' show addressPickerP
 import 'package:xlcab_ui/widgets/async_widgets.dart';
 import 'package:xlcab_core/l10n/l10n.dart';
 
+import 'seat_picker.dart';
+
 /// Recherche d'un départ de ligne régulière et réservation de places.
 class LineSearchScreen extends ConsumerStatefulWidget {
   const LineSearchScreen({super.key});
@@ -238,6 +240,9 @@ class _BookLineSheetState extends ConsumerState<BookLineSheet> {
   late int _seats = widget.seats.clamp(1, widget.result.seatsLeft < 1 ? 1 : widget.result.seatsLeft);
   int _childSeats = 0;
   int _luggage = 0;
+
+  /// Sièges choisis, dans l'ordre des touchers. Vide = attribution automatique.
+  List<int> _picked = [];
   final _notes = TextEditingController();
   bool _busy = false;
   String? _error;
@@ -262,13 +267,21 @@ class _BookLineSheetState extends ConsumerState<BookLineSheet> {
             childSeats: _childSeats,
             luggage: _luggage,
             notes: _notes.text.trim(),
+            seatNumbers: _picked.isEmpty ? null : _picked,
           );
       ref.invalidate(recentTripsProvider);
       navigator.pop();
       // Écran 8 : récapitulatif et QR d'embarquement de la réservation.
       router.push(AppRoutes.confirmationFor(tripId));
     } on ApiException catch (e) {
-      if (mounted) setState(() => _error = e.message);
+      // Siège pris entre-temps : le plan est rechargé pour montrer les sièges restants.
+      ref.invalidate(seatMapProvider(widget.result.departureId));
+      if (mounted) {
+        setState(() {
+          _error = e.message;
+          _picked = [];
+        });
+      }
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -279,6 +292,8 @@ class _BookLineSheetState extends ConsumerState<BookLineSheet> {
     final r = widget.result;
     final locale = Localizations.localeOf(context).languageCode;
     final total = r.perSeat ? r.unitPriceCents * _seats : r.totalPriceCents;
+    // Choix facultatif, mais jamais partiel : aucun siège, ou un par place.
+    final missing = _picked.isEmpty ? 0 : _seats - _picked.length;
     return Padding(
       padding: EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.md, AppSpacing.md, MediaQuery.of(context).viewInsets.bottom + AppSpacing.md),
       child: SingleChildScrollView(
@@ -286,8 +301,19 @@ class _BookLineSheetState extends ConsumerState<BookLineSheet> {
           Text(l10n.mkcReserverCeDepart, style: AppTypography.h3),
           Text('${formatTripDate(r.departureAt, locale: locale)} · ${l10n.opTrajet(r.origin, r.destination)}'),
           const SizedBox(height: AppSpacing.sm),
-          SeatStepper(label: l10n.mkcPlaces, value: _seats, min: 1, max: r.seatsLeft < 1 ? 1 : r.seatsLeft, onChanged: (v) => setState(() => _seats = v)),
+          SeatStepper(label: l10n.mkcPlaces, value: _seats, min: 1, max: r.seatsLeft < 1 ? 1 : r.seatsLeft, onChanged: (v) => setState(() {
+            _seats = v;
+            // Moins de places : on garde les derniers sièges touchés.
+            if (_picked.length > v) _picked = _picked.sublist(_picked.length - v);
+          })),
           SeatStepper(label: l10n.mkcSiegesEnfant, value: _childSeats, min: 0, max: 4, onChanged: (v) => setState(() => _childSeats = v)),
+          if (r.perSeat)
+            SeatPicker(
+              departureId: r.departureId,
+              count: _seats,
+              selected: _picked,
+              onChanged: (seats) => setState(() => _picked = seats),
+            ),
           SeatStepper(label: l10n.mkcBagages, value: _luggage, min: 0, max: r.luggage, onChanged: (v) => setState(() => _luggage = v)),
           TextField(
             controller: _notes,
@@ -297,7 +323,8 @@ class _BookLineSheetState extends ConsumerState<BookLineSheet> {
           Text(l10n.mkcPaiementPlusTard, style: AppTypography.caption),
           if (_error != null) Text(_error!, style: TextStyle(color: Theme.of(context).colorScheme.error)),
           const SizedBox(height: AppSpacing.sm),
-          PrimaryButton(label: l10n.mkcConfirmerPrix(formatPrice(total, locale: locale)), onPressed: _busy ? null : _book),
+          if (missing > 0) Text(l10n.sgReste(missing), style: AppTypography.caption),
+          PrimaryButton(label: l10n.mkcConfirmerPrix(formatPrice(total, locale: locale)), onPressed: _busy || missing > 0 ? null : _book),
         ]),
       ),
     );

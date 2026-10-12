@@ -988,5 +988,14 @@
   "secSmsImpossible": "Unable to open the messaging app. The link was copied.",
   "secPartageIndisponible": "Sharing is unavailable for now.",
   "secAucunContactFeuille": "Add trusted contacts to send them the link in one tap.",
-  "secPreparation": "Preparing the tracking link"
+  "secPreparation": "Preparing the tracking link",
+  "sgTitre": "Choose my seats (optional)",
+  "sgAide": "{count, plural, =1{Tap a seat, or let XLCAB assign one.} other{Tap {count} seats, or let XLCAB assign them.}}",
+  "sgReste": "{count, plural, =1{1 more seat to choose} other{{count} more seats to choose}}",
+  "sgSiegeLibre": "Seat {number}, free",
+  "sgSiegePris": "Seat {number}, taken",
+  "sgSiegeChoisi": "Seat {number}, selected",
+  "sgNumeros": "{count, plural, =1{Seat {list}} other{Seats {list}}}",
+  "sgPlanIndisponible": "Seat plan unavailable: seats will be assigned automatically.",
+  "sgDisposition": "Seats are shown by number: the layout depends on the vehicle."
 }
