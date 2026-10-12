@@ -59,6 +59,7 @@ async function main() {
     await prisma.driverBonus.deleteMany({ where: { driverId: { in: oldIds } } });
     await prisma.passengerCredit.deleteMany({ where: { userId: { in: oldIds } } });
     await prisma.lineBackup.deleteMany({ where: { OR: [{ lineId: { in: oldLines } }, { driverId: { in: oldIds } }] } });
+    await prisma.lineSeat.deleteMany({ where: { departureId: { in: oldDepartures } } });
     await prisma.lineDeparture.deleteMany({ where: { lineId: { in: oldLines } } });
     await prisma.lineException.deleteMany({ where: { lineId: { in: oldLines } } });
     await prisma.recurringLine.deleteMany({ where: { id: { in: oldLines } } });
@@ -66,6 +67,8 @@ async function main() {
     await prisma.tripRating.deleteMany({ where: { OR: [{ passengerId: { in: oldIds } }, { driverId: { in: oldIds } }] } });
     await prisma.savedAddress.deleteMany({ where: { userId: { in: oldIds } } });
     await prisma.userPreference.deleteMany({ where: { userId: { in: oldIds } } });
+    await prisma.trustedContact.deleteMany({ where: { userId: { in: oldIds } } });
+    await prisma.tripShare.deleteMany({ where: { userId: { in: oldIds } } });
     await prisma.trip.deleteMany({ where: { OR: [{ passengerId: { in: oldIds } }, { driverId: { in: oldIds } }] } });
     await prisma.corporateMember.deleteMany({ where: { userId: { in: oldIds } } });
     await prisma.vehicle.deleteMany({ where: { driverId: { in: oldIds } } });
@@ -233,7 +236,7 @@ async function main() {
   const first = await prisma.lineDeparture.findFirst({ where: { lineId: beauvaisLine.id, localDate: tomorrow, direction: 'outbound' } });
   if (first) {
     const held = await lines.reserveSeats(first.id, 3);
-    await prisma.trip.create({
+    const leaLineTrip = await prisma.trip.create({
       data: {
         type: 'passenger', status: 'accepted', source: 'line', lineDepartureId: first.id, passengerId: lea.id, driverId: djamel.id, vehicleId: vanDjamel.id,
         acceptedAt: new Date(), shuttleType: 'bleue', jurisdiction: 'FR', durationMin: 75, scheduledAt: first.departureAt,
@@ -244,6 +247,8 @@ async function main() {
         passengerBooking: { create: { seats: 3, childSeats: 1, qrCode: randomUUID(), notes: 'Vol de 8 h 10' } },
       },
     });
+    // Ses sièges numérotés : ils apparaissent « pris » dans le choix du siège.
+    await prisma.lineSeat.createMany({ data: [1, 2, 3].map((seatNumber) => ({ departureId: first.id, seatNumber, tripId: leaLineTrip.id })) });
   }
 
   // Adresses favorites de Léa : proposées en tête de la recherche d'adresse, elles

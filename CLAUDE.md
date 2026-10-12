@@ -305,7 +305,20 @@ référence — les exigences de la Partie 8 priment.
   « Envoyer à … » = `sms:` déjà rédigé, jamais envoyé par l'appli ; `AutoSharePrompt` dans le suivi si option activée,
   ≥ 1 contact et aucun partage actif). Tests : `test/screens/safety_screens_test.dart`, `test/support/safety_fakes.dart`.
   Téléphone de démo : `scratchpad/demo/ph.sh` exige `GUARD=<paquet>` et refuse gestes ET captures si cette appli
-  n'est pas au premier plan (le porteur de projet se sert du téléphone en même temps).
+  n'est pas au premier plan (le porteur de projet se sert du téléphone en même temps). Ne JAMAIS envoyer Retour
+  pour fermer la proposition « Enregistrer le mot de passe » de Google : elle disparaît seule et Retour ferme l'appli.
+- Choix du siège (2026-10-12, lignes vendues à la place seulement, migration `line_seats`) : `LineSeat`
+  (`@@unique([departureId, seatNumber])` = jamais deux fois le même siège). `POST /lines/bookings` accepte
+  `seatNumbers` (autant que de places, ≤ `seatsTotal`, sinon 400 ; siège pris = 409 vérifié AVANT de retenir les
+  places, la contrainte d'unicité tranchant les demandes simultanées) ; sans `seatNumbers`, les premiers sièges
+  libres sont attribués ; départ `per_vehicle` : aucun siège, `seatNumbers` refusé. `GET
+  /lines/bookings/seats/:departureId` = `{ seatsTotal, choosable, taken }` (numéros seulement, aucune identité).
+  Sièges dans la réponse de réservation, `booking.seatNumbers` de `/trips/:id` et la liste d'embarquement ;
+  libérés par `LinesService.releaseSeats(departureId, seats, tripId)` à l'annulation. App passager :
+  `screens/market/seat_picker.dart` (`SeatPicker`, `seatMapProvider`) dans `BookLineSheet` — grille NUMÉROTÉE, pas
+  un plan du véhicule (on ne connaît pas la disposition des navettes) ; choix facultatif mais jamais partiel ;
+  récapitulatif (écran 8) et liste du chauffeur affichent « Sièges 2, 5 » (`l10n.sgNumeros`). Non repris de la
+  maquette : « à côté d'une femme » (on ne stocke pas le genre ; formulation à valider par l'avocat).
 - Migrations : `init_xlcab` appliquée sur la base locale ; toute modification de
   `prisma/schema.prisma` demande désormais `npx prisma migrate dev --name <nom>`. Référentiel :
   `npx prisma db seed` (config FR uniquement).
