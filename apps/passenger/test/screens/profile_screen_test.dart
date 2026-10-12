@@ -160,7 +160,7 @@ void main() {
       expect(find.text('Léana Roux'), findsOneWidget);
     });
 
-    testWidgets('chauffeur : le mode chauffeur renvoie vers l'application XLCAB Driver', (tester) async {
+    testWidgets('chauffeur : le mode chauffeur renvoie vers l’application XLCAB Driver', (tester) async {
       await pump(tester, role: 'driver');
       await tap(tester, find.text('Mode chauffeur'));
       expect(find.text('Application XLCAB Driver'), findsOneWidget);

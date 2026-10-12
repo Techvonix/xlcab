@@ -145,7 +145,7 @@ void main() {
       expect(find.text('ÉCRAN COLIS'), findsOneWidget);
     });
 
-    testWidgets('"Devenir chauffeur XLCAB" renvoie vers l'application XLCAB Driver', (tester) async {
+    testWidgets('"Devenir chauffeur XLCAB" renvoie vers l’application XLCAB Driver', (tester) async {
       await pumpHome(tester, loadTrips: () async => []);
       await scrollTo(tester, find.text('Devenir chauffeur XLCAB'));
       await tester.tap(find.text('Devenir chauffeur XLCAB'));

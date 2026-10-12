@@ -250,11 +250,31 @@ référence — les exigences de la Partie 8 priment.
   `lib/fonts/` déclarées par l'appli sous `packages/xlcab_ui/fonts/…`). core ne dépend JAMAIS de ui :
   `ShuttleType.color` est une extension de `xlcab_ui/theme/shuttle_colors.dart` (réexportée par `app_colors.dart`).
   `guardOperatorCall` vit dans `api_service.dart`. Imports entre paquets en `package:xlcab_core/…` /
-  `package:xlcab_ui/…`. `xlcab_app` (écrans et services passager + chauffeur) reste l'appli unique jusqu'aux
-  étapes 2 (apps/passenger) et 3 (apps/driver). Dépendances croisées à dénouer alors : pickers d'adresse / date
-  (`booking_provider`, `operator_provider`), `parcel_service`, `document_picker`, `offer_messages_sheet`,
-  constantes de routes de `router.dart`. Outils de déplacement : scripts Node de `tools/monorepo/` (`graph.js` vérifie un découpage, `move.js` déplace et réécrit les imports).
-  Dans les chemins ci-dessous, `lib/…` de l'ancienne appli peut donc désigner `packages/core/lib/…` ou `packages/ui/lib/…`.
+  `package:xlcab_ui/…`. Outils de déplacement : scripts Node de `tools/monorepo/` (`graph.js` vérifie un
+  découpage, `move.js` déplace et réécrit les imports, `add-l10n.js <spec.json>` ajoute des clés aux deux ARB).
+  Étape 2 faite (2026-10-11) : `apps/passenger` (`xlcab_passenger`, Android `com.xlcab.passenger`, iOS idem) =
+  tous les écrans passager (home, onboarding, booking, market, tracking, profile, corporate, accessibility),
+  services booking / payment / tracking_channel, providers booking / home / tracking. Barre à 5 onglets
+  (`screens/shell/passenger_shell.dart`, `StatefulShellRoute.indexedStack` dans `router.dart`) : Accueil `/home`,
+  Trajets `PassengerTabs.trips` (= `TripHistoryScreen`), Colis `PassengerTabs.parcels` (`screens/parcels/`,
+  colis parmi les 50 dernières réservations), Impact `PassengerTabs.impact` (écran d'attente : AUCUN chiffre CO₂
+  tant que XLCAB n'a pas fourni sa méthode), Compte `/profile`. Aller à un onglet = `context.go`, jamais `push`.
+  Tout rôle peut se connecter à l'appli passager ; « Mode chauffeur » / « Devenir chauffeur » y ouvrent
+  `showDriverAppInfo` (renvoi vers XLCAB Driver). Manifest passager : ni FOREGROUND_SERVICE ni CAMERA (la photo
+  d'un colis passe par `image_picker`, sans permission) ; iOS sans `UIBackgroundModes`.
+  Partagé, donc dans core : `routes.dart` (`AppRoutes`, `PassengerTabs` ; chaque appli n'enregistre que ses
+  routes), `providers/clock_provider.dart`, `providers/market_provider.dart` (bourse des deux côtés +
+  `timePickerProvider` / `datePickerProvider`), services parcel / document_picker / feedback. Dans ui :
+  `xlcab_app.dart` (`XlcabApp(router:, title:)`, widget racine commun), `screens/address_search_screen.dart`
+  (+ `addressPickerProvider`), `widgets/offer_messages_sheet.dart`, `widgets/legal_links.dart`.
+  `xlcab_app/` ne contient plus que le côté chauffeur (screens driver + operator, services driver_* / operator,
+  providers driver_* / operator ; un compte non chauffeur y atterrit sur la candidature) : il deviendra
+  `apps/driver` (4 onglets, écran « dossier en attente », `com.xlcab.driver`) à l'étape 3. Tests : ceux de core
+  dans `packages/core/test`, doubles `test/support/fakes.dart` scindés par appli (copies distinctes).
+  Compilation : `flutter build apk --debug --dart-define=API_BASE_URL=http://localhost:3000` DANS le dossier de
+  l'appli ; première compilation d'une nouvelle appli ≈ 10 min, lancer en arrière-plan et attendre l'APK.
+  Dans les chemins ci-dessous, `lib/…` de l'ancienne appli désigne donc `packages/core/lib/…`,
+  `packages/ui/lib/…`, `apps/passenger/lib/…` ou `xlcab_app/lib/…` (chauffeur).
 - Migrations : `init_xlcab` appliquée sur la base locale ; toute modification de
   `prisma/schema.prisma` demande désormais `npx prisma migrate dev --name <nom>`. Référentiel :
   `npx prisma db seed` (config FR uniquement).
