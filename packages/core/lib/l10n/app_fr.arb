@@ -1930,5 +1930,61 @@
   "drvMesDocuments": "Mes documents chauffeur",
   "drvOutils": "Lignes et bourse",
   "drvAucuneCourseRecente": "Aucune course récente.",
-  "drvCompteNonValide": "Disponible dès que votre compte chauffeur est validé par XLCAB."
+  "drvCompteNonValide": "Disponible dès que votre compte chauffeur est validé par XLCAB.",
+  "secContacts": "Contacts de confiance",
+  "secContactsIntro": "Ces proches peuvent suivre vos trajets : vous leur envoyez un lien, ils n’ont pas besoin de l’application.",
+  "secAucunContact": "Aucun contact pour l’instant.",
+  "secAjouterContact": "Ajouter un contact",
+  "secNom": "Nom",
+  "secTelephone": "Téléphone",
+  "secNomRequis": "Indiquez un nom",
+  "secTelephoneInvalide": "Numéro invalide",
+  "secSupprimerContact": "Supprimer {name} ?",
+  "@secSupprimerContact": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "secSupprimerContactAction": "Supprimer {name}",
+  "@secSupprimerContactAction": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "secContactsMax": "5 contacts au maximum. Supprimez-en un pour en ajouter un autre.",
+  "secContactsIndisponibles": "Contacts indisponibles",
+  "secChargementContacts": "Chargement des contacts",
+  "secPartageAuto": "Proposer le partage à chaque trajet",
+  "secPartageAutoAide": "À l’ouverture du suivi, XLCAB vous propose d’envoyer le lien à vos contacts.",
+  "secPartagerTrajet": "Partager mon trajet",
+  "secPartageExplication": "Votre proche voit le chauffeur, le véhicule et la position de la navette, sans installer l’application. Votre adresse exacte n’est pas affichée.",
+  "secEnvoyerA": "Envoyer à {name}",
+  "@secEnvoyerA": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "secCopierLien": "Copier le lien",
+  "secLienCopie": "Lien de suivi copié.",
+  "secArreterPartage": "Arrêter le partage",
+  "secPartageArrete": "Partage arrêté : le lien ne fonctionne plus.",
+  "secMessageSuivi": "Je voyage avec XLCAB. Suis mon trajet en direct : {url}",
+  "@secMessageSuivi": {
+    "placeholders": {
+      "url": {
+        "type": "String"
+      }
+    }
+  },
+  "secGererContacts": "Gérer mes contacts de confiance",
+  "secSmsImpossible": "Impossible d’ouvrir la messagerie. Le lien a été copié.",
+  "secPartageIndisponible": "Partage indisponible pour le moment.",
+  "secAucunContactFeuille": "Ajoutez des contacts de confiance pour leur envoyer le lien en un geste.",
+  "secPreparation": "Préparation du lien de suivi"
 }

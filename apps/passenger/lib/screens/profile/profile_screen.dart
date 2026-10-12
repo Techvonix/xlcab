@@ -80,6 +80,7 @@ class ProfileScreen extends ConsumerWidget {
           tile(Icons.history, l10n.historiqueDesTrajets, () => context.go(PassengerTabs.trips)),
           tile(Icons.credit_card, l10n.moyensDePaiement, () => context.push(AppRoutes.paymentMethods)),
           tile(Icons.star_outline_rounded, l10n.adressesFavorites, () => context.push(AppRoutes.savedAddresses)),
+          tile(Icons.shield_outlined, l10n.secContacts, () => context.push(AppRoutes.trustedContacts)),
           section(l10n.preferences),
           tile(Icons.notifications_none, l10n.notifications, () => context.push(AppRoutes.notificationPreferences)),
           const ThemeSelector(),

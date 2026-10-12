@@ -3365,4 +3365,101 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get drvCompteNonValide =>
       'Available once XLCAB has approved your driver account.';
+
+  @override
+  String get secContacts => 'Trusted contacts';
+
+  @override
+  String get secContactsIntro =>
+      'These people can follow your trips: you send them a link, they do not need the app.';
+
+  @override
+  String get secAucunContact => 'No contact yet.';
+
+  @override
+  String get secAjouterContact => 'Add a contact';
+
+  @override
+  String get secNom => 'Name';
+
+  @override
+  String get secTelephone => 'Phone';
+
+  @override
+  String get secNomRequis => 'Enter a name';
+
+  @override
+  String get secTelephoneInvalide => 'Invalid number';
+
+  @override
+  String secSupprimerContact(String name) {
+    return 'Remove $name?';
+  }
+
+  @override
+  String secSupprimerContactAction(String name) {
+    return 'Remove $name';
+  }
+
+  @override
+  String get secContactsMax => '5 contacts maximum. Remove one to add another.';
+
+  @override
+  String get secContactsIndisponibles => 'Contacts unavailable';
+
+  @override
+  String get secChargementContacts => 'Loading contacts';
+
+  @override
+  String get secPartageAuto => 'Offer sharing on every trip';
+
+  @override
+  String get secPartageAutoAide =>
+      'When tracking opens, XLCAB offers to send the link to your contacts.';
+
+  @override
+  String get secPartagerTrajet => 'Share my trip';
+
+  @override
+  String get secPartageExplication =>
+      'Your contact sees the driver, the vehicle and the shuttle’s position without installing the app. Your exact address is not shown.';
+
+  @override
+  String secEnvoyerA(String name) {
+    return 'Send to $name';
+  }
+
+  @override
+  String get secCopierLien => 'Copy the link';
+
+  @override
+  String get secLienCopie => 'Tracking link copied.';
+
+  @override
+  String get secArreterPartage => 'Stop sharing';
+
+  @override
+  String get secPartageArrete => 'Sharing stopped: the link no longer works.';
+
+  @override
+  String secMessageSuivi(String url) {
+    return 'I am travelling with XLCAB. Follow my trip live: $url';
+  }
+
+  @override
+  String get secGererContacts => 'Manage my trusted contacts';
+
+  @override
+  String get secSmsImpossible =>
+      'Unable to open the messaging app. The link was copied.';
+
+  @override
+  String get secPartageIndisponible => 'Sharing is unavailable for now.';
+
+  @override
+  String get secAucunContactFeuille =>
+      'Add trusted contacts to send them the link in one tap.';
+
+  @override
+  String get secPreparation => 'Preparing the tracking link';
 }

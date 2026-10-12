@@ -3387,4 +3387,102 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get drvCompteNonValide =>
       'Disponible dès que votre compte chauffeur est validé par XLCAB.';
+
+  @override
+  String get secContacts => 'Contacts de confiance';
+
+  @override
+  String get secContactsIntro =>
+      'Ces proches peuvent suivre vos trajets : vous leur envoyez un lien, ils n’ont pas besoin de l’application.';
+
+  @override
+  String get secAucunContact => 'Aucun contact pour l’instant.';
+
+  @override
+  String get secAjouterContact => 'Ajouter un contact';
+
+  @override
+  String get secNom => 'Nom';
+
+  @override
+  String get secTelephone => 'Téléphone';
+
+  @override
+  String get secNomRequis => 'Indiquez un nom';
+
+  @override
+  String get secTelephoneInvalide => 'Numéro invalide';
+
+  @override
+  String secSupprimerContact(String name) {
+    return 'Supprimer $name ?';
+  }
+
+  @override
+  String secSupprimerContactAction(String name) {
+    return 'Supprimer $name';
+  }
+
+  @override
+  String get secContactsMax =>
+      '5 contacts au maximum. Supprimez-en un pour en ajouter un autre.';
+
+  @override
+  String get secContactsIndisponibles => 'Contacts indisponibles';
+
+  @override
+  String get secChargementContacts => 'Chargement des contacts';
+
+  @override
+  String get secPartageAuto => 'Proposer le partage à chaque trajet';
+
+  @override
+  String get secPartageAutoAide =>
+      'À l’ouverture du suivi, XLCAB vous propose d’envoyer le lien à vos contacts.';
+
+  @override
+  String get secPartagerTrajet => 'Partager mon trajet';
+
+  @override
+  String get secPartageExplication =>
+      'Votre proche voit le chauffeur, le véhicule et la position de la navette, sans installer l’application. Votre adresse exacte n’est pas affichée.';
+
+  @override
+  String secEnvoyerA(String name) {
+    return 'Envoyer à $name';
+  }
+
+  @override
+  String get secCopierLien => 'Copier le lien';
+
+  @override
+  String get secLienCopie => 'Lien de suivi copié.';
+
+  @override
+  String get secArreterPartage => 'Arrêter le partage';
+
+  @override
+  String get secPartageArrete => 'Partage arrêté : le lien ne fonctionne plus.';
+
+  @override
+  String secMessageSuivi(String url) {
+    return 'Je voyage avec XLCAB. Suis mon trajet en direct : $url';
+  }
+
+  @override
+  String get secGererContacts => 'Gérer mes contacts de confiance';
+
+  @override
+  String get secSmsImpossible =>
+      'Impossible d’ouvrir la messagerie. Le lien a été copié.';
+
+  @override
+  String get secPartageIndisponible => 'Partage indisponible pour le moment.';
+
+  @override
+  String get secAucunContactFeuille =>
+      'Ajoutez des contacts de confiance pour leur envoyer le lien en un geste.';
+
+  @override
+  String get secPreparation => 'Préparation du lien de suivi';
 }

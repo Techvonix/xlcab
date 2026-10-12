@@ -29,6 +29,7 @@ import 'screens/profile/payment_methods_screen.dart';
 import 'screens/profile/profile_screen.dart';
 import 'screens/profile/saved_addresses_screen.dart';
 import 'screens/profile/trip_history_screen.dart';
+import 'screens/profile/trusted_contacts_screen.dart';
 import 'screens/shell/passenger_shell.dart';
 import 'screens/tracking/tracking_screen.dart';
 
@@ -133,6 +134,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(path: AppRoutes.tripHistory, builder: (context, state) => const TripHistoryScreen()),
       GoRoute(path: AppRoutes.paymentMethods, builder: (context, state) => const PaymentMethodsScreen()),
       GoRoute(path: AppRoutes.savedAddresses, builder: (context, state) => const SavedAddressesScreen()),
+      GoRoute(path: AppRoutes.trustedContacts, builder: (context, state) => const TrustedContactsScreen()),
       GoRoute(path: AppRoutes.notificationPreferences, builder: (context, state) => const NotificationPreferencesScreen()),
       GoRoute(path: AppRoutes.corporatePortal, builder: (context, state) => const CorporatePortalScreen()),
 

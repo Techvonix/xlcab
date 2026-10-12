@@ -23,6 +23,7 @@ class AppRoutes {
   static const tripHistory = '/profile/trips';
   static const paymentMethods = '/profile/payment-methods';
   static const savedAddresses = '/profile/addresses';
+  static const trustedContacts = '/profile/contacts';
   static const notificationPreferences = '/profile/notifications';
   static const corporatePortal = '/corporate';
   static const driverMode = '/driver-mode';

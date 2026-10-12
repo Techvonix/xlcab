@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -14,6 +13,7 @@ import 'package:xlcab_core/utils/geo.dart';
 import 'package:xlcab_ui/widgets/driver_avatar.dart';
 import 'package:xlcab_ui/widgets/eta_progress.dart';
 import 'widgets/chat_sheet.dart';
+import 'widgets/share_sheet.dart';
 import 'widgets/sos_button.dart';
 import 'widgets/tracking_map.dart';
 import 'package:xlcab_core/l10n/l10n.dart';
@@ -59,6 +59,7 @@ class TrackingScreen extends ConsumerWidget {
       body: Stack(
         children: [
           Positioned.fill(child: mapBuilder(snapshot.origin, snapshot.destination, state.position)),
+          if (snapshot.status == TripStatus.accepted || snapshot.status == TripStatus.started) AutoSharePrompt(tripId: tripId),
           // Barre du haut : retour, bandeau de connexion, SOS.
           SafeArea(
             child: Padding(
@@ -339,29 +340,13 @@ class _ActionsRow extends StatelessWidget {
           child: _ActionButton(
             icon: Icons.ios_share,
             label: l10n.partager,
-            onPressed: () => _share(context),
+            onPressed: () => showShareSheet(context, snapshot.tripId),
           ),
         ),
       ],
     );
   }
 
-  /// Copie un résumé du trajet à envoyer à un proche. Le lien de suivi
-  /// en direct (obligatoire pour la navette Rose, Partie 8) demandera un
-  /// lien signé côté serveur, pas encore disponible.
-  Future<void> _share(BuildContext context) async {
-    final messenger = ScaffoldMessenger.of(context);
-    final vehicle = driver.vehicle;
-    final text = [
-      l10n.jeSuisEnTrajetXlcab(snapshot.destination.address),
-      '${l10n.chauffeur3(driver.displayName)}${vehicle != null ? ' — ${vehicle.description.isNotEmpty ? '${vehicle.description}, ' : ''}${l10n.plaqueDansPhrase(vehicle.plate)}' : ''}.',
-      if (eta != null) l10n.arriveeEstimeeDansMin(eta!.minutes),
-    ].join('\n');
-    await Clipboard.setData(ClipboardData(text: text));
-    messenger.showSnackBar(
-      SnackBar(content: Text(l10n.infosDuTrajetCopieesCollez)),
-    );
-  }
 }
 
 // ── Petits éléments ───────────────────────────────────────────────────────

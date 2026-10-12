@@ -171,11 +171,14 @@ class SavedAddress {
 
 /// GET/PATCH /users/me/preferences.
 class NotificationPreferences {
-  const NotificationPreferences({this.push = true, this.email = true, this.sms = false, this.marketing = false});
+  const NotificationPreferences({this.push = true, this.email = true, this.sms = false, this.marketing = false, this.autoShareTrips = false});
 
   final bool push;
   final bool email;
   final bool sms;
+
+  /// Espace sécurité : proposer le partage du trajet aux contacts de confiance à chaque course.
+  final bool autoShareTrips;
 
   /// Offres et nouveautés : consentement explicite, jamais coché par défaut.
   final bool marketing;
@@ -185,5 +188,6 @@ class NotificationPreferences {
         email: json['notifyEmail'] != false,
         sms: json['notifySms'] == true,
         marketing: json['marketing'] == true,
+        autoShareTrips: json['autoShareTrips'] == true,
       );
 }

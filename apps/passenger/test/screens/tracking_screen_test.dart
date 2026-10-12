@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -9,12 +8,15 @@ import 'package:xlcab_core/models/trip.dart';
 import 'package:xlcab_passenger/screens/tracking/tracking_screen.dart';
 import 'package:xlcab_passenger/screens/tracking/widgets/tracking_map.dart';
 import 'package:xlcab_core/services/api_service.dart';
+import 'package:xlcab_core/services/feedback_service.dart';
 import 'package:xlcab_core/services/location_service.dart';
+import 'package:xlcab_passenger/services/safety_service.dart';
 import 'package:xlcab_passenger/services/tracking_channel.dart';
 import 'package:xlcab_core/services/trip_service.dart';
 import 'package:xlcab_ui/theme/app_theme.dart';
 
 import '../support/fakes.dart';
+import '../support/safety_fakes.dart';
 
 // Tests de l'écran 9 (Suivi temps réel). Serveur, WebSocket, carte et
 // localisation sont remplacés par des doubles de test.
@@ -22,7 +24,9 @@ import '../support/fakes.dart';
 late FakeTripService trips;
 late FakeTrackingChannel channel;
 late FakeLocationService location;
-String? clipboard;
+late FakeSafetyService safety;
+late FakePreferencesService prefs;
+final List<(String, String)> sms = [];
 
 Future<void> pumpTracking(WidgetTester tester) async {
   // Téléphone de 360 × 2000 points : le panneau affiche tout son contenu.
@@ -30,19 +34,19 @@ Future<void> pumpTracking(WidgetTester tester) async {
   tester.view.devicePixelRatio = 3.0;
   addTearDown(tester.view.reset);
 
-  // Presse-papiers simulé (bouton "Partager").
-  tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (call) async {
-    if (call.method == 'Clipboard.setData') clipboard = (call.arguments as Map)['text'] as String?;
-    return null;
-  });
-  addTearDown(() => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, null));
-
   await tester.pumpWidget(
     ProviderScope(
       overrides: [
         tripServiceProvider.overrideWithValue(trips),
         trackingChannelFactoryProvider.overrideWithValue(() => channel),
         locationServiceProvider.overrideWithValue(location),
+        // Espace sécurité : partage du trajet (serveur et messagerie SMS simulés).
+        safetyServiceProvider.overrideWithValue(safety),
+        feedbackServiceProvider.overrideWithValue(prefs),
+        smsComposerProvider.overrideWithValue((phone, body) async {
+          sms.add((phone, body));
+          return true;
+        }),
         trackingMapBuilderProvider.overrideWithValue(
           (_, __, ___) => const ColoredBox(key: Key('fake-map'), color: Colors.grey),
         ),
@@ -76,7 +80,9 @@ void main() {
     trips = FakeTripService();
     channel = FakeTrackingChannel();
     location = FakeLocationService();
-    clipboard = null;
+    safety = FakeSafetyService();
+    prefs = FakePreferencesService();
+    sms.clear();
   });
 
   group('contenu (Partie 7, écran 9)', () {
@@ -175,14 +181,39 @@ void main() {
       expect(find.text('Je suis devant'), findsOneWidget);
     });
 
-    testWidgets('"Partager" copie un résumé du trajet', (tester) async {
+    testWidgets('"Partager" ouvre la feuille de partage et prépare le SMS d’un contact', (tester) async {
+      safety.saved.add(const TrustedContact(id: 'c1', name: 'Maman', phone: '0612345678'));
       await pumpTracking(tester);
+      expect(find.text('Partager mon trajet'), findsNothing); // option désactivée : rien ne s'ouvre seul
+
       await tester.tap(find.widgetWithText(OutlinedButton, 'Partager'));
       await tester.pumpAndSettle();
+      expect(find.text('Partager mon trajet'), findsOneWidget);
+      await tester.tap(find.text('Envoyer à Maman'));
+      await tester.pumpAndSettle();
+      expect(sms.single.$1, '0612345678');
+      expect(sms.single.$2, contains(sharedTripUrl));
+    });
 
-      expect(clipboard, contains(rouen.address));
-      expect(clipboard, contains('AB-123-CD'));
-      expect(find.textContaining('Infos du trajet copiées'), findsOneWidget);
+    testWidgets('partage à chaque trajet activé : la feuille se propose seule, une fois', (tester) async {
+      prefs.autoShare = true;
+      safety.saved.add(const TrustedContact(id: 'c1', name: 'Maman', phone: '0612345678'));
+      await pumpTracking(tester);
+      expect(find.text('Partager mon trajet'), findsOneWidget);
+      expect(safety.shareCalls, 1);
+    });
+
+    testWidgets('partage déjà actif, ou aucun contact : rien ne s’ouvre seul', (tester) async {
+      prefs.autoShare = true;
+      await pumpTracking(tester); // aucun contact
+      expect(find.text('Partager mon trajet'), findsNothing);
+
+      await tester.pumpWidget(const SizedBox());
+      safety.saved.add(const TrustedContact(id: 'c1', name: 'Maman', phone: '0612345678'));
+      safety.sharing = true;
+      await pumpTracking(tester);
+      expect(find.text('Partager mon trajet'), findsNothing);
+      expect(safety.shareCalls, 0);
     });
   });
 

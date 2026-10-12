@@ -60,7 +60,12 @@
             <action android:name="android.intent.action.DIAL"/>
             <data android:scheme="tel"/>
         </intent>
-        <!-- Liens légaux et partage du suivi ouverts dans le navigateur. -->
+        <!-- Partage du trajet : SMS déjà rédigé dans la messagerie du téléphone. -->
+        <intent>
+            <action android:name="android.intent.action.SENDTO"/>
+            <data android:scheme="sms"/>
+        </intent>
+        <!-- Liens légaux ouverts dans le navigateur. -->
         <intent>
             <action android:name="android.intent.action.VIEW"/>
             <data android:scheme="https"/>

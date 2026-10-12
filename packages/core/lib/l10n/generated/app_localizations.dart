@@ -5864,6 +5864,174 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Disponible dès que votre compte chauffeur est validé par XLCAB.'**
   String get drvCompteNonValide;
+
+  /// No description provided for @secContacts.
+  ///
+  /// In fr, this message translates to:
+  /// **'Contacts de confiance'**
+  String get secContacts;
+
+  /// No description provided for @secContactsIntro.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ces proches peuvent suivre vos trajets : vous leur envoyez un lien, ils n’ont pas besoin de l’application.'**
+  String get secContactsIntro;
+
+  /// No description provided for @secAucunContact.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun contact pour l’instant.'**
+  String get secAucunContact;
+
+  /// No description provided for @secAjouterContact.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajouter un contact'**
+  String get secAjouterContact;
+
+  /// No description provided for @secNom.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nom'**
+  String get secNom;
+
+  /// No description provided for @secTelephone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Téléphone'**
+  String get secTelephone;
+
+  /// No description provided for @secNomRequis.
+  ///
+  /// In fr, this message translates to:
+  /// **'Indiquez un nom'**
+  String get secNomRequis;
+
+  /// No description provided for @secTelephoneInvalide.
+  ///
+  /// In fr, this message translates to:
+  /// **'Numéro invalide'**
+  String get secTelephoneInvalide;
+
+  /// No description provided for @secSupprimerContact.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer {name} ?'**
+  String secSupprimerContact(String name);
+
+  /// No description provided for @secSupprimerContactAction.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer {name}'**
+  String secSupprimerContactAction(String name);
+
+  /// No description provided for @secContactsMax.
+  ///
+  /// In fr, this message translates to:
+  /// **'5 contacts au maximum. Supprimez-en un pour en ajouter un autre.'**
+  String get secContactsMax;
+
+  /// No description provided for @secContactsIndisponibles.
+  ///
+  /// In fr, this message translates to:
+  /// **'Contacts indisponibles'**
+  String get secContactsIndisponibles;
+
+  /// No description provided for @secChargementContacts.
+  ///
+  /// In fr, this message translates to:
+  /// **'Chargement des contacts'**
+  String get secChargementContacts;
+
+  /// No description provided for @secPartageAuto.
+  ///
+  /// In fr, this message translates to:
+  /// **'Proposer le partage à chaque trajet'**
+  String get secPartageAuto;
+
+  /// No description provided for @secPartageAutoAide.
+  ///
+  /// In fr, this message translates to:
+  /// **'À l’ouverture du suivi, XLCAB vous propose d’envoyer le lien à vos contacts.'**
+  String get secPartageAutoAide;
+
+  /// No description provided for @secPartagerTrajet.
+  ///
+  /// In fr, this message translates to:
+  /// **'Partager mon trajet'**
+  String get secPartagerTrajet;
+
+  /// No description provided for @secPartageExplication.
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre proche voit le chauffeur, le véhicule et la position de la navette, sans installer l’application. Votre adresse exacte n’est pas affichée.'**
+  String get secPartageExplication;
+
+  /// No description provided for @secEnvoyerA.
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoyer à {name}'**
+  String secEnvoyerA(String name);
+
+  /// No description provided for @secCopierLien.
+  ///
+  /// In fr, this message translates to:
+  /// **'Copier le lien'**
+  String get secCopierLien;
+
+  /// No description provided for @secLienCopie.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lien de suivi copié.'**
+  String get secLienCopie;
+
+  /// No description provided for @secArreterPartage.
+  ///
+  /// In fr, this message translates to:
+  /// **'Arrêter le partage'**
+  String get secArreterPartage;
+
+  /// No description provided for @secPartageArrete.
+  ///
+  /// In fr, this message translates to:
+  /// **'Partage arrêté : le lien ne fonctionne plus.'**
+  String get secPartageArrete;
+
+  /// No description provided for @secMessageSuivi.
+  ///
+  /// In fr, this message translates to:
+  /// **'Je voyage avec XLCAB. Suis mon trajet en direct : {url}'**
+  String secMessageSuivi(String url);
+
+  /// No description provided for @secGererContacts.
+  ///
+  /// In fr, this message translates to:
+  /// **'Gérer mes contacts de confiance'**
+  String get secGererContacts;
+
+  /// No description provided for @secSmsImpossible.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible d’ouvrir la messagerie. Le lien a été copié.'**
+  String get secSmsImpossible;
+
+  /// No description provided for @secPartageIndisponible.
+  ///
+  /// In fr, this message translates to:
+  /// **'Partage indisponible pour le moment.'**
+  String get secPartageIndisponible;
+
+  /// No description provided for @secAucunContactFeuille.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajoutez des contacts de confiance pour leur envoyer le lien en un geste.'**
+  String get secAucunContactFeuille;
+
+  /// No description provided for @secPreparation.
+  ///
+  /// In fr, this message translates to:
+  /// **'Préparation du lien de suivi'**
+  String get secPreparation;
 }
 
 class _AppLocalizationsDelegate
