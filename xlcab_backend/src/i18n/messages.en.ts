@@ -60,6 +60,10 @@ export const MESSAGES_EN: Record<string, string> = {
   'Ce trajet est terminé : il ne peut plus être partagé': 'This trip has ended: it can no longer be shared',
   'Lien de suivi indisponible': 'Tracking link unavailable',
 
+  // ── Étiquettes rapides d'une note ────────────────────────────────────
+  'Étiquettes invalides': 'Invalid tags',
+  'Étiquette inconnue': 'Unknown tag',
+
   // ── Choix du siège (lignes vendues à la place) ───────────────────────
   'Sièges invalides': 'Invalid seats',
   'Un même siège ne peut pas être choisi deux fois': 'The same seat cannot be chosen twice',

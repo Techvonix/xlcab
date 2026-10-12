@@ -6,6 +6,7 @@ import 'package:xlcab_core/models/quote.dart';
 import 'package:xlcab_core/models/shuttle.dart';
 import '../../providers/booking_provider.dart';
 import 'package:xlcab_core/routes.dart';
+import '../../models/return_trip.dart';
 import 'package:xlcab_ui/theme/shuttle_colors.dart';
 import 'package:xlcab_ui/theme/app_spacing.dart';
 import 'package:xlcab_ui/theme/app_typography.dart';
@@ -23,7 +24,10 @@ import 'package:xlcab_core/l10n/l10n.dart';
 /// payer. La distance minimale de 60 km est vérifiée par le serveur sur
 /// la distance routière (voir PassengerQuoteRequest).
 class PassengerBookingScreen extends ConsumerStatefulWidget {
-  const PassengerBookingScreen({super.key, this.initialShuttleType});
+  const PassengerBookingScreen({super.key, this.initialShuttleType, this.initialReturn});
+
+  /// « Réserver le retour » : adresses (déjà inversées) et passagers préremplis.
+  final ReturnTripRequest? initialReturn;
 
   /// Navette présélectionnée (depuis l'accueil ou la sélection de navette).
   final ShuttleType? initialShuttleType;
@@ -37,11 +41,19 @@ class _PassengerBookingScreenState extends ConsumerState<PassengerBookingScreen>
   void initState() {
     super.initState();
     final initial = widget.initialShuttleType;
-    if (initial != null) {
+    final back = widget.initialReturn;
+    if (initial != null || back != null) {
       // Un provider ne peut pas être modifié pendant la construction de
       // l'arbre : on applique la présélection juste après la 1re image.
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) ref.read(bookingFormProvider.notifier).setShuttleType(initial);
+        if (!mounted) return;
+        final form = ref.read(bookingFormProvider.notifier);
+        if (initial != null) form.setShuttleType(initial);
+        if (back != null) {
+          form.setOrigin(back.origin);
+          form.setDestination(back.destination);
+          form.setSeats(back.seats);
+        }
       });
     }
   }

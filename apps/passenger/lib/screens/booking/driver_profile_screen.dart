@@ -183,6 +183,16 @@ class _VehicleCard extends StatelessWidget {
 }
 
 /// Note de 1 à 5 étoiles + commentaire facultatif (lu par l'équipe seulement).
+/// Étiquettes rapides d'une note : code du serveur et libellé affiché
+/// (accesseur : les libellés suivent la langue courante).
+List<(String, String)> ratingTags() => [
+      ('conduite_sure', l10n.etqConduiteSure),
+      ('ponctuel', l10n.etqPonctuel),
+      ('vehicule_propre', l10n.etqVehiculePropre),
+      ('accueil', l10n.etqAccueil),
+      ('colis_soigne', l10n.etqColisSoigne),
+    ];
+
 class _RatingForm extends ConsumerStatefulWidget {
   const _RatingForm({required this.tripId, required this.firstName});
 
@@ -196,6 +206,9 @@ class _RatingForm extends ConsumerStatefulWidget {
 class _RatingFormState extends ConsumerState<_RatingForm> {
   final _comment = TextEditingController();
   int _stars = 0;
+
+  /// Étiquettes rapides choisies (codes du serveur).
+  final Set<String> _tags = {};
   bool _busy = false;
   String? _error;
 
@@ -211,7 +224,13 @@ class _RatingFormState extends ConsumerState<_RatingForm> {
       _error = null;
     });
     try {
-      await ref.read(feedbackServiceProvider).rate(widget.tripId, _stars, comment: _comment.text);
+      await ref.read(feedbackServiceProvider).rate(
+            widget.tripId,
+            _stars,
+            comment: _comment.text,
+            // Les étiquettes disent ce qui a plu : sans objet pour une note basse.
+            tags: _stars >= 4 ? _tags.toList() : const [],
+          );
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.merciPourVotreNote)));
       ref.invalidate(driverPublicProfileProvider(widget.tripId));
@@ -255,6 +274,23 @@ class _RatingFormState extends ConsumerState<_RatingForm> {
                 textAlign: TextAlign.center,
                 style: AppTypography.bodyBold.copyWith(color: onSurface),
               ),
+              if (_stars >= 4) ...[
+                const SizedBox(height: AppSpacing.sm),
+                Text(l10n.etqTitre, style: AppTypography.body.copyWith(color: onSurface)),
+                const SizedBox(height: AppSpacing.xs),
+                Wrap(
+                  spacing: AppSpacing.sm,
+                  runSpacing: AppSpacing.xs,
+                  children: [
+                    for (final (code, label) in ratingTags())
+                      FilterChip(
+                        label: Text(label),
+                        selected: _tags.contains(code),
+                        onSelected: _busy ? null : (on) => setState(() => on ? _tags.add(code) : _tags.remove(code)),
+                      ),
+                  ],
+                ),
+              ],
               const SizedBox(height: AppSpacing.sm),
               TextField(
                 controller: _comment,

@@ -17,21 +17,25 @@ import 'package:xlcab_ui/screens/address_search_screen.dart' show addressPickerP
 import 'package:xlcab_ui/widgets/async_widgets.dart';
 import 'package:xlcab_core/l10n/l10n.dart';
 
+import '../../models/return_trip.dart';
 import 'seat_picker.dart';
 
 /// Recherche d'un départ de ligne régulière et réservation de places.
 class LineSearchScreen extends ConsumerStatefulWidget {
-  const LineSearchScreen({super.key});
+  const LineSearchScreen({super.key, this.initial});
+
+  /// « Réserver le retour » : adresses (déjà inversées) et places préremplies.
+  final ReturnTripRequest? initial;
 
   @override
   ConsumerState<LineSearchScreen> createState() => _LineSearchScreenState();
 }
 
 class _LineSearchScreenState extends ConsumerState<LineSearchScreen> {
-  Place? _from;
-  Place? _to;
+  late Place? _from = widget.initial?.origin;
+  late Place? _to = widget.initial?.destination;
   DateTime? _date;
-  int _seats = 1;
+  late int _seats = (widget.initial?.seats ?? 1).clamp(1, 20);
   bool _loading = false;
   String? _error;
   List<LineSearchResult>? _results;

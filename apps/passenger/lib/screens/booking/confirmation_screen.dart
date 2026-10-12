@@ -7,6 +7,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:xlcab_core/models/trip.dart';
 import 'package:xlcab_core/models/trip_detail.dart';
 import 'package:xlcab_core/routes.dart';
+import '../../models/return_trip.dart';
 import 'package:xlcab_core/services/api_service.dart';
 import 'package:xlcab_core/services/trip_service.dart';
 import 'package:xlcab_ui/theme/app_colors.dart';
@@ -146,6 +147,23 @@ class _Body extends ConsumerWidget {
                     label: Text(l10n.profilDuChauffeur),
                     onPressed: () => context.push(AppRoutes.driverProfileFor(trip.id)),
                   ),
+          ),
+        // Trajet retour : mêmes adresses inversées, sur l'écran qui correspond
+        // (lignes régulières pour une place de ligne, réservation classique sinon).
+        if (returnTripOf(trip) case final back?)
+          Padding(
+            padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+            child: OutlinedButton.icon(
+              style: OutlinedButton.styleFrom(minimumSize: const Size.fromHeight(AppSpacing.buttonHeight)),
+              icon: const Icon(Icons.u_turn_left),
+              label: Text(l10n.retReserverLeRetour),
+              onPressed: () => trip.isLine
+                  ? context.push(AppRoutes.lineSearch, extra: back)
+                  : context.push(
+                      trip.shuttleType == null ? AppRoutes.passengerBooking : '${AppRoutes.passengerBooking}?type=${trip.shuttleType!.apiValue}',
+                      extra: back,
+                    ),
+            ),
           ),
         if (trip.isCancellable)
           Padding(

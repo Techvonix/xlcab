@@ -97,6 +97,8 @@ export class TripsService {
     return {
       id: trip.id,
       type: trip.type,
+      // instant | line | market : « Réserver le retour » ouvre l'écran correspondant.
+      source: trip.source,
       status: trip.status,
       shuttleType: trip.shuttleType,
       origin: { address: trip.originAddress, lat: trip.originLat, lng: trip.originLng },

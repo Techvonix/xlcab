@@ -2040,5 +2040,12 @@
     }
   },
   "sgPlanIndisponible": "Plan des sièges indisponible : ils seront attribués automatiquement.",
-  "sgDisposition": "Sièges présentés par numéro : la disposition dépend du véhicule."
+  "sgDisposition": "Sièges présentés par numéro : la disposition dépend du véhicule.",
+  "retReserverLeRetour": "Réserver le retour",
+  "etqTitre": "Qu’avez-vous apprécié ? (facultatif)",
+  "etqConduiteSure": "Conduite sûre",
+  "etqPonctuel": "Ponctualité",
+  "etqVehiculePropre": "Véhicule propre",
+  "etqAccueil": "Accueil agréable",
+  "etqColisSoigne": "Colis bien traité"
 }

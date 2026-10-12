@@ -1,0 +1,9 @@
+{
+  "retReserverLeRetour": { "fr": "Réserver le retour", "en": "Book the return trip" },
+  "etqTitre": { "fr": "Qu’avez-vous apprécié ? (facultatif)", "en": "What did you like? (optional)" },
+  "etqConduiteSure": { "fr": "Conduite sûre", "en": "Safe driving" },
+  "etqPonctuel": { "fr": "Ponctualité", "en": "On time" },
+  "etqVehiculePropre": { "fr": "Véhicule propre", "en": "Clean vehicle" },
+  "etqAccueil": { "fr": "Accueil agréable", "en": "Friendly welcome" },
+  "etqColisSoigne": { "fr": "Colis bien traité", "en": "Parcel handled well" }
+}

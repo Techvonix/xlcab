@@ -6086,6 +6086,48 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Sièges présentés par numéro : la disposition dépend du véhicule.'**
   String get sgDisposition;
+
+  /// No description provided for @retReserverLeRetour.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réserver le retour'**
+  String get retReserverLeRetour;
+
+  /// No description provided for @etqTitre.
+  ///
+  /// In fr, this message translates to:
+  /// **'Qu’avez-vous apprécié ? (facultatif)'**
+  String get etqTitre;
+
+  /// No description provided for @etqConduiteSure.
+  ///
+  /// In fr, this message translates to:
+  /// **'Conduite sûre'**
+  String get etqConduiteSure;
+
+  /// No description provided for @etqPonctuel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ponctualité'**
+  String get etqPonctuel;
+
+  /// No description provided for @etqVehiculePropre.
+  ///
+  /// In fr, this message translates to:
+  /// **'Véhicule propre'**
+  String get etqVehiculePropre;
+
+  /// No description provided for @etqAccueil.
+  ///
+  /// In fr, this message translates to:
+  /// **'Accueil agréable'**
+  String get etqAccueil;
+
+  /// No description provided for @etqColisSoigne.
+  ///
+  /// In fr, this message translates to:
+  /// **'Colis bien traité'**
+  String get etqColisSoigne;
 }
 
 class _AppLocalizationsDelegate

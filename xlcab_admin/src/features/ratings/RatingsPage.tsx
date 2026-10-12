@@ -12,6 +12,24 @@ import { t } from '@/lib/i18n';
 /** Moyenne « 2,50 » (virgule française, deux décimales). */
 const average = (n: number) => n.toFixed(2).replace('.', ',');
 
+/** Libellé d'une étiquette rapide (codes du serveur) ; un code inconnu est affiché tel quel. */
+function ratingTagLabel(tag: string): string {
+  switch (tag) {
+    case 'conduite_sure':
+      return t('etqConduiteSure');
+    case 'ponctuel':
+      return t('etqPonctuel');
+    case 'vehicule_propre':
+      return t('etqVehiculePropre');
+    case 'accueil':
+      return t('etqAccueil');
+    case 'colis_soigne':
+      return t('etqColisSoigne');
+    default:
+      return tag;
+  }
+}
+
 /** Étoiles écrites ET annoncées en clair (jamais l'icône seule). */
 function Stars({ value }: { value: number }) {
   return (
@@ -193,6 +211,13 @@ function RatingItem({ rating }: { rating: AdminRating }) {
           <div className="flex justify-between gap-4"><dt>{t('passager')}</dt><dd>{rating.passenger.name ?? '—'}</dd></div>
           <div className="flex justify-between gap-4"><dt>{t('course')}</dt><dd className="text-sm">{rating.tripId}</dd></div>
         </dl>
+        {rating.tags && rating.tags.length > 0 ? (
+          <ul className="mt-3 flex flex-wrap gap-2" aria-label={t('etiquettesDeLaNote')}>
+            {rating.tags.map((tag) => (
+              <li key={tag} className="rounded-full border border-line px-3 py-1 text-sm">{ratingTagLabel(tag)}</li>
+            ))}
+          </ul>
+        ) : null}
         {rating.comment ? (
           <blockquote className="mt-3 border-l-4 border-line pl-3 italic">{rating.comment}</blockquote>
         ) : (

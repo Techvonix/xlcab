@@ -997,5 +997,12 @@
   "sgSiegeChoisi": "Seat {number}, selected",
   "sgNumeros": "{count, plural, =1{Seat {list}} other{Seats {list}}}",
   "sgPlanIndisponible": "Seat plan unavailable: seats will be assigned automatically.",
-  "sgDisposition": "Seats are shown by number: the layout depends on the vehicle."
+  "sgDisposition": "Seats are shown by number: the layout depends on the vehicle.",
+  "retReserverLeRetour": "Book the return trip",
+  "etqTitre": "What did you like? (optional)",
+  "etqConduiteSure": "Safe driving",
+  "etqPonctuel": "On time",
+  "etqVehiculePropre": "Clean vehicle",
+  "etqAccueil": "Friendly welcome",
+  "etqColisSoigne": "Parcel handled well"
 }

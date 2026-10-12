@@ -10,6 +10,7 @@ import 'package:xlcab_core/models/shuttle.dart';
 import 'package:xlcab_core/models/trip.dart';
 import 'package:xlcab_core/models/trip_detail.dart';
 import 'package:xlcab_passenger/router.dart';
+import 'package:xlcab_passenger/models/return_trip.dart';
 import 'package:xlcab_passenger/screens/booking/confirmation_screen.dart';
 import 'package:xlcab_passenger/screens/booking/payment_screen.dart';
 import 'package:xlcab_core/services/api_service.dart';
@@ -54,6 +55,27 @@ TripDetail detailFor(TripStatus status) => TripDetail(
       totalCents: 12186,
     );
 
+String retourRecu(String ecran, Object? extra) =>
+    extra is ReturnTripRequest ? '$ecran : ${extra.origin.address} > ${extra.destination.address} (${extra.seats})' : '$ecran sans retour';
+
+/// Course avec les coordonnées de ses adresses (le retour en a besoin).
+TripDetail locatedTrip(TripStatus status, {String source = 'instant', int? seats = 2}) => TripDetail(
+      id: 'trip-paid',
+      status: status,
+      source: source,
+      shuttleType: ShuttleType.bleue,
+      originAddress: paris.address,
+      originLat: paris.lat,
+      originLng: paris.lng,
+      destinationAddress: rouen.address,
+      destinationLat: rouen.lat,
+      destinationLng: rouen.lng,
+      scheduledAt: DateTime(2026, 10, 12, 14, 30),
+      seats: seats,
+      qrCode: '9b2e0000-0000-4000-8000-0000000000aa',
+      totalCents: 12186,
+    );
+
 Future<void> pump(WidgetTester tester, {String initial = '/pay'}) async {
   tester.view.physicalSize = const Size(1080, 4200);
   tester.view.devicePixelRatio = 3.0;
@@ -64,6 +86,9 @@ Future<void> pump(WidgetTester tester, {String initial = '/pay'}) async {
     GoRoute(path: AppRoutes.confirmation, builder: (_, s) => ConfirmationScreen(tripId: s.pathParameters['tripId']!)),
     GoRoute(path: AppRoutes.home, builder: (_, __) => const Scaffold(body: Text('ACCUEIL'))),
     GoRoute(path: AppRoutes.tracking, builder: (_, s) => Scaffold(body: Text('SUIVI ${s.pathParameters['tripId']}'))),
+    // « Réserver le retour » : écrans de destination réduits à ce qu'ils reçoivent.
+    GoRoute(path: AppRoutes.passengerBooking, builder: (_, s) => Scaffold(body: Text(retourRecu('RÉSERVATION ${s.uri.queryParameters['type']}', s.extra)))),
+    GoRoute(path: AppRoutes.lineSearch, builder: (_, s) => Scaffold(body: Text(retourRecu('LIGNES', s.extra)))),
   ]);
 
   await tester.pumpWidget(ProviderScope(
@@ -182,6 +207,31 @@ void main() {
   });
 
   group('écran 8 — confirmation', () {
+    testWidgets('« Réserver le retour » : adresses inversées, même navette, mêmes passagers', (tester) async {
+      trips.tripDetail = locatedTrip(TripStatus.completed);
+      await pump(tester, initial: AppRoutes.confirmationFor('trip-paid'));
+      await tester.tap(find.text('Réserver le retour'));
+      await tester.pumpAndSettle();
+      expect(find.text('RÉSERVATION bleue : ${rouen.address} > ${paris.address} (2)'), findsOneWidget);
+    });
+
+    testWidgets('place sur une ligne régulière : le retour ouvre la recherche de lignes', (tester) async {
+      trips.tripDetail = locatedTrip(TripStatus.accepted, source: 'line');
+      await pump(tester, initial: AppRoutes.confirmationFor('trip-paid'));
+      await tester.tap(find.text('Réserver le retour'));
+      await tester.pumpAndSettle();
+      expect(find.text('LIGNES : ${rouen.address} > ${paris.address} (2)'), findsOneWidget);
+    });
+
+    testWidgets('pas de retour proposé : course annulée, colis, ou sans chauffeur encore', (tester) async {
+      for (final trip in [locatedTrip(TripStatus.cancelled), locatedTrip(TripStatus.completed, seats: null), locatedTrip(TripStatus.searching)]) {
+        trips.tripDetail = trip;
+        await pump(tester, initial: AppRoutes.confirmationFor('trip-paid'));
+        expect(find.text('Réserver le retour'), findsNothing);
+        await tester.pumpWidget(const SizedBox());
+      }
+    });
+
     testWidgets('chauffeur attribué : bouton de suivi', (tester) async {
       trips.tripDetail = detailFor(TripStatus.accepted);
       await pump(tester, initial: AppRoutes.confirmationFor('trip-paid'));

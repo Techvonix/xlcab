@@ -127,6 +127,20 @@ describe('Avis passager (intégration)', () => {
       expect(late.body.message).toMatch(/7 jours/);
     });
 
+    it('étiquettes rapides : enregistrées avec la note ; inconnues ou en double refusées', async () => {
+      trip({ status: 'completed', completedAt: new Date() });
+      const send = (body: object) => http().post(`/api/v1/trips/${TRIP}/rating`).set('Authorization', as('p1')).send(body);
+      expect((await send({ stars: 5, tags: ['conduite_sure', 'inventee'] })).status).toBe(400);
+      expect((await send({ stars: 5, tags: ['ponctuel', 'ponctuel'] })).status).toBe(400);
+      expect((await send({ stars: 5, tags: 'ponctuel' })).status).toBe(400);
+      expect(db.tripRating.rows).toHaveLength(0);
+
+      const ok = await send({ stars: 5, tags: ['conduite_sure', 'colis_soigne'] });
+      expect(ok.status).toBe(201);
+      expect(ok.body.tags).toEqual(['conduite_sure', 'colis_soigne']);
+      expect(db.tripRating.rows[0]).toMatchObject({ stars: 5, tags: ['conduite_sure', 'colis_soigne'] });
+    });
+
     it('validation : 1 à 5 étoiles entières, commentaire ≤ 500 caractères', async () => {
       trip({ status: 'completed', completedAt: new Date() });
       for (const stars of [0, 6, 3.5, '5']) {

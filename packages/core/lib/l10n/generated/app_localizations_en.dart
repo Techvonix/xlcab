@@ -3521,4 +3521,25 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get sgDisposition =>
       'Seats are shown by number: the layout depends on the vehicle.';
+
+  @override
+  String get retReserverLeRetour => 'Book the return trip';
+
+  @override
+  String get etqTitre => 'What did you like? (optional)';
+
+  @override
+  String get etqConduiteSure => 'Safe driving';
+
+  @override
+  String get etqPonctuel => 'On time';
+
+  @override
+  String get etqVehiculePropre => 'Clean vehicle';
+
+  @override
+  String get etqAccueil => 'Friendly welcome';
+
+  @override
+  String get etqColisSoigne => 'Parcel handled well';
 }

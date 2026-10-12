@@ -19,9 +19,14 @@ class FeedbackService {
         return DriverPublicProfile.fromJson(res.data ?? const {});
       });
 
-  Future<void> rate(String tripId, int stars, {String? comment}) => _guard(() => _dio.post<void>(
+  Future<void> rate(String tripId, int stars, {String? comment, List<String> tags = const []}) => _guard(() => _dio.post<void>(
         '${_trip(tripId)}/rating',
-        data: {'stars': stars, if (comment != null && comment.trim().isNotEmpty) 'comment': comment.trim()},
+        data: {
+          'stars': stars,
+          if (comment != null && comment.trim().isNotEmpty) 'comment': comment.trim(),
+          // Étiquettes rapides (liste fermée côté serveur).
+          if (tags.isNotEmpty) 'tags': tags,
+        },
       ));
 
   Future<void> report(String tripId, ReportReason reason, {String? details}) => _guard(() => _dio.post<void>(

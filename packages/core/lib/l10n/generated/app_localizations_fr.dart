@@ -3544,4 +3544,25 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get sgDisposition =>
       'Sièges présentés par numéro : la disposition dépend du véhicule.';
+
+  @override
+  String get retReserverLeRetour => 'Réserver le retour';
+
+  @override
+  String get etqTitre => 'Qu’avez-vous apprécié ? (facultatif)';
+
+  @override
+  String get etqConduiteSure => 'Conduite sûre';
+
+  @override
+  String get etqPonctuel => 'Ponctualité';
+
+  @override
+  String get etqVehiculePropre => 'Véhicule propre';
+
+  @override
+  String get etqAccueil => 'Accueil agréable';
+
+  @override
+  String get etqColisSoigne => 'Colis bien traité';
 }

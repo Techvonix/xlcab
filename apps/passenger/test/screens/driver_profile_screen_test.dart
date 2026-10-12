@@ -33,6 +33,7 @@ class FakeFeedbackService extends FeedbackService {
   );
   Object? profileError;
   final List<(int, String?)> ratings = [];
+  List<String> ratedTags = const [];
   final List<(ReportReason, String?)> reports = [];
   final List<SavedAddress> saved = [];
   final List<Map<String, bool>> preferenceChanges = [];
@@ -45,8 +46,9 @@ class FakeFeedbackService extends FeedbackService {
   }
 
   @override
-  Future<void> rate(String tripId, int stars, {String? comment}) async {
+  Future<void> rate(String tripId, int stars, {String? comment, List<String> tags = const []}) async {
     ratings.add((stars, comment));
+    ratedTags = tags;
     profile = profile.copyWith(myRating: stars, canRate: false);
   }
 
@@ -145,6 +147,37 @@ void main() {
 
       expect(service.ratings, [(4, 'Très ponctuelle')]);
       expect(find.text('Vous avez donné 4 / 5'), findsOneWidget);
+    });
+
+    testWidgets('étiquettes rapides : proposées à partir de 4 étoiles, envoyées avec la note', (tester) async {
+      await pump(tester, const DriverProfileScreen(tripId: 't1'));
+      await tester.tap(find.byTooltip('3 étoiles'));
+      await tester.pump();
+      expect(find.text('Conduite sûre'), findsNothing); // note moyenne : pas d'étiquettes
+
+      await tester.tap(find.byTooltip('5 étoiles'));
+      await tester.pump();
+      await tester.tap(find.text('Conduite sûre'));
+      await tester.tap(find.text('Colis bien traité'));
+      await tester.tap(find.text('Ponctualité'));
+      await tester.tap(find.text('Ponctualité')); // retirée
+      await tester.pump();
+      await tester.tap(find.widgetWithText(PrimaryButton, 'Envoyer ma note'));
+      await tester.pumpAndSettle();
+      expect(service.ratings, [(5, '')]);
+      expect(service.ratedTags, unorderedEquals(['conduite_sure', 'colis_soigne']));
+    });
+
+    testWidgets('étiquettes cochées puis note ramenée à 2 étoiles : aucune étiquette envoyée', (tester) async {
+      await pump(tester, const DriverProfileScreen(tripId: 't1'));
+      await tester.tap(find.byTooltip('5 étoiles'));
+      await tester.pump();
+      await tester.tap(find.text('Véhicule propre'));
+      await tester.tap(find.byTooltip('2 étoiles'));
+      await tester.pump();
+      await tester.tap(find.widgetWithText(PrimaryButton, 'Envoyer ma note'));
+      await tester.pumpAndSettle();
+      expect(service.ratedTags, isEmpty);
     });
 
     testWidgets('signalement : motif obligatoire, envoi confirmé', (tester) async {

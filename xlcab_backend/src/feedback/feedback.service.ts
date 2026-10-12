@@ -19,6 +19,10 @@ interface AuditCtx {
 export const RATING_WINDOW_DAYS = 7;
 
 /** Motifs de signalement d'un chauffeur (écran 10, bouton « Signaler »). */
+/** Étiquettes rapides d'une note (ce que le passager a apprécié). Liste fermée : l'app les traduit. */
+export const RATING_TAGS = ['conduite_sure', 'ponctuel', 'vehicule_propre', 'accueil', 'colis_soigne'] as const;
+export type RatingTag = (typeof RATING_TAGS)[number];
+
 export const REPORT_REASONS = ['comportement', 'conduite', 'vehicule', 'retard', 'autre'] as const;
 export type ReportReason = (typeof REPORT_REASONS)[number];
 
@@ -101,7 +105,7 @@ export class FeedbackService {
 
   // ── POST /trips/:id/rating ─────────────────────────────────────────────
 
-  async rate(user: RequestUser, tripId: string, stars: number, comment: string | undefined, ctx: AuditCtx) {
+  async rate(user: RequestUser, tripId: string, stars: number, comment: string | undefined, ctx: AuditCtx, tags: RatingTag[] = []) {
     const trip = await this.passengerTrip(user, tripId);
     if (trip.status !== TripStatus.COMPLETED) throw new ForbiddenException('Vous pourrez noter le trajet une fois arrivé');
     if (!this.withinRatingWindow(trip)) throw new ForbiddenException(`La note doit être donnée dans les ${RATING_WINDOW_DAYS} jours suivant le trajet`);
@@ -110,7 +114,7 @@ export class FeedbackService {
     let rating;
     try {
       rating = await this.prisma.tripRating.create({
-        data: { tripId, passengerId: user.sub, driverId: trip.driverId, stars, comment: comment || null },
+        data: { tripId, passengerId: user.sub, driverId: trip.driverId, stars, comment: comment || null, tags },
       });
     } catch {
       // Deux envois simultanés : l'index unique sur tripId garde le premier.
@@ -119,8 +123,8 @@ export class FeedbackService {
 
     await recomputeDriverRating(this.prisma, trip.driverId);
 
-    await this.audit.log({ userId: user.sub, action: 'trip.rated', entity: 'Trip', entityId: tripId, metadata: { stars }, ...ctx });
-    return { stars: rating.stars, createdAt: rating.createdAt };
+    await this.audit.log({ userId: user.sub, action: 'trip.rated', entity: 'Trip', entityId: tripId, metadata: { stars, tags }, ...ctx });
+    return { stars: rating.stars, tags, createdAt: rating.createdAt };
   }
 
   // ── POST /trips/:id/report ─────────────────────────────────────────────

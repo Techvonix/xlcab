@@ -82,6 +82,7 @@ export class AdminRatingsService {
         tripId: r.tripId,
         stars: r.stars,
         comment: r.comment,
+        tags: r.tags ?? [],
         createdAt: r.createdAt,
         driver: { id: r.driverId, name: fullName(users.get(r.driverId)) },
         passenger: { id: r.passengerId, name: fullName(users.get(r.passengerId)) },

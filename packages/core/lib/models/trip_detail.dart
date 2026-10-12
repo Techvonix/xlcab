@@ -15,6 +15,11 @@ class TripDetail {
     required this.totalCents,
     this.dispatchAt,
     this.seatNumbers = const [],
+    this.source,
+    this.originLat,
+    this.originLng,
+    this.destinationLat,
+    this.destinationLng,
     this.invoiceId,
     this.invoiceNumber,
   });
@@ -26,6 +31,18 @@ class TripDetail {
   /// Course en attente de chauffeur : heure de début de la recherche
   /// (le serveur sollicite les chauffeurs à partir de T − 3 h).
   final DateTime? dispatchAt;
+
+  /// instant | line | market (null : serveur plus ancien).
+  final String? source;
+
+  /// Réservation d'une place sur une ligne régulière.
+  bool get isLine => source == 'line';
+
+  /// Coordonnées des deux adresses : nécessaires pour proposer le trajet retour.
+  final double? originLat;
+  final double? originLng;
+  final double? destinationLat;
+  final double? destinationLng;
 
   final String id;
   final TripStatus status;
@@ -68,6 +85,11 @@ class TripDetail {
       invoiceNumber: invoice is Map && invoice['number'] is String ? invoice['number'] as String : null,
       dispatchAt: dispatchAt is String ? DateTime.tryParse(dispatchAt)?.toLocal() : null,
       id: json['id'] as String,
+      source: json['source'] is String ? json['source'] as String : null,
+      originLat: origin['lat'] is num ? (origin['lat'] as num).toDouble() : null,
+      originLng: origin['lng'] is num ? (origin['lng'] as num).toDouble() : null,
+      destinationLat: destination['lat'] is num ? (destination['lat'] as num).toDouble() : null,
+      destinationLng: destination['lng'] is num ? (destination['lng'] as num).toDouble() : null,
       status: TripStatus.fromApi(status is String ? status : null),
       shuttleType: ShuttleType.fromApi(shuttle is String ? shuttle : null),
       originAddress: origin['address'] is String ? origin['address'] as String : '',

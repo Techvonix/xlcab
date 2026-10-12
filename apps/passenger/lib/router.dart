@@ -8,6 +8,7 @@ import 'package:xlcab_core/services/preferences_store.dart';
 import 'package:xlcab_ui/screens/login_screen.dart';
 import 'package:xlcab_ui/screens/splash_screen.dart';
 
+import 'models/return_trip.dart';
 import 'screens/booking/confirmation_screen.dart';
 import 'screens/booking/driver_profile_screen.dart';
 import 'screens/booking/parcel_creation_screen.dart';
@@ -103,6 +104,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         // ?type=rose|bleue|orange|accessibility : navette présélectionnée.
         builder: (context, state) => PassengerBookingScreen(
           initialShuttleType: ShuttleType.fromApi(state.uri.queryParameters['type']),
+          initialReturn: state.extra is ReturnTripRequest ? state.extra as ReturnTripRequest : null,
         ),
       ),
       GoRoute(
@@ -140,7 +142,10 @@ final routerProvider = Provider<GoRouter>((ref) {
 
       // ── Bourse de transport côté client : lignes régulières et devis ──
       GoRoute(path: AppRoutes.market, builder: (context, state) => const MarketHomeScreen()),
-      GoRoute(path: AppRoutes.lineSearch, builder: (context, state) => const LineSearchScreen()),
+      GoRoute(
+        path: AppRoutes.lineSearch,
+        builder: (context, state) => LineSearchScreen(initial: state.extra is ReturnTripRequest ? state.extra as ReturnTripRequest : null),
+      ),
       // Avant la route paramétrée : « new » n'est pas un identifiant de demande.
       GoRoute(path: AppRoutes.requestNew, builder: (context, state) => const RequestFormScreen()),
       GoRoute(

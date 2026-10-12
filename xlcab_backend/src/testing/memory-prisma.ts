@@ -201,7 +201,7 @@ export function memoryPrisma() {
     trustedContact: new Table(() => ({ createdAt: new Date() })),
     lineSeat: new Table(() => ({ createdAt: new Date() })),
     tripShare: new Table(() => ({ createdAt: new Date(), revokedAt: null })),
-    tripRating: new Table(() => ({ comment: null, createdAt: new Date() })),
+    tripRating: new Table(() => ({ comment: null, tags: [], createdAt: new Date() })),
     operatorProfile: new Table(() => ({
       kind: 'independent', legalName: null, siret: null, transportLicense: null, cities: [], services: [], description: null,
       status: 'pending', perSeatAllowed: false, verifiedAt: null, termsAcceptedAt: null, termsVersion: null, createdAt: new Date(), updatedAt: new Date(),

@@ -488,6 +488,8 @@ model TripRating {
   driverId    String
   stars       Int // 1 à 5
   comment     String? // visible de l'équipe XLCAB seulement
+  // Étiquettes rapides choisies par le passager (liste fermée RATING_TAGS).
+  tags        String[] @default([])
   createdAt   DateTime @default(now())
 
   @@index([driverId])

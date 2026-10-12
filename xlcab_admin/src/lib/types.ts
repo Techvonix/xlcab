@@ -221,6 +221,8 @@ export interface AdminRating {
   tripId: string;
   stars: number;
   comment: string | null;
+  /** Étiquettes rapides choisies par le passager (codes). */
+  tags?: string[];
   createdAt: string;
   driver: { id: string; name: string | null };
   passenger: { id: string; name: string | null };
