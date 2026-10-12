@@ -1,6 +1,6 @@
 # XLCAB — passage à deux applications (plan à valider)
 
-Rédigé le 11 octobre 2026. **Rien n'est déplacé tant que ce plan n'est pas approuvé.**
+Rédigé le 11 octobre 2026, approuvé le même jour. **Étapes 0 à 4 terminées le 12 octobre 2026** ; reste l'étape 5.
 Sources : la demande de restructuration (monorepo, deux applis) et la maquette « XLCAB — App design »
 (10 écrans). Aucune fonction existante n'est supprimée : tout est déplacé.
 
