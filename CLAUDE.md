@@ -319,6 +319,14 @@ référence — les exigences de la Partie 8 priment.
   un plan du véhicule (on ne connaît pas la disposition des navettes) ; choix facultatif mais jamais partiel ;
   récapitulatif (écran 8) et liste du chauffeur affichent « Sièges 2, 5 » (`l10n.sgNumeros`). Non repris de la
   maquette : « à côté d'une femme » (on ne stocke pas le genre ; formulation à valider par l'avocat).
+- Réserver le retour et étiquettes de note (2026-10-12, migration `rating_tags`) : `GET /trips/:id` renvoie `source`
+  (instant | line | market) ; app passager `models/return_trip.dart` (`ReturnTripRequest`, `returnTripOf` : course
+  passager `accepted|started|completed` avec coordonnées, adresses inversées, mêmes passagers), bouton du
+  récapitulatif (écran 8) → `extra` go_router vers `PassengerBookingScreen(initialReturn:)` (même navette) ou
+  `LineSearchScreen(initial:)` pour une place de ligne. Étiquettes : `RATING_TAGS` (feedback.service : conduite_sure,
+  ponctuel, vehicule_propre, accueil, colis_soigne ; liste fermée, 400 sinon), `TripRating.tags`, `POST
+  /trips/:id/rating { tags }` ; app : `ratingTags()` + `FilterChip` proposés à partir de 4 étoiles seulement (jamais
+  envoyées pour une note plus basse) ; admin : étiquettes affichées avec la note (`ratingTagLabel`).
 - Migrations : `init_xlcab` appliquée sur la base locale ; toute modification de
   `prisma/schema.prisma` demande désormais `npx prisma migrate dev --name <nom>`. Référentiel :
   `npx prisma db seed` (config FR uniquement).
