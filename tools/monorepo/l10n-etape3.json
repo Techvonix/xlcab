@@ -1,0 +1,8 @@
+{
+  "drvAucunDepart": { "fr": "Aucun départ de ligne à assurer pour le moment.", "en": "No line departure to operate for now." },
+  "drvDepartsIndisponibles": { "fr": "Impossible de charger vos départs.", "en": "Unable to load your departures." },
+  "drvMesDocuments": { "fr": "Mes documents chauffeur", "en": "My driver documents" },
+  "drvOutils": { "fr": "Lignes et bourse", "en": "Lines and marketplace" },
+  "drvAucuneCourseRecente": { "fr": "Aucune course récente.", "en": "No recent trip." },
+  "drvCompteNonValide": { "fr": "Disponible dès que votre compte chauffeur est validé par XLCAB.", "en": "Available once XLCAB has approved your driver account." }
+}

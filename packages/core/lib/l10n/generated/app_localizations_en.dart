@@ -3346,4 +3346,23 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get compris => 'Got it';
+
+  @override
+  String get drvAucunDepart => 'No line departure to operate for now.';
+
+  @override
+  String get drvDepartsIndisponibles => 'Unable to load your departures.';
+
+  @override
+  String get drvMesDocuments => 'My driver documents';
+
+  @override
+  String get drvOutils => 'Lines and marketplace';
+
+  @override
+  String get drvAucuneCourseRecente => 'No recent trip.';
+
+  @override
+  String get drvCompteNonValide =>
+      'Available once XLCAB has approved your driver account.';
 }

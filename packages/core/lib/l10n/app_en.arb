@@ -954,5 +954,11 @@
   "impactBientotTexte": "You will see here the CO₂ saved by sharing your trips and sending your parcels on a shuttle that is already on the road. The calculation method is being prepared.",
   "appliChauffeurTitre": "XLCAB Driver app",
   "appliChauffeurTexte": "The driver area (application, missions, lines, earnings) is in the XLCAB Driver app. Sign in there with this same account.",
-  "compris": "Got it"
+  "compris": "Got it",
+  "drvAucunDepart": "No line departure to operate for now.",
+  "drvDepartsIndisponibles": "Unable to load your departures.",
+  "drvMesDocuments": "My driver documents",
+  "drvOutils": "Lines and marketplace",
+  "drvAucuneCourseRecente": "No recent trip.",
+  "drvCompteNonValide": "Available once XLCAB has approved your driver account."
 }

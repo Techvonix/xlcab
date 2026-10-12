@@ -1924,5 +1924,11 @@
   "impactBientotTexte": "Vous verrez ici le CO₂ économisé en partageant vos trajets et en confiant vos colis à une navette déjà en route. Le mode de calcul est en préparation.",
   "appliChauffeurTitre": "Application XLCAB Driver",
   "appliChauffeurTexte": "L’espace chauffeur (candidature, missions, lignes, revenus) se trouve dans l’application XLCAB Driver. Connectez-vous-y avec ce même compte.",
-  "compris": "Compris"
+  "compris": "Compris",
+  "drvAucunDepart": "Aucun départ de ligne à assurer pour le moment.",
+  "drvDepartsIndisponibles": "Impossible de charger vos départs.",
+  "drvMesDocuments": "Mes documents chauffeur",
+  "drvOutils": "Lignes et bourse",
+  "drvAucuneCourseRecente": "Aucune course récente.",
+  "drvCompteNonValide": "Disponible dès que votre compte chauffeur est validé par XLCAB."
 }

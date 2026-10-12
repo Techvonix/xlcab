@@ -1,0 +1,77 @@
+name: xlcab_driver
+description: "XLCAB Driver — application chauffeur : missions, départs de ligne, colis, revenus."
+publish_to: "none"
+version: 1.0.0+1
+resolution: workspace
+
+environment:
+  # 3.27 minimum : le thème utilise Color.withValues et CardThemeData,
+  # apparus dans Flutter 3.27 (Dart 3.6).
+  sdk: ">=3.6.0 <4.0.0"
+  flutter: ">=3.27.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # Paquets communs du monorepo
+  xlcab_core:
+    path: ../../packages/core
+  xlcab_ui:
+    path: ../../packages/ui
+
+  # State management & routing
+  flutter_riverpod: ^2.5.1
+  go_router: ^14.2.0
+
+  # Réseau & stockage
+  dio: ^5.4.3
+  hive_flutter: ^1.1.0
+  socket_io_client: ^2.0.3+1
+
+  # Position (en ligne : envoyée écran verrouillé, appli chauffeur seulement)
+  geolocator: ^12.0.0
+
+  # Firebase (notifications push : à brancher)
+  firebase_core: ^3.3.0
+  firebase_messaging: ^15.0.4
+
+  intl: ^0.20.2
+  cupertino_icons: ^1.0.8
+
+  # Scan des QR d'embarquement et des colis
+  mobile_scanner: ^5.2.3
+  # Itinéraire, appel
+  url_launcher: ^6.3.0
+  # Photo des documents et des colis remis, compressée sous 2 Mo
+  image_picker: ^1.2.3
+  flutter_image_compress: ^2.5.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+  flutter_localizations:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
+
+  # Polices — Poppins (titres) + Inter (corps), fournies par xlcab_ui
+  fonts:
+    - family: Poppins
+      fonts:
+        - asset: packages/xlcab_ui/fonts/Poppins-Regular.ttf
+          weight: 400
+        - asset: packages/xlcab_ui/fonts/Poppins-SemiBold.ttf
+          weight: 600
+        - asset: packages/xlcab_ui/fonts/Poppins-Bold.ttf
+          weight: 700
+    - family: Inter
+      fonts:
+        - asset: packages/xlcab_ui/fonts/Inter-Regular.ttf
+          weight: 400
+        - asset: packages/xlcab_ui/fonts/Inter-SemiBold.ttf
+          weight: 600
+        - asset: packages/xlcab_ui/fonts/Inter-Bold.ttf
+          weight: 700

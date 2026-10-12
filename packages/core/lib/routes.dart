@@ -53,3 +53,12 @@ class PassengerTabs {
   static const parcels = '/parcels';
   static const impact = '/impact';
 }
+
+/// Onglets de l'application chauffeur (« Aujourd'hui » = [AppRoutes.driverMode]).
+class DriverTabs {
+  DriverTabs._();
+
+  static const departure = '/driver/departure';
+  static const earnings = '/driver/earnings';
+  static const profile = '/driver/profile';
+}

@@ -267,14 +267,26 @@ référence — les exigences de la Partie 8 priment.
   `timePickerProvider` / `datePickerProvider`), services parcel / document_picker / feedback. Dans ui :
   `xlcab_app.dart` (`XlcabApp(router:, title:)`, widget racine commun), `screens/address_search_screen.dart`
   (+ `addressPickerProvider`), `widgets/offer_messages_sheet.dart`, `widgets/legal_links.dart`.
-  `xlcab_app/` ne contient plus que le côté chauffeur (screens driver + operator, services driver_* / operator,
-  providers driver_* / operator ; un compte non chauffeur y atterrit sur la candidature) : il deviendra
-  `apps/driver` (4 onglets, écran « dossier en attente », `com.xlcab.driver`) à l'étape 3. Tests : ceux de core
-  dans `packages/core/test`, doubles `test/support/fakes.dart` scindés par appli (copies distinctes).
+  Étape 3 faite (2026-10-12) : `apps/driver` (`xlcab_driver`, « XLCAB Driver », `com.xlcab.driver`) = ex
+  `xlcab_app` (screens driver + operator, services driver_* / operator, providers driver_* / operator).
+  `xlcab_app/` N'EXISTE PLUS. Barre à 4 onglets (`screens/shell/` : `driver_shell.dart`) : Aujourd'hui
+  `AppRoutes.driverMode` (= `DriverModeScreen` : en ligne, offres, reprises urgentes, missions), Départ
+  `DriverTabs.departure` (`departure_tab.dart` : `AssignmentTile` des départs que j'assure, mes lignes, bourse),
+  Revenus `DriverTabs.earnings` (`EarningsCard`, courses récentes, mes annulations), Profil `DriverTabs.profile`
+  (documents, profil opérateur, apparence, langue, liens légaux, déconnexion). Un compte non chauffeur n'y voit
+  que la candidature `DriverOnboardingScreen` (formulaire, puis « Dossier en cours de vérification » ;
+  `SignOutAction` dans sa barre) ; un chauffeur non validé voit le bandeau d'attente et ne peut pas passer en
+  ligne (403 du serveur). `ThemeSelector` / `LanguageSelector` / `ChoiceGroup` partagés :
+  `xlcab_ui/widgets/display_preferences.dart`. Android chauffeur : `FlutterActivity` et thèmes Android standards
+  (les thèmes AppCompat venaient de Stripe, absent ici), ni carte Google ni clé Maps ; position en arrière-plan,
+  CAMERA et lecteur de QR seulement dans cette appli. Dépendances inutilisées retirées (lottie, firebase_auth /
+  analytics / crashlytics, connectivity_plus, permission_handler, build_runner, générateurs).
+  Tests : ceux de core dans `packages/core/test`, doubles `test/support/fakes.dart` scindés par appli (copies
+  distinctes).
   Compilation : `flutter build apk --debug --dart-define=API_BASE_URL=http://localhost:3000` DANS le dossier de
   l'appli ; première compilation d'une nouvelle appli ≈ 10 min, lancer en arrière-plan et attendre l'APK.
   Dans les chemins ci-dessous, `lib/…` de l'ancienne appli désigne donc `packages/core/lib/…`,
-  `packages/ui/lib/…`, `apps/passenger/lib/…` ou `xlcab_app/lib/…` (chauffeur).
+  `packages/ui/lib/…`, `apps/passenger/lib/…` ou `apps/driver/lib/…`.
 - Migrations : `init_xlcab` appliquée sur la base locale ; toute modification de
   `prisma/schema.prisma` demande désormais `npx prisma migrate dev --name <nom>`. Référentiel :
   `npx prisma db seed` (config FR uniquement).

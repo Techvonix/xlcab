@@ -4,12 +4,11 @@ import 'package:go_router/go_router.dart';
 import 'package:xlcab_core/config/legal.dart';
 import 'package:xlcab_core/models/account.dart';
 import 'package:xlcab_core/providers/auth_provider.dart';
-import 'package:xlcab_core/providers/theme_provider.dart';
-import 'package:xlcab_core/providers/locale_provider.dart';
 import 'package:xlcab_core/routes.dart';
 import '../../widgets/driver_app_info.dart';
 import 'package:xlcab_core/services/account_service.dart';
 import 'package:xlcab_core/services/api_service.dart';
+import 'package:xlcab_ui/widgets/display_preferences.dart';
 import 'package:xlcab_ui/widgets/legal_links.dart';
 import 'package:xlcab_ui/theme/app_colors.dart';
 
@@ -83,9 +82,9 @@ class ProfileScreen extends ConsumerWidget {
           tile(Icons.star_outline_rounded, l10n.adressesFavorites, () => context.push(AppRoutes.savedAddresses)),
           section(l10n.preferences),
           tile(Icons.notifications_none, l10n.notifications, () => context.push(AppRoutes.notificationPreferences)),
-          const _ThemeSelector(),
+          const ThemeSelector(),
           const SizedBox(height: AppSpacing.md),
-          const _LanguageSelector(),
+          const LanguageSelector(),
           section(l10n.informationsLegales),
           tile(Icons.privacy_tip_outlined, l10n.politiqueDeConfidentialite, () => _open(context, ref, privacyPolicyFor(Localizations.localeOf(context).languageCode))),
           tile(Icons.description_outlined, l10n.conditionsGeneralesCguCgv, () => _open(context, ref, termsFor(Localizations.localeOf(context).languageCode))),
@@ -283,89 +282,6 @@ class _DeleteAccountDialogState extends State<_DeleteAccountDialog> {
           style: FilledButton.styleFrom(backgroundColor: const Color(0xFFC62828), foregroundColor: Colors.white),
           onPressed: _password.text.isEmpty ? null : () => Navigator.of(context).pop(_password.text),
           child: Text(l10n.supprimer),
-        ),
-      ],
-    );
-  }
-}
-
-/// Langue de l'interface : celle du téléphone par défaut. Le choix est aussi
-/// enregistré sur le compte (langue des futurs e-mails et notifications).
-class _LanguageSelector extends ConsumerWidget {
-  const _LanguageSelector();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final code = ref.watch(localeProvider)?.languageCode ?? 'system';
-    return _ChoiceGroup<String>(
-      title: l10n.langue,
-      selected: code,
-      options: [
-        ('system', l10n.langueDuTelephone, Icons.smartphone),
-        // Chaque langue est écrite dans sa propre langue.
-        ('fr', 'Français', null),
-        ('en', 'English', null),
-      ],
-      onSelected: (choice) {
-        ref.read(localeProvider.notifier).state = choice == 'system' ? null : Locale(choice);
-        final effective = choice == 'system' ? resolveAppLocale(WidgetsBinding.instance.platformDispatcher.locale).languageCode : choice;
-        // Sans réseau, le choix reste valable sur l'appareil.
-        ref.read(accountServiceProvider).updateLocale(effective).catchError((_) {});
-      },
-    );
-  }
-}
-
-class _ThemeSelector extends ConsumerWidget {
-  const _ThemeSelector();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final mode = ref.watch(themeModeProvider);
-    return _ChoiceGroup<ThemeMode>(
-      title: l10n.apparence,
-      selected: mode,
-      options: [
-        (ThemeMode.system, l10n.systeme, Icons.brightness_auto),
-        (ThemeMode.light, l10n.clair, Icons.light_mode_outlined),
-        (ThemeMode.dark, l10n.sombre, Icons.dark_mode_outlined),
-      ],
-      onSelected: (m) => ref.read(themeModeProvider.notifier).state = m,
-    );
-  }
-}
-
-/// Choix exclusif en pastilles : passent à la ligne sur un petit écran ou avec
-/// un texte agrandi (Partie 5 : jusqu'à 200 %), au lieu de couper les mots
-/// comme un SegmentedButton.
-class _ChoiceGroup<T> extends StatelessWidget {
-  const _ChoiceGroup({required this.title, required this.selected, required this.options, required this.onSelected});
-
-  final String title;
-  final T selected;
-  final List<(T, String, IconData?)> options;
-  final ValueChanged<T> onSelected;
-
-  @override
-  Widget build(BuildContext context) {
-    final onSurface = Theme.of(context).colorScheme.onSurface;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(title, style: AppTypography.bodyBold.copyWith(color: onSurface)),
-        const SizedBox(height: AppSpacing.xs),
-        Wrap(
-          spacing: AppSpacing.sm,
-          runSpacing: AppSpacing.xs,
-          children: [
-            for (final (value, label, icon) in options)
-              ChoiceChip(
-                avatar: icon == null ? null : Icon(icon, size: 18),
-                label: Text(label),
-                selected: value == selected,
-                onSelected: (_) => onSelected(value),
-              ),
-          ],
         ),
       ],
     );

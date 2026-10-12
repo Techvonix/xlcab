@@ -5828,6 +5828,42 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Compris'**
   String get compris;
+
+  /// No description provided for @drvAucunDepart.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun départ de ligne à assurer pour le moment.'**
+  String get drvAucunDepart;
+
+  /// No description provided for @drvDepartsIndisponibles.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible de charger vos départs.'**
+  String get drvDepartsIndisponibles;
+
+  /// No description provided for @drvMesDocuments.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mes documents chauffeur'**
+  String get drvMesDocuments;
+
+  /// No description provided for @drvOutils.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lignes et bourse'**
+  String get drvOutils;
+
+  /// No description provided for @drvAucuneCourseRecente.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune course récente.'**
+  String get drvAucuneCourseRecente;
+
+  /// No description provided for @drvCompteNonValide.
+  ///
+  /// In fr, this message translates to:
+  /// **'Disponible dès que votre compte chauffeur est validé par XLCAB.'**
+  String get drvCompteNonValide;
 }
 
 class _AppLocalizationsDelegate

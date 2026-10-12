@@ -3367,4 +3367,24 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get compris => 'Compris';
+
+  @override
+  String get drvAucunDepart =>
+      'Aucun départ de ligne à assurer pour le moment.';
+
+  @override
+  String get drvDepartsIndisponibles => 'Impossible de charger vos départs.';
+
+  @override
+  String get drvMesDocuments => 'Mes documents chauffeur';
+
+  @override
+  String get drvOutils => 'Lignes et bourse';
+
+  @override
+  String get drvAucuneCourseRecente => 'Aucune course récente.';
+
+  @override
+  String get drvCompteNonValide =>
+      'Disponible dès que votre compte chauffeur est validé par XLCAB.';
 }
