@@ -199,6 +199,7 @@ export function memoryPrisma() {
     savedAddress: new Table(() => ({ createdAt: new Date() })),
     userPreference: new Table(() => ({ notifyPush: true, notifyEmail: true, notifySms: false, marketing: false, autoShareTrips: false, updatedAt: new Date() })),
     trustedContact: new Table(() => ({ createdAt: new Date() })),
+    lineSeat: new Table(() => ({ createdAt: new Date() })),
     tripShare: new Table(() => ({ createdAt: new Date(), revokedAt: null })),
     tripRating: new Table(() => ({ comment: null, createdAt: new Date() })),
     operatorProfile: new Table(() => ({

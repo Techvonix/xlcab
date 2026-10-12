@@ -797,3 +797,16 @@ model TripShare {
 
   @@index([tripId, userId])
 }
+
+// Siège numéroté d'une réservation sur un départ de ligne vendu à la place.
+// La contrainte d'unicité garantit qu'un siège n'est jamais vendu deux fois.
+model LineSeat {
+  id          String   @id @default(uuid())
+  departureId String
+  seatNumber  Int
+  tripId      String
+  createdAt   DateTime @default(now())
+
+  @@unique([departureId, seatNumber])
+  @@index([tripId])
+}

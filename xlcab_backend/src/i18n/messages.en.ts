@@ -60,6 +60,14 @@ export const MESSAGES_EN: Record<string, string> = {
   'Ce trajet est terminé : il ne peut plus être partagé': 'This trip has ended: it can no longer be shared',
   'Lien de suivi indisponible': 'Tracking link unavailable',
 
+  // ── Choix du siège (lignes vendues à la place) ───────────────────────
+  'Sièges invalides': 'Invalid seats',
+  'Un même siège ne peut pas être choisi deux fois': 'The same seat cannot be chosen twice',
+  'Ce départ se réserve en entier : pas de choix de siège': 'This departure is booked as a whole: no seat choice',
+  'Choisissez autant de sièges que de places': 'Choose as many seats as places booked',
+  'Ce siège n’existe pas sur ce départ': 'This seat does not exist on this departure',
+  'Ce siège vient d’être pris : choisissez-en un autre': 'This seat has just been taken: choose another one',
+
   // ── Double authentification ──────────────────────────────────────────
   'Double authentification requise': 'Two-factor authentication required',
   'Code à 6 chiffres': '6-digit code',

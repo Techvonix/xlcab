@@ -85,6 +85,17 @@ export class LineBookingsService {
     });
     if (mine > 0) throw new ConflictException('Vous avez déjà une réservation sur ce départ');
 
+    const perSeat = departure.pricingMode === 'per_seat';
+    if (dto.seatNumbers) {
+      if (!perSeat) throw new BadRequestException('Ce départ se réserve en entier : pas de choix de siège');
+      if (dto.seatNumbers.length !== dto.seats) throw new BadRequestException('Choisissez autant de sièges que de places');
+      if (dto.seatNumbers.some((n) => n > departure.seatsTotal)) throw new BadRequestException('Ce siège n’existe pas sur ce départ');
+      // Siège déjà vendu : refus avant de retenir quoi que ce soit (la contrainte
+      // d'unicité de la base tranche ensuite les demandes simultanées).
+      const clash = await this.prisma.lineSeat.count({ where: { departureId: departure.id, seatNumber: { in: dto.seatNumbers } } });
+      if (clash > 0) throw new ConflictException('Ce siège vient d’être pris : choisissez-en un autre');
+    }
+
     // Places retenues d'abord (écriture conditionnelle) : pas de survente.
     const held = await this.lines.reserveSeats(departure.id, dto.seats, now);
     const vehicleId = assignedVehicle(departure, line);
@@ -138,7 +149,9 @@ export class LineBookingsService {
             notes: dto.notes || null,
           },
         });
-        return created;
+        // Sièges numérotés (vente à la place) : ceux choisis, sinon les premiers libres.
+        const seatNumbers = perSeat ? await this.assignSeats(tx, departure.id, created.id, dto.seats, departure.seatsTotal, dto.seatNumbers) : [];
+        return { ...created, seatNumbers };
       });
 
       await this.notifications.notify(userId, 'line.booked', 'Réservation confirmée', 'Votre place sur la ligne est réservée.', { tripId: trip.id });
@@ -153,6 +166,7 @@ export class LineBookingsService {
         status: TripStatus.ACCEPTED,
         departureAt: departure.departureAt,
         seats: dto.seats,
+        seatNumbers: trip.seatNumbers,
         totalPriceCents: total,
         paymentMode: 'deferred',
       };
@@ -161,6 +175,44 @@ export class LineBookingsService {
       await this.lines.releaseSeats(departure.id, dto.seats);
       throw err;
     }
+  }
+
+  /**
+   * Attribue des sièges à une réservation. La contrainte d'unicité de la
+   * base tranche si deux clients visent le même siège au même instant :
+   * le second reçoit un 409 et sa réservation n'est pas créée.
+   */
+  private async assignSeats(tx: any, departureId: string, tripId: string, count: number, seatsTotal: number, wanted?: number[]) {
+    const taken = new Set<number>((await tx.lineSeat.findMany({ where: { departureId }, select: { seatNumber: true } })).map((s: { seatNumber: number }) => s.seatNumber));
+    let numbers: number[];
+    if (wanted) {
+      if (wanted.some((n) => taken.has(n))) throw new ConflictException('Ce siège vient d’être pris : choisissez-en un autre');
+      numbers = [...wanted].sort((a, b) => a - b);
+    } else {
+      numbers = [];
+      for (let n = 1; n <= seatsTotal && numbers.length < count; n++) if (!taken.has(n)) numbers.push(n);
+    }
+    try {
+      for (const seatNumber of numbers) await tx.lineSeat.create({ data: { departureId, seatNumber, tripId } });
+    } catch (err: any) {
+      if (err?.code === 'P2002') throw new ConflictException('Ce siège vient d’être pris : choisissez-en un autre');
+      throw err;
+    }
+    return numbers;
+  }
+
+  /** Plan des sièges d'un départ : ceux déjà pris (aucune identité), pour le choix à la réservation. */
+  async seatMap(departureId: string) {
+    const departure = await this.prisma.lineDeparture.findUnique({ where: { id: departureId } });
+    if (!departure) throw new NotFoundException('Départ introuvable');
+    const rows = await this.prisma.lineSeat.findMany({ where: { departureId }, select: { seatNumber: true } });
+    return {
+      departureId,
+      seatsTotal: departure.seatsTotal,
+      // Un départ privatisé (prix au véhicule) ne propose pas de choix de siège.
+      choosable: departure.pricingMode === 'per_seat',
+      taken: rows.map((r: { seatNumber: number }) => r.seatNumber).sort((a: number, b: number) => a - b),
+    };
   }
 
   // ── Départ côté chauffeur ───────────────────────────────────────────
@@ -230,6 +282,9 @@ export class LineBookingsService {
       where: { id: { in: trips.map((t) => t.passengerId!).filter(Boolean) } },
       select: { id: true, firstName: true, phone: true },
     });
+    const seatRows = await this.prisma.lineSeat.findMany({ where: { departureId }, select: { seatNumber: true, tripId: true } });
+    const seatsOf = (tripId: string) =>
+      seatRows.filter((s: { tripId: string }) => s.tripId === tripId).map((s: { seatNumber: number }) => s.seatNumber).sort((a: number, b: number) => a - b);
     const outbound = departure.direction === 'outbound';
     return {
       departureId,
@@ -246,6 +301,7 @@ export class LineBookingsService {
           firstName: u?.firstName ?? null,
           phone: showPhone ? u?.phone ?? null : null,
           seats: t.passengerBooking?.seats ?? 0,
+          seatNumbers: seatsOf(t.id),
           childSeats: t.passengerBooking?.childSeats ?? 0,
           checkedIn: t.passengerBooking?.checkedIn ?? false,
           status: t.status,

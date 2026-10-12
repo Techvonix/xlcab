@@ -1,5 +1,5 @@
 import { Transform } from 'class-transformer';
-import { IsEmail, IsIn, IsInt, IsOptional, IsString, IsUUID, Max, MaxLength, Min, MinLength } from 'class-validator';
+import { IsEmail, IsIn, IsInt, IsOptional, IsString, IsUUID, Max, MaxLength, Min, MinLength, ArrayMaxSize, ArrayUnique, IsArray } from 'class-validator';
 
 const trim = ({ value }: { value: unknown }) => (typeof value === 'string' ? value.trim() : value);
 
@@ -30,6 +30,19 @@ export class BookLineDto {
   @IsString()
   @MaxLength(300, { message: 'Message limité à 300 caractères' })
   notes?: string;
+
+  /**
+   * Sièges choisis (lignes vendues à la place) : autant que de places.
+   * Absent : les premiers sièges libres sont attribués.
+   */
+  @IsOptional()
+  @IsArray({ message: 'Sièges invalides' })
+  @ArrayMaxSize(60, { message: 'Sièges invalides' })
+  @ArrayUnique({ message: 'Un même siège ne peut pas être choisi deux fois' })
+  @IsInt({ each: true, message: 'Sièges invalides' })
+  @Min(1, { each: true, message: 'Sièges invalides' })
+  @Max(60, { each: true, message: 'Sièges invalides' })
+  seatNumbers?: number[];
 }
 
 export class QrCheckInDto {

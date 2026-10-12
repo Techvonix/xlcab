@@ -90,6 +90,10 @@ export class TripsService {
       : null;
 
     const b = trip.passengerBooking;
+    // Sièges numérotés (ligne vendue à la place) : vides pour les autres courses.
+    const seatNumbers = trip.lineDepartureId
+      ? (await this.prisma.lineSeat.findMany({ where: { tripId: trip.id }, select: { seatNumber: true } })).map((r) => r.seatNumber).sort((x, y) => x - y)
+      : [];
     return {
       id: trip.id,
       type: trip.type,
@@ -123,6 +127,7 @@ export class TripsService {
       booking: b
         ? {
             seats: b.seats,
+            seatNumbers,
             childSeats: b.childSeats,
             wifi: b.wifiRequested,
             extraLuggage: b.extraLuggage,
@@ -281,7 +286,7 @@ export class TripsService {
     // Place sur un départ de ligne : rendue à la vente.
     if (trip.lineDepartureId) {
       const booking = await this.prisma.passengerBooking.findUnique({ where: { tripId }, select: { seats: true } });
-      await this.lines.releaseSeats(trip.lineDepartureId, booking?.seats ?? 0);
+      await this.lines.releaseSeats(trip.lineDepartureId, booking?.seats ?? 0, tripId);
     }
 
     // Remboursement Stripe (montant payé − frais). Sans effet pour une

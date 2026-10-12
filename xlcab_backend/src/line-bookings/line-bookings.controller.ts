@@ -18,6 +18,12 @@ export class LineBookingsController {
   book(@Req() req: any, @Body() dto: BookLineDto) {
     return this.bookings.book(req.user.sub, dto);
   }
+
+  /** Sièges déjà pris sur un départ (numéros seulement). */
+  @Get('seats/:departureId')
+  seatMap(@Param('departureId', ParseUUIDPipe) departureId: string) {
+    return this.bookings.seatMap(departureId);
+  }
 }
 
 /**

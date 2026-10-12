@@ -322,8 +322,9 @@ export class LinesService {
     return { departureId: d.id, seats: d.pricingMode === 'per_vehicle' ? d.seatsTotal : seats, priceCents: priceFor(d, seats) };
   }
 
-  /** Rend des places (annulation d'une réservation). */
-  async releaseSeats(departureId: string, seats: number) {
+  /** Rend des places (annulation d'une réservation) et libère ses sièges numérotés. */
+  async releaseSeats(departureId: string, seats: number, tripId?: string) {
+    if (tripId) await this.prisma.lineSeat.deleteMany({ where: { departureId, tripId } });
     const d = await this.prisma.lineDeparture.findUnique({ where: { id: departureId } });
     if (!d) return;
     await this.prisma.lineDeparture.update({
