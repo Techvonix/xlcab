@@ -298,7 +298,14 @@ référence — les exigences de la Partie 8 priment.
   position seulement si `accepted|started`, lien Google Maps (pas de carte intégrée, pas de clé). « Terminé »
   pendant 30 min puis 404 ; lien inconnu / falsifié / coupé / expiré = même 404. Le serveur n'envoie RIEN aux
   contacts (ni SMS ni e-mail branchés) : le passager transmet le lien. Contacts dans l'export RGPD, effacés à
-  l'anonymisation avec les partages. Côté app passager : À FAIRE (écran des contacts, feuille de partage du suivi).
+  l'anonymisation avec les partages. Appli passager (vérifiée sur le téléphone) : `services/safety_service.dart`
+  (`SafetyService`, `trustedContactsProvider`, `smsComposerProvider` et `clipboardWriterProvider` injectables),
+  `screens/profile/trusted_contacts_screen.dart` (route `AppRoutes.trustedContacts`, tuile du Compte, interrupteur
+  `autoShareTrips`), `screens/tracking/widgets/share_sheet.dart` (`showShareSheet` : ouvrir la feuille crée le lien ;
+  « Envoyer à … » = `sms:` déjà rédigé, jamais envoyé par l'appli ; `AutoSharePrompt` dans le suivi si option activée,
+  ≥ 1 contact et aucun partage actif). Tests : `test/screens/safety_screens_test.dart`, `test/support/safety_fakes.dart`.
+  Téléphone de démo : `scratchpad/demo/ph.sh` exige `GUARD=<paquet>` et refuse gestes ET captures si cette appli
+  n'est pas au premier plan (le porteur de projet se sert du téléphone en même temps).
 - Migrations : `init_xlcab` appliquée sur la base locale ; toute modification de
   `prisma/schema.prisma` demande désormais `npx prisma migrate dev --name <nom>`. Référentiel :
   `npx prisma db seed` (config FR uniquement).
