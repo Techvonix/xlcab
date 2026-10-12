@@ -244,6 +244,7 @@ class _RatingFormState extends ConsumerState<_RatingForm> {
   @override
   Widget build(BuildContext context) {
     final onSurface = Theme.of(context).colorScheme.onSurface;
+    final starColor = Theme.of(context).brightness == Brightness.dark ? AppColors.tertiary : AppColors.tertiaryText;
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.md),
@@ -262,7 +263,7 @@ class _RatingFormState extends ConsumerState<_RatingForm> {
                       iconSize: 36,
                       tooltip: i == 1 ? l10n.n1Etoile : l10n.etoiles(i),
                       icon: Icon(i <= _stars ? Icons.star_rounded : Icons.star_outline_rounded,
-                          color: i <= _stars ? AppColors.tertiaryText : onSurface.withValues(alpha: 0.6)),
+                          color: i <= _stars ? starColor : onSurface.withValues(alpha: 0.6)),
                       onPressed: _busy ? null : () => setState(() => _stars = i),
                     ),
                   ),
@@ -284,6 +285,8 @@ class _RatingFormState extends ConsumerState<_RatingForm> {
                   children: [
                     for (final (code, label) in ratingTags())
                       FilterChip(
+                        showCheckmark: false,
+                        avatar: Icon(_tags.contains(code) ? Icons.check : Icons.add, size: 18),
                         label: Text(label),
                         selected: _tags.contains(code),
                         onSelected: _busy ? null : (on) => setState(() => on ? _tags.add(code) : _tags.remove(code)),

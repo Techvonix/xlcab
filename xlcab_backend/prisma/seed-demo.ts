@@ -166,6 +166,9 @@ async function main() {
     });
   }
   await recomputeDriverRating(prisma as never, nadia.id);
+  // Une course terminée hier, pas encore notée : notation, étiquettes et « Réserver le retour ».
+  const yesterday = inHours(-20);
+  await trip({ passengerId: lea.id, status: 'completed', driverId: nadia.id, vehicleId: van.id, scheduledAt: yesterday, startedAt: yesterday, completedAt: new Date(yesterday.getTime() + 97 * 60_000) });
   await trip({
     passengerId: member.id, corporateId: corp.id, costCenter: 'VENTES', bookedById: corpAdmin.id, shuttleType: 'orange',
     status: 'pending', scheduledAt: inHours(72), totalPriceCents: 18000, priceLines: { create: [{ regime: 'passenger', baseCents: 18000, ratePercent: 0, vatCents: 0 }] },
@@ -232,13 +235,13 @@ async function main() {
     ],
   });
 
-  // Léa a réservé 3 places sur le départ de demain.
+  // Thomas a réservé 3 places (sièges 1 à 3) sur le départ de demain : Léa peut y choisir les siennes.
   const first = await prisma.lineDeparture.findFirst({ where: { lineId: beauvaisLine.id, localDate: tomorrow, direction: 'outbound' } });
   if (first) {
     const held = await lines.reserveSeats(first.id, 3);
     const leaLineTrip = await prisma.trip.create({
       data: {
-        type: 'passenger', status: 'accepted', source: 'line', lineDepartureId: first.id, passengerId: lea.id, driverId: djamel.id, vehicleId: vanDjamel.id,
+        type: 'passenger', status: 'accepted', source: 'line', lineDepartureId: first.id, passengerId: member.id, driverId: djamel.id, vehicleId: vanDjamel.id,
         acceptedAt: new Date(), shuttleType: 'bleue', jurisdiction: 'FR', durationMin: 75, scheduledAt: first.departureAt,
         originAddress: MAILLOT.address, originLat: MAILLOT.lat, originLng: MAILLOT.lng,
         destinationAddress: BEAUVAIS.address, destinationLat: BEAUVAIS.lat, destinationLng: BEAUVAIS.lng,
@@ -260,6 +263,10 @@ async function main() {
       { userId: lea.id, label: 'Gare de Rouen', address: ROUEN.address, lat: ROUEN.lat, lng: ROUEN.lng },
     ],
   });
+
+  // Espace sécurité de Léa : un contact de confiance (numéro fictif) et le partage proposé à chaque trajet.
+  await prisma.trustedContact.create({ data: { userId: lea.id, name: 'Maman', phone: '0600000099' } });
+  await prisma.userPreference.create({ data: { userId: lea.id, autoShareTrips: true } });
 
   // Bourse : demande publiée par Léa (6 passagers dans 3 jours), une proposition de Djamel.
   const departureAt = inHours(72);
