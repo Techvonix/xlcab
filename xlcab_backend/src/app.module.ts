@@ -17,6 +17,7 @@ import { PaymentsModule } from './payments/payments.module';
 import { SchedulerModule } from './scheduler/scheduler.module';
 import { DriverModeModule } from './driver-mode/driver-mode.module';
 import { UsersModule } from './users/users.module';
+import { TripSharingModule } from './trip-sharing/trip-sharing';
 import { ParcelsModule } from './parcels/parcels.module';
 import { InvoicesModule } from './invoices/invoices.module';
 import { ComplianceModule } from './compliance/compliance.module';
@@ -59,6 +60,7 @@ import { validateEnv } from './security/env.validation';
     PaymentsModule,
     DriverModeModule,
     UsersModule,
+    TripSharingModule,
     ParcelsModule,
     InvoicesModule,
     ComplianceModule,

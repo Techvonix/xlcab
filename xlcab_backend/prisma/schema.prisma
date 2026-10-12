@@ -475,6 +475,8 @@ model UserPreference {
   notifySms   Boolean  @default(false)
   // Prospection commerciale : consentement explicite, jamais coché par défaut (RGPD).
   marketing   Boolean  @default(false)
+  // Espace sécurité : proposer d'envoyer le lien de suivi à mes contacts à chaque trajet.
+  autoShareTrips Boolean @default(false)
   updatedAt   DateTime @updatedAt
 }
 
@@ -768,4 +770,30 @@ model OfferMessage {
   createdAt DateTime @default(now())
 
   @@index([offerId, createdAt])
+}
+
+// Contacts de confiance du passager (espace sécurité) : proches à qui il envoie
+// le lien de suivi d'un trajet. Données de tiers : nom et téléphone seulement,
+// 5 au maximum, effacées à l'anonymisation du compte.
+model TrustedContact {
+  id        String   @id @default(uuid())
+  userId    String
+  name      String
+  phone     String
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+// Partage d'un trajet par lien signé (le lien = id + signature HMAC, rien de
+// secret n'est stocké). Coupé par le passager (revokedAt) ou à l'expiration.
+model TripShare {
+  id        String    @id @default(uuid())
+  tripId    String
+  userId    String
+  createdAt DateTime  @default(now())
+  expiresAt DateTime
+  revokedAt DateTime?
+
+  @@index([tripId, userId])
 }

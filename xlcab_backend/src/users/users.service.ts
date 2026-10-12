@@ -106,7 +106,7 @@ export class UsersService {
       where: { id: user.sub },
       select: { termsAcceptedAt: true, termsVersion: true },
     });
-    const [trips, payments, notifications, driverProfile, vehicles, documents, addresses, preferences, ratingsGiven] = await Promise.all([
+    const [trips, payments, notifications, driverProfile, vehicles, documents, addresses, preferences, ratingsGiven, trustedContacts] = await Promise.all([
       this.prisma.trip.findMany({
         where: { OR: [{ passengerId: user.sub }, { driverId: user.sub }] },
         select: {
@@ -128,8 +128,9 @@ export class UsersService {
       this.prisma.vehicle.findMany({ where: { driverId: user.sub }, select: { brand: true, model: true, color: true, plate: true, capacity: true, shuttleType: true } }),
       this.prisma.driverDocument.findMany({ where: { userId: user.sub }, select: { type: true, status: true, uploadedAt: true } }),
       this.prisma.savedAddress.findMany({ where: { userId: user.sub }, select: { label: true, address: true, lat: true, lng: true, createdAt: true } }),
-      this.prisma.userPreference.findUnique({ where: { userId: user.sub }, select: { notifyPush: true, notifyEmail: true, notifySms: true, marketing: true, updatedAt: true } }),
+      this.prisma.userPreference.findUnique({ where: { userId: user.sub }, select: { notifyPush: true, notifyEmail: true, notifySms: true, marketing: true, autoShareTrips: true, updatedAt: true } }),
       this.prisma.tripRating.findMany({ where: { passengerId: user.sub }, select: { tripId: true, stars: true, comment: true, createdAt: true } }),
+      this.prisma.trustedContact.findMany({ where: { userId: user.sub }, select: { name: true, phone: true, createdAt: true } }),
     ]);
 
     await this.audit.log({ userId: user.sub, action: 'user.export', entity: 'User', entityId: user.sub, ...ctx });
@@ -143,6 +144,7 @@ export class UsersService {
       addresses,
       preferences,
       ratingsGiven,
+      trustedContacts,
       driver: driverProfile ? { profile: driverProfile, vehicles, documents } : null,
     };
   }
@@ -223,6 +225,9 @@ export class UsersService {
       await tx.notification.deleteMany({ where: { userId: userId } });
       await tx.savedAddress.deleteMany({ where: { userId } });
       await tx.userPreference.deleteMany({ where: { userId } });
+      // Espace sécurité : contacts (données de tiers) effacés, liens de suivi coupés.
+      await tx.trustedContact.deleteMany({ where: { userId } });
+      await tx.tripShare.deleteMany({ where: { userId } });
       // Notes conservées (moyenne du chauffeur), commentaires libres effacés.
       await tx.tripRating.updateMany({ where: { passengerId: userId }, data: { comment: null } });
       await tx.corporateMember.updateMany({ where: { userId: userId }, data: { isActive: false } });

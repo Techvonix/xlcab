@@ -25,7 +25,7 @@ const trim = ({ value }: { value: unknown }) => (typeof value === 'string' ? val
 /** Au-delà, la liste n'est plus « favorite » et la saisie devient pénible. */
 export const MAX_SAVED_ADDRESSES = 10;
 
-export const DEFAULT_PREFERENCES = { notifyPush: true, notifyEmail: true, notifySms: false, marketing: false };
+export const DEFAULT_PREFERENCES = { notifyPush: true, notifyEmail: true, notifySms: false, marketing: false, autoShareTrips: false };
 
 export class UpdatePreferencesDto {
   @IsOptional() @IsBoolean() notifyPush?: boolean;
@@ -33,6 +33,8 @@ export class UpdatePreferencesDto {
   @IsOptional() @IsBoolean() notifySms?: boolean;
   /** Offres et nouveautés XLCAB : consentement explicite (RGPD), désactivé par défaut. */
   @IsOptional() @IsBoolean() marketing?: boolean;
+  /** Espace sécurité : proposer le partage du trajet à mes contacts de confiance à chaque course. */
+  @IsOptional() @IsBoolean() autoShareTrips?: boolean;
 }
 
 export class SaveAddressDto {
@@ -104,6 +106,7 @@ const pick = (p: typeof DEFAULT_PREFERENCES) => ({
   notifyEmail: p.notifyEmail,
   notifySms: p.notifySms,
   marketing: p.marketing,
+  autoShareTrips: p.autoShareTrips,
 });
 
 @Controller('api/v1/users/me')

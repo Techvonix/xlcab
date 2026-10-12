@@ -52,6 +52,14 @@ export const MESSAGES_EN: Record<string, string> = {
   '{} adresses favorites au maximum : supprimez-en une d’abord': '{} saved addresses maximum: remove one first',
   'Adresse introuvable': 'Address not found',
 
+  // ── Contacts de confiance et partage du trajet ───────────────────────
+  'Donnez un nom à ce contact': 'Give this contact a name',
+  'Nom limité à 60 caractères': 'Name limited to 60 characters',
+  '{} contacts de confiance au maximum : supprimez-en un d’abord': '{} trusted contacts maximum: remove one first',
+  'Contact introuvable': 'Contact not found',
+  'Ce trajet est terminé : il ne peut plus être partagé': 'This trip has ended: it can no longer be shared',
+  'Lien de suivi indisponible': 'Tracking link unavailable',
+
   // ── Double authentification ──────────────────────────────────────────
   'Double authentification requise': 'Two-factor authentication required',
   'Code à 6 chiffres': '6-digit code',

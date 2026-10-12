@@ -62,14 +62,14 @@ describe('Préférences, adresses favorites, santé (intégration)', () => {
   describe('préférences', () => {
     it('valeurs par défaut sans ligne en base : prospection désactivée (RGPD)', async () => {
       const res = await http().get('/api/v1/users/me/preferences').set('Authorization', as('p1'));
-      expect(res.body).toEqual({ notifyPush: true, notifyEmail: true, notifySms: false, marketing: false });
+      expect(res.body).toEqual({ notifyPush: true, notifyEmail: true, notifySms: false, marketing: false, autoShareTrips: false });
     });
 
     it('modification partielle conservée ; champ inconnu ou non booléen refusé', async () => {
       const res = await http().patch('/api/v1/users/me/preferences').set('Authorization', as('p1')).send({ marketing: true, notifyEmail: false });
-      expect(res.body).toEqual({ notifyPush: true, notifyEmail: false, notifySms: false, marketing: true });
+      expect(res.body).toEqual({ notifyPush: true, notifyEmail: false, notifySms: false, marketing: true, autoShareTrips: false });
       const again = await http().patch('/api/v1/users/me/preferences').set('Authorization', as('p1')).send({ notifySms: true });
-      expect(again.body).toEqual({ notifyPush: true, notifyEmail: false, notifySms: true, marketing: true });
+      expect(again.body).toEqual({ notifyPush: true, notifyEmail: false, notifySms: true, marketing: true, autoShareTrips: false });
 
       expect((await http().patch('/api/v1/users/me/preferences').set('Authorization', as('p1')).send({ marketing: 'oui' })).status).toBe(400);
       expect((await http().patch('/api/v1/users/me/preferences').set('Authorization', as('p1')).send({ role: 'admin' })).status).toBe(400);
