@@ -345,6 +345,13 @@ référence — les exigences de la Partie 8 priment.
   les DEUX thèmes (`buttonFill` dans `app_theme.dart`) ; `colorScheme.primary` reste le cyan profond #0E7490 le
   jour (textes, liens, contours : le cyan vif y serait illisible). Thème sombre « Orbite Nuit » inchangé, au choix
   dans le profil. Écran de démarrage et icône gardent la nuit. Ce qui dit « sombre par défaut » plus haut est périmé.
+- Vidéos de démo en vigueur (2026-10-12, thème Orbite Jour VALIDÉ par le porteur de projet, remplacent toutes les
+  précédentes) : `demo/videos/xlcab-passager-fr.mp4`, `xlcab-chauffeur-fr.mp4`, `xlcab-passenger-en.mp4`,
+  `xlcab-driver-en.mp4`. ffmpeg (autorisé) : `C:UsersAdmindevfmpegfmpeg-9.0.2-essentials_buildin` — assemblage
+  par `-f concat -c copy`, contrôle par planche d'images (`fps=1/4,scale=180:-1,tile=10x5`). Chapitres :
+  `scratchpad/demo/takes.sh p1|p2|d1 <langue>` (en anglais : `CHIP1="225 752" CHIP2="283 1064"` pour p2) ; entre
+  deux séries `node demo/reset-video.js` (annule la réservation, la note et le partage de Léa sans régénérer les
+  comptes : les applis restent connectées). Langue changée dans le profil de chaque appli, puis remise sur « Téléphone ».
 - Migrations : `init_xlcab` appliquée sur la base locale ; toute modification de
   `prisma/schema.prisma` demande désormais `npx prisma migrate dev --name <nom>`. Référentiel :
   `npx prisma db seed` (config FR uniquement).
