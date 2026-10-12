@@ -27,8 +27,8 @@ class HivePreferencesStore implements PreferencesStore {
   @override
   ThemeMode readTheme() {
     final name = _box.get('themeMode');
-    // Identité Orbite : sombre par défaut ; le mode clair se choisit dans le profil.
-    return ThemeMode.values.firstWhere((m) => m.name == name, orElse: () => ThemeMode.dark);
+    // Identité Orbite : thème clair « Orbite Jour » par défaut ; le sombre se choisit dans le profil.
+    return ThemeMode.values.firstWhere((m) => m.name == name, orElse: () => ThemeMode.light);
   }
 
   @override

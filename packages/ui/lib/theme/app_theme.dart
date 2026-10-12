@@ -20,10 +20,14 @@ class AppTheme {
     final onSurface = isDark ? AppColors.darkText : AppColors.lightText;
     final border = isDark ? AppColors.darkBorder : AppColors.lightBorder;
 
-    // Identité Orbite : cyan électrique et texte sombre la nuit, cyan profond
-    // et texte blanc en clair (contraste AA dans les deux cas).
+    // Identité Orbite. Textes, liens et contours : cyan électrique la nuit, cyan
+    // profond le jour (le cyan vif serait illisible sur fond clair).
     final brand = isDark ? AppColors.brand : AppColors.brandDeep;
     final onBrand = isDark ? AppColors.onBrand : Colors.white;
+    // Boutons pleins : cyan orbite vif et texte presque noir dans les DEUX thèmes
+    // (12:1) — c'est ce qui donne au thème clair son énergie.
+    const buttonFill = AppColors.brand;
+    const onButtonFill = AppColors.onBrand;
 
     final colorScheme = ColorScheme(
       brightness: brightness,
@@ -65,8 +69,8 @@ class AppTheme {
       // ── Bouton primaire : couleur de marque, hauteur 52, rayon 12 ────
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: brand,
-          foregroundColor: onBrand,
+          backgroundColor: buttonFill,
+          foregroundColor: onButtonFill,
           minimumSize: const Size.fromHeight(AppSpacing.buttonHeight),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppSpacing.radiusButton),
@@ -78,7 +82,7 @@ class AppTheme {
 
       // Boutons pleins (FilledButton) : mêmes couleurs que le bouton primaire.
       filledButtonTheme: FilledButtonThemeData(
-        style: FilledButton.styleFrom(backgroundColor: brand, foregroundColor: onBrand),
+        style: FilledButton.styleFrom(backgroundColor: buttonFill, foregroundColor: onButtonFill),
       ),
 
       // ── Boutons secondaires (contour) et textuels ────────────────────
@@ -126,6 +130,8 @@ class AppTheme {
         margin: EdgeInsets.zero,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
+          // Le jour, une carte blanche sur fond glacier se détache par un liseré.
+          side: isDark ? BorderSide.none : BorderSide(color: border),
         ),
       ),
 
@@ -139,8 +145,12 @@ class AppTheme {
         ),
       ),
 
+      // Barre du bas : blanche le jour, carte nuit le soir ; pas de teinte ajoutée par Material 3.
+      navigationBarTheme: NavigationBarThemeData(backgroundColor: surface, surfaceTintColor: Colors.transparent),
+
       appBarTheme: AppBarTheme(
         backgroundColor: background,
+        surfaceTintColor: Colors.transparent,
         foregroundColor: onSurface,
         elevation: 0,
         centerTitle: false,

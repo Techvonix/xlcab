@@ -62,13 +62,16 @@ class AppColors {
   static const Color warning = Color(0xFFFFC107);
   static const Color error = Color(0xFFF44336);
 
-  // ── Thème clair ──────────────────────────────────────────────────────
-  static const Color lightBackground = Color(0xFFFFFFFF);
-  static const Color lightSurface = Color(0xFFF4F7FB);
+  // ── Thème clair « Orbite Jour » (par défaut depuis le 2026-10-12) ─────
+  // Fond bleu glacier très clair, cartes blanches, bordures bleutées : lumineux
+  // sans être blanc cru. Les boutons pleins y gardent le cyan orbite vif avec
+  // un texte presque noir (12:1) ; le cyan profond sert aux textes et contours.
+  static const Color lightBackground = Color(0xFFF1F7FE);
+  static const Color lightSurface = Color(0xFFFFFFFF);
   static const Color lightText = Color(0xFF0B1220);
-  static const Color lightBorder = Color(0xFFD9E0EA);
+  static const Color lightBorder = Color(0xFFCBDDF0);
 
-  // ── Thème sombre (par défaut) ────────────────────────────────────────
+  // ── Thème sombre « Orbite Nuit » (au choix dans le profil) ───────────
   static const Color darkBackground = Color(0xFF070B1A); // nuit
   static const Color darkSurface = Color(0xFF111936); // carte
   static const Color darkText = Color(0xFFE8F1FF);

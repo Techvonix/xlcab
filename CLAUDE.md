@@ -339,6 +339,12 @@ référence — les exigences de la Partie 8 priment.
   contact « Maman » et le partage automatique). Un balayage `input swipe` de durée différente ne défile pas de la
   même distance : garder 400 ms entre répétition et prise. Pas de ffmpeg sur ce PC : pas de montage, et les
   vidéos ne peuvent pas être relues image par image (vérifier par la base et les écrans de fin).
+- Thème « Orbite Jour » (2026-10-12, demande du porteur de projet : plus clair et positif que le fond noir ; EN ATTENTE
+  de sa validation sur captures `demo/captures/jour-*.png`) : thème CLAIR par défaut (`HivePreferencesStore.readTheme`),
+  fond glacier #F1F7FE, cartes blanches à liseré #CBDDF0, boutons pleins cyan orbite #22D3EE + texte #04202B dans
+  les DEUX thèmes (`buttonFill` dans `app_theme.dart`) ; `colorScheme.primary` reste le cyan profond #0E7490 le
+  jour (textes, liens, contours : le cyan vif y serait illisible). Thème sombre « Orbite Nuit » inchangé, au choix
+  dans le profil. Écran de démarrage et icône gardent la nuit. Ce qui dit « sombre par défaut » plus haut est périmé.
 - Migrations : `init_xlcab` appliquée sur la base locale ; toute modification de
   `prisma/schema.prisma` demande désormais `npx prisma migrate dev --name <nom>`. Référentiel :
   `npx prisma db seed` (config FR uniquement).
