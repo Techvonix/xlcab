@@ -115,7 +115,9 @@ describe('Factures (intégration)', () => {
       ]);
       // Identité du vendeur figée ; mentions manquantes signalées.
       expect(inv.seller.lines).toEqual(expect.arrayContaining(['SIREN 123456789 — RCS [à compléter]']));
-      expect(inv.pdfKey).toMatch(/^invoice-FA-/);
+      // Clé opaque « uuid.pdf », seul format accepté par le stockage sur disque
+      // (l'ancienne clé « invoice-FA-… » y était refusée : aucun PDF n'était archivé hors tests).
+      expect(inv.pdfKey).toMatch(/^[0-9a-f-]{36}\.pdf$/);
     });
 
     it('numérotation continue, sans trou ; une course déjà facturée ne l’est pas deux fois', async () => {

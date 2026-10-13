@@ -19,6 +19,11 @@ export abstract class DocumentStorage {
  * générées par le serveur (UUID) : aucun nom de fichier client n'entre
  * dans un chemin, donc pas de traversée de répertoire possible.
  */
+/** Clé opaque « uuid.ext » : jamais de nom lisible ni de séparateur de chemin. */
+export function assertStorageKey(key: string): void {
+  if (!/^[0-9a-f-]{36}\.(jpg|png|pdf)$/.test(key)) throw new Error('Clé de stockage invalide');
+}
+
 @Injectable()
 export class LocalDiskStorage extends DocumentStorage {
   private readonly root: string;
@@ -43,9 +48,7 @@ export class LocalDiskStorage extends DocumentStorage {
   }
 
   private path(key: string): string {
-    if (!/^[0-9a-f-]{36}\.(jpg|png|pdf)$/.test(key)) {
-      throw new Error('Clé de stockage invalide');
-    }
+    assertStorageKey(key);
     return join(this.root, key);
   }
 }
@@ -78,6 +81,8 @@ export class MemoryDocumentStorage extends DocumentStorage {
   private files = new Map<string, Buffer>();
 
   async put(key: string, data: Buffer): Promise<void> {
+    // Même contrôle que sur disque : un format de clé refusé en vrai l'est aussi dans les tests.
+    assertStorageKey(key);
     this.files.set(key, data);
   }
 

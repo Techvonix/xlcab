@@ -286,6 +286,34 @@ async function main() {
     },
   });
 
+  // Protocole d'annulation (démo) : Chris a annulé trois départs à la dernière minute en deux
+  // mois. La 3e lui vaut une pénalité de 260 €, appliquée il y a 31 jours, dont 45 € seulement
+  // ont été retenus sur ses reversements : le planificateur de l'API émet la facture du solde
+  // (215 €) dans la minute qui suit — par le vrai circuit, avec son numéro et son PDF.
+  // Djamel avait repris ce départ : son bonus de 160 € attend le recouvrement de la pénalité.
+  const DAY = 24 * HOUR;
+  const daysAgo = (n: number) => new Date(Date.now() - n * DAY);
+  const rescuedDeparture = randomUUID();
+  let lastCancellation = '';
+  for (const [i, age] of [60, 50, 40].entries()) {
+    const cancellation = await prisma.driverCancellation.create({
+      data: {
+        driverId: chris.id, departureId: i === 2 ? rescuedDeparture : randomUUID(), trigger: 'driver_cancel', reason: 'Indisponible',
+        minutesBefore: 120, lastMinute: true, status: 'counted', createdAt: daysAgo(age),
+      },
+    });
+    lastCancellation = cancellation.id;
+  }
+  const penalty = await prisma.driverPenalty.create({
+    data: {
+      driverId: chris.id, cancellationId: lastCancellation, amountCents: 26_000, status: 'applied', contestUntil: daysAgo(33),
+      decidedAt: daysAgo(31), decidedBy: 'system', collectedCents: 4_500, createdAt: daysAgo(40),
+    },
+  });
+  await prisma.driverBonus.create({
+    data: { driverId: djamel.id, departureId: rescuedDeparture, penaltyId: penalty.id, amountCents: 16_000, createdAt: daysAgo(31) },
+  });
+
   const file = join(__dirname, '..', 'demo-accounts.local.txt');
   writeFileSync(
     file,

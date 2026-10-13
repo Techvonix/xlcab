@@ -412,7 +412,8 @@ export class InvoicesService {
       mentions: this.mentions(lines, invoice.paymentStatus === 'due'),
     };
     const data = await renderInvoicePdf(doc);
-    const key = `invoice-${invoice.number}-${randomUUID()}.pdf`;
+    // Clé opaque « uuid.pdf » : seul format accepté par le stockage (jamais de nom lisible ni de chemin).
+    const key = `${randomUUID()}.pdf`;
     await this.storage.put(key, data, 'application/pdf');
     await this.prisma.invoice.update({ where: { id: invoice.id }, data: { pdfKey: key } });
     return data;
