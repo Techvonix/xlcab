@@ -38,8 +38,10 @@ late GoRouter router;
 final today = DateTime(2026, 10, 10, 9);
 
 /// Affiche [screen] au-dessus d'une page d'accueil (pour que « retour » fonctionne).
-Future<void> pump(WidgetTester tester, Widget screen) async {
-  tester.view.physicalSize = const Size(1170, 4200);
+/// [height] : hauteur de l'écran de test en pixels physiques (÷ 3 = points). Les longs formulaires sont des
+/// listes paresseuses : ce qui dépasse l'écran n'est pas construit, donc introuvable.
+Future<void> pump(WidgetTester tester, Widget screen, {double height = 4200}) async {
+  tester.view.physicalSize = Size(1170, height);
   tester.view.devicePixelRatio = 3.0;
   addTearDown(tester.view.reset);
 
@@ -150,7 +152,7 @@ void main() {
       operators.operatorProfile = const OperatorProfile(
         kind: 'independent', status: OperatorStatus.verified, perSeatAllowed: false, termsAccepted: true, termsVersion: '2026-10-09',
       );
-      await pump(tester, const LineFormScreen());
+      await pump(tester, const LineFormScreen(), height: 7800);
 
       expect(tester.widget<ChoiceChip>(find.widgetWithText(ChoiceChip, 'Par place')).onSelected, isNull);
       expect(find.textContaining('réservée aux licences de transport collectif'), findsOneWidget);
@@ -180,7 +182,7 @@ void main() {
     });
 
     testWidgets('plus de places que le véhicule : refusé avant l’envoi ; erreur du serveur affichée', (tester) async {
-      await pump(tester, const LineFormScreen());
+      await pump(tester, const LineFormScreen(), height: 7800);
       await tester.tap(find.text('Départ'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Arrivée'));

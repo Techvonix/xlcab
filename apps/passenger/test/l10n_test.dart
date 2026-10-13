@@ -14,7 +14,7 @@ import 'package:xlcab_ui/theme/app_theme.dart';
 // Traductions : fichiers ARB complets et cohérents, choix de la langue,
 // interface réellement affichée en anglais.
 
-Map<String, dynamic> arb(String locale) => jsonDecode(File('../packages/core/lib/l10n/app_$locale.arb').readAsStringSync()) as Map<String, dynamic>;
+Map<String, dynamic> arb(String locale) => jsonDecode(File('../../packages/core/lib/l10n/app_$locale.arb').readAsStringSync()) as Map<String, dynamic>;
 
 Set<String> placeholders(String message) => RegExp(r'\{(\w+)\}').allMatches(message).map((m) => m.group(1)!).toSet();
 

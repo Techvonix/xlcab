@@ -7,6 +7,7 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:xlcab_core/models/operator.dart';
 import 'package:xlcab_core/models/payouts.dart';
 import 'package:xlcab_core/services/api_service.dart';
+import 'package:xlcab_core/utils/formatters.dart';
 import 'package:xlcab_driver/screens/operator/cancellations_screen.dart';
 import 'package:xlcab_driver/screens/operator/my_lines_screen.dart';
 import 'package:xlcab_driver/screens/operator/payouts_screen.dart';
@@ -151,11 +152,11 @@ void main() {
       ]);
       await pump(tester, const PayoutsScreen());
 
-      expect(find.text('64,00 €'), findsNWidgets(2)); // total versé et ligne
-      expect(find.text('98,00 €'), findsOneWidget); // total retenu
+      expect(find.text(formatPrice(6400)), findsNWidgets(2)); // total versé et ligne
+      expect(find.text(formatPrice(9800)), findsOneWidget); // total retenu
       expect(find.text('En attente de votre compte de versement'), findsOneWidget);
       expect(find.text('Retenu pour une pénalité'), findsOneWidget);
-      expect(find.textContaining('Revenu 162,00 € · retenu 98,00 €'), findsOneWidget);
+      expect(find.textContaining('Revenu ${formatPrice(16200)} · retenu ${formatPrice(9800)}'), findsOneWidget);
       expect(find.textContaining('Porte Maillot, Paris → Aéroport de Beauvais'), findsNWidgets(3));
 
       await tester.tap(find.text('Voir mes annulations et pénalités'));
@@ -204,6 +205,6 @@ void main() {
       ),
     ];
     await pump(tester, const CancellationsScreen());
-    expect(find.text('Déjà retenu sur vos reversements : 162,00 €'), findsOneWidget);
+    expect(find.text('Déjà retenu sur vos reversements : ${formatPrice(16200)}'), findsOneWidget);
   });
 }

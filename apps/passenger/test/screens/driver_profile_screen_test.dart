@@ -160,6 +160,8 @@ void main() {
       await tester.tap(find.text('Conduite sûre'));
       await tester.tap(find.text('Colis bien traité'));
       await tester.tap(find.text('Ponctualité'));
+      // L'écran doit se redessiner entre deux touchers : sinon le second voit encore la pastille non cochée.
+      await tester.pump();
       await tester.tap(find.text('Ponctualité')); // retirée
       await tester.pump();
       await tester.tap(find.widgetWithText(PrimaryButton, 'Envoyer ma note'));

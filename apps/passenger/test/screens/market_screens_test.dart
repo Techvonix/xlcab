@@ -234,6 +234,7 @@ void main() {
       await tester.pumpAndSettle();
       for (var i = 0; i < 4; i++) {
         await tester.tap(find.byTooltip('Plus : Passagers'));
+        await tester.pump(); // sinon chaque toucher repart de la même valeur affichée
       }
       await tester.enterText(find.widgetWithText(TextField, 'Besoins particuliers (facultatif)'), 'Un siège bébé');
       await tester.tap(find.text('Publier la demande'));

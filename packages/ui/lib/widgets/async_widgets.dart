@@ -94,8 +94,11 @@ class OpCard extends StatelessWidget {
   }
 }
 
-void showToast(BuildContext context, String message) =>
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message), duration: const Duration(seconds: 5)));
+/// Message bref en bas d'écran. Un nouveau message REMPLACE celui qui est affiché : sans cela il
+/// attendait 5 secondes derrière le précédent (deux actions de suite = information en retard).
+void showToast(BuildContext context, String message) => ScaffoldMessenger.of(context)
+  ..removeCurrentSnackBar()
+  ..showSnackBar(SnackBar(content: Text(message), duration: const Duration(seconds: 5)));
 
 /// Exécute une action réseau ; affiche son erreur. Renvoie true si elle a réussi.
 Future<bool> runAction(BuildContext context, Future<void> Function() action, {String? success}) async {

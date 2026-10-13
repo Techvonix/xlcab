@@ -93,7 +93,10 @@ Future<void> pumpHome(
 }
 
 Future<void> scrollTo(WidgetTester tester, Finder finder) async {
-  await tester.scrollUntilVisible(finder, 200, scrollable: find.byType(Scrollable).first);
+  // ensureVisible fait défiler jusqu'à ce que le widget soit réellement à l'écran (scrollUntilVisible
+  // s'arrête dès qu'il existe dans l'arbre, même sous le bord : le toucher tombait alors dans le vide).
+  await tester.ensureVisible(finder);
+  await tester.pumpAndSettle();
 }
 
 void main() {
@@ -111,7 +114,8 @@ void main() {
       for (final type in ShuttleType.values) {
         expect(find.text(type.label), findsOneWidget);
       }
-      expect(find.text('Accueil'), findsOneWidget); // barre de navigation
+      // La barre de navigation appartient à la coque à onglets (PassengerShell), testée à part.
+      expect(find.text('Accueil'), findsNothing);
     });
 
     testWidgets('le bouton Accessibilité est visible et ouvre son panneau', (tester) async {
