@@ -46,7 +46,7 @@ class OperatorSection extends ConsumerWidget {
   }
 }
 
-/// Accès à l'espace opérateur : lignes, bourse, annulations, profil.
+/// Accès à l'espace opérateur : lignes, bourse, compte de versement, annulations, profil.
 class OperatorEntries extends StatelessWidget {
   const OperatorEntries({super.key, this.onNavigate});
 
@@ -57,6 +57,7 @@ class OperatorEntries extends StatelessWidget {
   Widget build(BuildContext context) => Column(mainAxisSize: MainAxisSize.min, children: [
         _Entry(icon: Icons.alt_route, label: l10n.opMesLignes, route: AppRoutes.myLines, onNavigate: onNavigate),
         _Entry(icon: Icons.storefront_outlined, label: l10n.mkBourse, route: AppRoutes.driverMarket, onNavigate: onNavigate),
+        _Entry(icon: Icons.account_balance_outlined, label: l10n.payEntree, route: AppRoutes.driverPayouts, onNavigate: onNavigate),
         _Entry(icon: Icons.report_outlined, label: l10n.opMesAnnulations, route: AppRoutes.driverCancellations, onNavigate: onNavigate),
         _Entry(icon: Icons.badge_outlined, label: l10n.opProfilOperateur, route: AppRoutes.operatorProfile, onNavigate: onNavigate),
       ]);

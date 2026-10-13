@@ -38,6 +38,7 @@ class AppRoutes {
   static const operatorProfile = '/driver/operator';
   static const driverMarket = '/driver/market';
   static const driverCancellations = '/driver/cancellations';
+  static const driverPayouts = '/driver/payouts';
   // Bourse de transport côté client : lignes régulières et demandes de devis.
   static const market = '/market';
   static const lineSearch = '/market/lines';

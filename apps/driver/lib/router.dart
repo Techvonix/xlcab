@@ -8,6 +8,7 @@ import 'package:xlcab_ui/screens/splash_screen.dart';
 import 'screens/driver/driver_mode_screen.dart';
 import 'screens/driver/driver_onboarding_screen.dart';
 import 'screens/operator/cancellations_screen.dart';
+import 'screens/operator/payouts_screen.dart';
 import 'screens/operator/departure_screen.dart';
 import 'screens/operator/line_detail_screen.dart';
 import 'screens/operator/line_form_screen.dart';
@@ -86,6 +87,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(path: AppRoutes.operatorProfile, builder: (context, state) => const OperatorProfileScreen()),
       GoRoute(path: AppRoutes.driverMarket, builder: (context, state) => const MarketFeedScreen()),
       GoRoute(path: AppRoutes.driverCancellations, builder: (context, state) => const CancellationsScreen()),
+      GoRoute(path: AppRoutes.driverPayouts, builder: (context, state) => const PayoutsScreen()),
     ],
   );
 });

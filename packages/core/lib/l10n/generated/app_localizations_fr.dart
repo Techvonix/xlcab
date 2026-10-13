@@ -3618,4 +3618,122 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get secPreferences => 'Mes préférences de sécurité';
+
+  @override
+  String get payTitre => 'Compte de versement';
+
+  @override
+  String get payEntree => 'Compte de versement et reversements';
+
+  @override
+  String get payChargement => 'Chargement du compte de versement';
+
+  @override
+  String get payEtatAucun => 'Aucun compte de versement';
+
+  @override
+  String get payEtatAucunAide =>
+      'Pour recevoir vos revenus des lignes et de la bourse, ouvrez un compte de versement chez Stripe, notre prestataire de paiement. Prévoyez une pièce d’identité et votre IBAN.';
+
+  @override
+  String get payEtatIncomplet => 'Compte de versement à compléter';
+
+  @override
+  String payEtatIncompletAide(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Stripe attend encore $count informations.',
+      one: 'Stripe attend encore 1 information.',
+      zero: 'Stripe attend la fin de votre inscription.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get payEtatVerification => 'Vérification en cours';
+
+  @override
+  String get payEtatVerificationAide =>
+      'Votre dossier est envoyé. Stripe vérifie vos informations : cela prend en général moins de deux jours ouvrés.';
+
+  @override
+  String get payEtatPret => 'Compte de versement validé';
+
+  @override
+  String get payEtatPretAide =>
+      'Vos revenus sont versés sur ce compte après chaque trajet terminé.';
+
+  @override
+  String get payExige =>
+      'Tant qu’il n’est pas validé, vous ne pouvez ni ouvrir un départ à la réservation ni proposer sur la bourse.';
+
+  @override
+  String get payOuvrir => 'Ouvrir mon compte de versement';
+
+  @override
+  String get payCompleter => 'Compléter mon dossier';
+
+  @override
+  String get payEspaceStripe => 'Voir mon espace Stripe';
+
+  @override
+  String get payConfidentialite =>
+      'Votre identité et votre IBAN sont saisis sur les pages de Stripe : XLCAB n’y a pas accès.';
+
+  @override
+  String get payOuvertureImpossible =>
+      'Impossible d’ouvrir la page de Stripe. Réessayez.';
+
+  @override
+  String get payReversements => 'Mes reversements';
+
+  @override
+  String get payReversementsIndisponibles =>
+      'Reversements indisponibles pour le moment.';
+
+  @override
+  String get payVerse => 'Versé';
+
+  @override
+  String get payEnAttente => 'En attente';
+
+  @override
+  String get payRetenu => 'Retenu';
+
+  @override
+  String get payExplication =>
+      'Après chaque trajet de ligne ou de bourse payé en ligne, vous recevez le prix hors taxes moins la commission XLCAB.';
+
+  @override
+  String get payVoirPenalites => 'Voir mes annulations et pénalités';
+
+  @override
+  String get payAucunReversement => 'Aucun reversement pour le moment.';
+
+  @override
+  String get payStatutEnCours => 'Virement en cours';
+
+  @override
+  String get payStatutVerse => 'Versé';
+
+  @override
+  String get payStatutBloque => 'En attente de votre compte de versement';
+
+  @override
+  String get payStatutRetenu => 'Retenu pour une pénalité';
+
+  @override
+  String payDetailRetenue(String gross, String withheld) {
+    return 'Revenu $gross · retenu $withheld au titre d’une pénalité d’annulation';
+  }
+
+  @override
+  String get payBanniere =>
+      'Ouvrez votre compte de versement pour mettre vos départs en vente et répondre aux demandes.';
+
+  @override
+  String payPenaliteRecouvree(String amount) {
+    return 'Déjà retenu sur vos reversements : $amount';
+  }
 }

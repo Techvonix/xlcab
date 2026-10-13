@@ -167,3 +167,8 @@ class UrlDriverLauncher implements DriverLauncher {
 final positionSourceProvider = Provider<PositionSource>((ref) => GeolocatorPositionSource());
 final qrScannerProvider = Provider<QrScanner>((ref) => CameraQrScanner());
 final driverLauncherProvider = Provider<DriverLauncher>((ref) => UrlDriverLauncher());
+
+/// Ouvre une page web dans le navigateur du téléphone (pages de Stripe du compte de versement).
+typedef ExternalLinkOpener = Future<bool> Function(Uri url);
+
+final externalLinkOpenerProvider = Provider<ExternalLinkOpener>((ref) => (url) => launchUrl(url, mode: LaunchMode.externalApplication));

@@ -79,6 +79,8 @@ class _CancellationsScreenState extends ConsumerState<CancellationsScreen> {
                       l10n.opPenalite(formatPrice(c.penalty!.amountCents, locale: locale), _penalty(c.penalty!.status)),
                       style: AppTypography.bodyBold,
                     ),
+                    if (c.penalty!.collectedCents > 0)
+                      Text(l10n.payPenaliteRecouvree(formatPrice(c.penalty!.collectedCents, locale: locale)), style: AppTypography.caption),
                   ],
                   Wrap(spacing: AppSpacing.sm, children: [
                     if (c.status == CancellationStatus.counted)

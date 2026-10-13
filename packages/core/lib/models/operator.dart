@@ -581,12 +581,15 @@ enum PenaltyStatus {
 }
 
 class DriverPenalty {
-  const DriverPenalty({required this.id, required this.amountCents, required this.status, required this.contestUntil});
+  const DriverPenalty({required this.id, required this.amountCents, required this.status, required this.contestUntil, this.collectedCents = 0});
 
   final String id;
   final int amountCents;
   final PenaltyStatus status;
   final DateTime? contestUntil;
+
+  /// Part déjà retenue sur les reversements du chauffeur.
+  final int collectedCents;
 }
 
 class DriverCancellation {
@@ -622,6 +625,7 @@ class DriverCancellation {
               amountCents: _int(p['amountCents']) ?? 0,
               status: PenaltyStatus.fromApi(_str(p['status'])),
               contestUntil: _date(p['contestUntil']),
+              collectedCents: _int(p['collectedCents']) ?? 0,
             )
           : null,
     );

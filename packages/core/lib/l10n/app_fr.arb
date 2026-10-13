@@ -2090,5 +2090,61 @@
   "impChargement": "Calcul de votre bilan",
   "secConductrice": "Préférer une conductrice",
   "secConductriceAide": "Quand une conductrice est disponible près de vous, elle est sollicitée en premier. Ce n’est pas une garantie : sinon, un autre chauffeur prend votre course.",
-  "secPreferences": "Mes préférences de sécurité"
+  "secPreferences": "Mes préférences de sécurité",
+  "payTitre": "Compte de versement",
+  "payEntree": "Compte de versement et reversements",
+  "payChargement": "Chargement du compte de versement",
+  "payEtatAucun": "Aucun compte de versement",
+  "payEtatAucunAide": "Pour recevoir vos revenus des lignes et de la bourse, ouvrez un compte de versement chez Stripe, notre prestataire de paiement. Prévoyez une pièce d’identité et votre IBAN.",
+  "payEtatIncomplet": "Compte de versement à compléter",
+  "payEtatIncompletAide": "{count, plural, =0{Stripe attend la fin de votre inscription.} =1{Stripe attend encore 1 information.} other{Stripe attend encore {count} informations.}}",
+  "@payEtatIncompletAide": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "payEtatVerification": "Vérification en cours",
+  "payEtatVerificationAide": "Votre dossier est envoyé. Stripe vérifie vos informations : cela prend en général moins de deux jours ouvrés.",
+  "payEtatPret": "Compte de versement validé",
+  "payEtatPretAide": "Vos revenus sont versés sur ce compte après chaque trajet terminé.",
+  "payExige": "Tant qu’il n’est pas validé, vous ne pouvez ni ouvrir un départ à la réservation ni proposer sur la bourse.",
+  "payOuvrir": "Ouvrir mon compte de versement",
+  "payCompleter": "Compléter mon dossier",
+  "payEspaceStripe": "Voir mon espace Stripe",
+  "payConfidentialite": "Votre identité et votre IBAN sont saisis sur les pages de Stripe : XLCAB n’y a pas accès.",
+  "payOuvertureImpossible": "Impossible d’ouvrir la page de Stripe. Réessayez.",
+  "payReversements": "Mes reversements",
+  "payReversementsIndisponibles": "Reversements indisponibles pour le moment.",
+  "payVerse": "Versé",
+  "payEnAttente": "En attente",
+  "payRetenu": "Retenu",
+  "payExplication": "Après chaque trajet de ligne ou de bourse payé en ligne, vous recevez le prix hors taxes moins la commission XLCAB.",
+  "payVoirPenalites": "Voir mes annulations et pénalités",
+  "payAucunReversement": "Aucun reversement pour le moment.",
+  "payStatutEnCours": "Virement en cours",
+  "payStatutVerse": "Versé",
+  "payStatutBloque": "En attente de votre compte de versement",
+  "payStatutRetenu": "Retenu pour une pénalité",
+  "payDetailRetenue": "Revenu {gross} · retenu {withheld} au titre d’une pénalité d’annulation",
+  "@payDetailRetenue": {
+    "placeholders": {
+      "gross": {
+        "type": "String"
+      },
+      "withheld": {
+        "type": "String"
+      }
+    }
+  },
+  "payBanniere": "Ouvrez votre compte de versement pour mettre vos départs en vente et répondre aux demandes.",
+  "payPenaliteRecouvree": "Déjà retenu sur vos reversements : {amount}",
+  "@payPenaliteRecouvree": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  }
 }

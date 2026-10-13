@@ -1,0 +1,67 @@
+{
+  "payTitre": { "fr": "Compte de versement", "en": "Payout account" },
+  "payEntree": { "fr": "Compte de versement et reversements", "en": "Payout account and payouts" },
+  "payChargement": { "fr": "Chargement du compte de versement", "en": "Loading payout account" },
+  "payEtatAucun": { "fr": "Aucun compte de versement", "en": "No payout account" },
+  "payEtatAucunAide": {
+    "fr": "Pour recevoir vos revenus des lignes et de la bourse, ouvrez un compte de versement chez Stripe, notre prestataire de paiement. Prévoyez une pièce d’identité et votre IBAN.",
+    "en": "To receive your earnings from scheduled lines and the marketplace, open a payout account with Stripe, our payment provider. Have an ID document and your IBAN ready."
+  },
+  "payEtatIncomplet": { "fr": "Compte de versement à compléter", "en": "Payout account incomplete" },
+  "payEtatIncompletAide": {
+    "fr": "{count, plural, =0{Stripe attend la fin de votre inscription.} =1{Stripe attend encore 1 information.} other{Stripe attend encore {count} informations.}}",
+    "en": "{count, plural, =0{Stripe is waiting for you to finish signing up.} =1{Stripe still needs 1 piece of information.} other{Stripe still needs {count} pieces of information.}}",
+    "p": { "count": "int" }
+  },
+  "payEtatVerification": { "fr": "Vérification en cours", "en": "Verification in progress" },
+  "payEtatVerificationAide": {
+    "fr": "Votre dossier est envoyé. Stripe vérifie vos informations : cela prend en général moins de deux jours ouvrés.",
+    "en": "Your details have been sent. Stripe is checking them: this usually takes less than two business days."
+  },
+  "payEtatPret": { "fr": "Compte de versement validé", "en": "Payout account approved" },
+  "payEtatPretAide": {
+    "fr": "Vos revenus sont versés sur ce compte après chaque trajet terminé.",
+    "en": "Your earnings are paid to this account after each completed trip."
+  },
+  "payExige": {
+    "fr": "Tant qu’il n’est pas validé, vous ne pouvez ni ouvrir un départ à la réservation ni proposer sur la bourse.",
+    "en": "Until it is approved, you cannot open a departure for booking or make offers on the marketplace."
+  },
+  "payOuvrir": { "fr": "Ouvrir mon compte de versement", "en": "Open my payout account" },
+  "payCompleter": { "fr": "Compléter mon dossier", "en": "Complete my details" },
+  "payEspaceStripe": { "fr": "Voir mon espace Stripe", "en": "View my Stripe dashboard" },
+  "payConfidentialite": {
+    "fr": "Votre identité et votre IBAN sont saisis sur les pages de Stripe : XLCAB n’y a pas accès.",
+    "en": "Your identity and IBAN are entered on Stripe’s pages: XLCAB has no access to them."
+  },
+  "payOuvertureImpossible": { "fr": "Impossible d’ouvrir la page de Stripe. Réessayez.", "en": "Could not open the Stripe page. Please try again." },
+  "payReversements": { "fr": "Mes reversements", "en": "My payouts" },
+  "payReversementsIndisponibles": { "fr": "Reversements indisponibles pour le moment.", "en": "Payouts are unavailable right now." },
+  "payVerse": { "fr": "Versé", "en": "Paid out" },
+  "payEnAttente": { "fr": "En attente", "en": "Pending" },
+  "payRetenu": { "fr": "Retenu", "en": "Withheld" },
+  "payExplication": {
+    "fr": "Après chaque trajet de ligne ou de bourse payé en ligne, vous recevez le prix hors taxes moins la commission XLCAB.",
+    "en": "After each line or marketplace trip paid online, you receive the price excluding tax minus the XLCAB commission."
+  },
+  "payVoirPenalites": { "fr": "Voir mes annulations et pénalités", "en": "View my cancellations and penalties" },
+  "payAucunReversement": { "fr": "Aucun reversement pour le moment.", "en": "No payouts yet." },
+  "payStatutEnCours": { "fr": "Virement en cours", "en": "Transfer in progress" },
+  "payStatutVerse": { "fr": "Versé", "en": "Paid out" },
+  "payStatutBloque": { "fr": "En attente de votre compte de versement", "en": "Waiting for your payout account" },
+  "payStatutRetenu": { "fr": "Retenu pour une pénalité", "en": "Withheld for a penalty" },
+  "payDetailRetenue": {
+    "fr": "Revenu {gross} · retenu {withheld} au titre d’une pénalité d’annulation",
+    "en": "Earnings {gross} · {withheld} withheld for a cancellation penalty",
+    "p": { "gross": "String", "withheld": "String" }
+  },
+  "payBanniere": {
+    "fr": "Ouvrez votre compte de versement pour mettre vos départs en vente et répondre aux demandes.",
+    "en": "Open your payout account to put your departures on sale and reply to requests."
+  },
+  "payPenaliteRecouvree": {
+    "fr": "Déjà retenu sur vos reversements : {amount}",
+    "en": "Already withheld from your payouts: {amount}",
+    "p": { "amount": "String" }
+  }
+}

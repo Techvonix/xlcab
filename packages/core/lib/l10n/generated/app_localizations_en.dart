@@ -3595,4 +3595,122 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get secPreferences => 'My safety preferences';
+
+  @override
+  String get payTitre => 'Payout account';
+
+  @override
+  String get payEntree => 'Payout account and payouts';
+
+  @override
+  String get payChargement => 'Loading payout account';
+
+  @override
+  String get payEtatAucun => 'No payout account';
+
+  @override
+  String get payEtatAucunAide =>
+      'To receive your earnings from scheduled lines and the marketplace, open a payout account with Stripe, our payment provider. Have an ID document and your IBAN ready.';
+
+  @override
+  String get payEtatIncomplet => 'Payout account incomplete';
+
+  @override
+  String payEtatIncompletAide(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Stripe still needs $count pieces of information.',
+      one: 'Stripe still needs 1 piece of information.',
+      zero: 'Stripe is waiting for you to finish signing up.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get payEtatVerification => 'Verification in progress';
+
+  @override
+  String get payEtatVerificationAide =>
+      'Your details have been sent. Stripe is checking them: this usually takes less than two business days.';
+
+  @override
+  String get payEtatPret => 'Payout account approved';
+
+  @override
+  String get payEtatPretAide =>
+      'Your earnings are paid to this account after each completed trip.';
+
+  @override
+  String get payExige =>
+      'Until it is approved, you cannot open a departure for booking or make offers on the marketplace.';
+
+  @override
+  String get payOuvrir => 'Open my payout account';
+
+  @override
+  String get payCompleter => 'Complete my details';
+
+  @override
+  String get payEspaceStripe => 'View my Stripe dashboard';
+
+  @override
+  String get payConfidentialite =>
+      'Your identity and IBAN are entered on Stripe’s pages: XLCAB has no access to them.';
+
+  @override
+  String get payOuvertureImpossible =>
+      'Could not open the Stripe page. Please try again.';
+
+  @override
+  String get payReversements => 'My payouts';
+
+  @override
+  String get payReversementsIndisponibles =>
+      'Payouts are unavailable right now.';
+
+  @override
+  String get payVerse => 'Paid out';
+
+  @override
+  String get payEnAttente => 'Pending';
+
+  @override
+  String get payRetenu => 'Withheld';
+
+  @override
+  String get payExplication =>
+      'After each line or marketplace trip paid online, you receive the price excluding tax minus the XLCAB commission.';
+
+  @override
+  String get payVoirPenalites => 'View my cancellations and penalties';
+
+  @override
+  String get payAucunReversement => 'No payouts yet.';
+
+  @override
+  String get payStatutEnCours => 'Transfer in progress';
+
+  @override
+  String get payStatutVerse => 'Paid out';
+
+  @override
+  String get payStatutBloque => 'Waiting for your payout account';
+
+  @override
+  String get payStatutRetenu => 'Withheld for a penalty';
+
+  @override
+  String payDetailRetenue(String gross, String withheld) {
+    return 'Earnings $gross · $withheld withheld for a cancellation penalty';
+  }
+
+  @override
+  String get payBanniere =>
+      'Open your payout account to put your departures on sale and reply to requests.';
+
+  @override
+  String payPenaliteRecouvree(String amount) {
+    return 'Already withheld from your payouts: $amount';
+  }
 }

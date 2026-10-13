@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:xlcab_core/models/operator.dart';
+import 'package:xlcab_core/models/payouts.dart';
 import 'package:xlcab_core/services/api_service.dart';
 
 /// Espace opérateur (xlcab_backend/src/operators et src/line-bookings) :
@@ -150,6 +151,32 @@ class OperatorService {
 
   Future<void> answerRescue(String offerId, {required bool accept}) =>
       _guard(() => _dio.post<void>('$_me/rescues/${_id(offerId)}/${accept ? 'accept' : 'decline'}', data: accept ? <String, dynamic>{} : null));
+
+  // ── Compte de versement et reversements (Stripe Connect) ──
+
+  Future<PayoutAccount> payoutAccount() => _guard(() async {
+        final res = await _dio.get<Map<String, dynamic>>('$_me/payout-account');
+        return PayoutAccount.fromJson(res.data);
+      });
+
+  /// Lien (usage unique, quelques minutes) vers les pages de Stripe où ouvrir ou compléter le compte.
+  Future<Uri> payoutOnboardingLink() => _payoutLink('onboarding-link');
+
+  /// Lien vers l'espace Stripe de l'opérateur (versements reçus, IBAN).
+  Future<Uri> payoutDashboardLink() => _payoutLink('dashboard-link');
+
+  Future<Uri> _payoutLink(String kind) => _guard(() async {
+        final res = await _dio.post<Map<String, dynamic>>('$_me/payout-account/$kind');
+        final url = Uri.tryParse(res.data?['url'] is String ? res.data!['url'] as String : '');
+        // Jamais autre chose qu'une page web sécurisée, quoi que réponde le serveur.
+        if (url == null || url.scheme != 'https' || url.host.isEmpty) throw const FormatException('lien');
+        return url;
+      });
+
+  Future<PayoutSummary> payouts() => _guard(() async {
+        final res = await _dio.get<Map<String, dynamic>>('$_me/payouts');
+        return PayoutSummary.fromJson(res.data);
+      });
 
   // ── Annulations et pénalités ──
 

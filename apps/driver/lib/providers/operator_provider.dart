@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:xlcab_core/models/operator.dart';
+import 'package:xlcab_core/models/payouts.dart';
 import '../services/operator_service.dart';
 
 export 'package:xlcab_core/providers/market_provider.dart';
@@ -34,3 +35,8 @@ final rescueOffersProvider = FutureProvider.autoDispose<List<RescueOffer>>((ref)
 final backupRolesProvider = FutureProvider.autoDispose<List<BackupRole>>((ref) => ref.watch(operatorServiceProvider).backupRoles());
 
 final cancellationsProvider = FutureProvider.autoDispose<List<DriverCancellation>>((ref) => ref.watch(operatorServiceProvider).cancellations());
+
+/// Compte de versement (Stripe Connect) : état relu à chaque ouverture de l'écran et au retour du navigateur.
+final payoutAccountProvider = FutureProvider.autoDispose<PayoutAccount>((ref) => ref.watch(operatorServiceProvider).payoutAccount());
+
+final payoutsProvider = FutureProvider.autoDispose<PayoutSummary>((ref) => ref.watch(operatorServiceProvider).payouts());

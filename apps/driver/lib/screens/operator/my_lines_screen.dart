@@ -1,3 +1,4 @@
+import 'payouts_screen.dart' show PayoutAccountBanner;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -62,6 +63,7 @@ class MyLinesScreen extends ConsumerWidget {
               padding: const EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.md, AppSpacing.md, 96),
               children: [
                 if (profile.valueOrNull != null) _ProfileBanner(profile: profile.value!),
+                const PayoutAccountBanner(),
                 if (toConfirm > 0) _ConfirmWeekCard(count: toConfirm),
                 if (list.isEmpty)
                   Padding(

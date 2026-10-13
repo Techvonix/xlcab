@@ -6200,6 +6200,198 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Mes préférences de sécurité'**
   String get secPreferences;
+
+  /// No description provided for @payTitre.
+  ///
+  /// In fr, this message translates to:
+  /// **'Compte de versement'**
+  String get payTitre;
+
+  /// No description provided for @payEntree.
+  ///
+  /// In fr, this message translates to:
+  /// **'Compte de versement et reversements'**
+  String get payEntree;
+
+  /// No description provided for @payChargement.
+  ///
+  /// In fr, this message translates to:
+  /// **'Chargement du compte de versement'**
+  String get payChargement;
+
+  /// No description provided for @payEtatAucun.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun compte de versement'**
+  String get payEtatAucun;
+
+  /// No description provided for @payEtatAucunAide.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pour recevoir vos revenus des lignes et de la bourse, ouvrez un compte de versement chez Stripe, notre prestataire de paiement. Prévoyez une pièce d’identité et votre IBAN.'**
+  String get payEtatAucunAide;
+
+  /// No description provided for @payEtatIncomplet.
+  ///
+  /// In fr, this message translates to:
+  /// **'Compte de versement à compléter'**
+  String get payEtatIncomplet;
+
+  /// No description provided for @payEtatIncompletAide.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =0{Stripe attend la fin de votre inscription.} =1{Stripe attend encore 1 information.} other{Stripe attend encore {count} informations.}}'**
+  String payEtatIncompletAide(int count);
+
+  /// No description provided for @payEtatVerification.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vérification en cours'**
+  String get payEtatVerification;
+
+  /// No description provided for @payEtatVerificationAide.
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre dossier est envoyé. Stripe vérifie vos informations : cela prend en général moins de deux jours ouvrés.'**
+  String get payEtatVerificationAide;
+
+  /// No description provided for @payEtatPret.
+  ///
+  /// In fr, this message translates to:
+  /// **'Compte de versement validé'**
+  String get payEtatPret;
+
+  /// No description provided for @payEtatPretAide.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vos revenus sont versés sur ce compte après chaque trajet terminé.'**
+  String get payEtatPretAide;
+
+  /// No description provided for @payExige.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tant qu’il n’est pas validé, vous ne pouvez ni ouvrir un départ à la réservation ni proposer sur la bourse.'**
+  String get payExige;
+
+  /// No description provided for @payOuvrir.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ouvrir mon compte de versement'**
+  String get payOuvrir;
+
+  /// No description provided for @payCompleter.
+  ///
+  /// In fr, this message translates to:
+  /// **'Compléter mon dossier'**
+  String get payCompleter;
+
+  /// No description provided for @payEspaceStripe.
+  ///
+  /// In fr, this message translates to:
+  /// **'Voir mon espace Stripe'**
+  String get payEspaceStripe;
+
+  /// No description provided for @payConfidentialite.
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre identité et votre IBAN sont saisis sur les pages de Stripe : XLCAB n’y a pas accès.'**
+  String get payConfidentialite;
+
+  /// No description provided for @payOuvertureImpossible.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible d’ouvrir la page de Stripe. Réessayez.'**
+  String get payOuvertureImpossible;
+
+  /// No description provided for @payReversements.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mes reversements'**
+  String get payReversements;
+
+  /// No description provided for @payReversementsIndisponibles.
+  ///
+  /// In fr, this message translates to:
+  /// **'Reversements indisponibles pour le moment.'**
+  String get payReversementsIndisponibles;
+
+  /// No description provided for @payVerse.
+  ///
+  /// In fr, this message translates to:
+  /// **'Versé'**
+  String get payVerse;
+
+  /// No description provided for @payEnAttente.
+  ///
+  /// In fr, this message translates to:
+  /// **'En attente'**
+  String get payEnAttente;
+
+  /// No description provided for @payRetenu.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retenu'**
+  String get payRetenu;
+
+  /// No description provided for @payExplication.
+  ///
+  /// In fr, this message translates to:
+  /// **'Après chaque trajet de ligne ou de bourse payé en ligne, vous recevez le prix hors taxes moins la commission XLCAB.'**
+  String get payExplication;
+
+  /// No description provided for @payVoirPenalites.
+  ///
+  /// In fr, this message translates to:
+  /// **'Voir mes annulations et pénalités'**
+  String get payVoirPenalites;
+
+  /// No description provided for @payAucunReversement.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun reversement pour le moment.'**
+  String get payAucunReversement;
+
+  /// No description provided for @payStatutEnCours.
+  ///
+  /// In fr, this message translates to:
+  /// **'Virement en cours'**
+  String get payStatutEnCours;
+
+  /// No description provided for @payStatutVerse.
+  ///
+  /// In fr, this message translates to:
+  /// **'Versé'**
+  String get payStatutVerse;
+
+  /// No description provided for @payStatutBloque.
+  ///
+  /// In fr, this message translates to:
+  /// **'En attente de votre compte de versement'**
+  String get payStatutBloque;
+
+  /// No description provided for @payStatutRetenu.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retenu pour une pénalité'**
+  String get payStatutRetenu;
+
+  /// No description provided for @payDetailRetenue.
+  ///
+  /// In fr, this message translates to:
+  /// **'Revenu {gross} · retenu {withheld} au titre d’une pénalité d’annulation'**
+  String payDetailRetenue(String gross, String withheld);
+
+  /// No description provided for @payBanniere.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ouvrez votre compte de versement pour mettre vos départs en vente et répondre aux demandes.'**
+  String get payBanniere;
+
+  /// No description provided for @payPenaliteRecouvree.
+  ///
+  /// In fr, this message translates to:
+  /// **'Déjà retenu sur vos reversements : {amount}'**
+  String payPenaliteRecouvree(String amount);
 }
 
 class _AppLocalizationsDelegate

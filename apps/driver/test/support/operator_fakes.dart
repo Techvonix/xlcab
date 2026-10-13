@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:xlcab_core/models/market.dart';
 import 'package:xlcab_core/models/operator.dart';
+import 'package:xlcab_core/models/payouts.dart';
 import 'package:xlcab_core/models/place.dart';
 import 'package:xlcab_core/services/api_service.dart';
 import 'package:xlcab_core/services/market_service.dart';
@@ -167,6 +168,35 @@ class FakeOperatorService extends OperatorService {
 
   @override
   Future<void> contest(String penaltyId, String reason) async => _act('contest:$reason');
+
+  // ── Compte de versement et reversements ──
+  PayoutAccount account = const PayoutAccount(required: false, state: PayoutAccountState.none);
+  PayoutSummary summary = const PayoutSummary(paidCents: 0, pendingCents: 0, withheldCents: 0, items: []);
+  ApiException? linkError;
+  int accountReads = 0;
+
+  @override
+  Future<PayoutAccount> payoutAccount() async {
+    accountReads++;
+    return account;
+  }
+
+  @override
+  Future<Uri> payoutOnboardingLink() async {
+    if (linkError != null) throw linkError!;
+    calls.add('onboardingLink');
+    return Uri.parse('https://connect.stripe.test/setup/acct_1/1');
+  }
+
+  @override
+  Future<Uri> payoutDashboardLink() async {
+    if (linkError != null) throw linkError!;
+    calls.add('dashboardLink');
+    return Uri.parse('https://connect.stripe.test/express/acct_1');
+  }
+
+  @override
+  Future<PayoutSummary> payouts() async => summary;
 }
 
 class FakeMarketService extends MarketService {

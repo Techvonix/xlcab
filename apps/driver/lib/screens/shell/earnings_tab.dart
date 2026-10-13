@@ -12,7 +12,7 @@ import '../driver/driver_mode_screen.dart';
 import '../driver/widgets/mission_card.dart';
 
 /// Onglet Revenus : net du jour, de la semaine et du mois, courses récentes,
-/// et le suivi de mes annulations (protocole des lignes régulières).
+/// compte de versement et reversements, et le suivi de mes annulations (protocole des lignes régulières).
 class EarningsTab extends ConsumerWidget {
   const EarningsTab({super.key});
 
@@ -38,6 +38,13 @@ class EarningsTab extends ConsumerWidget {
                   else
                     for (final m in recent) MissionTile(mission: m),
                   const SizedBox(height: AppSpacing.md),
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: const Icon(Icons.account_balance_outlined),
+                    title: Text(l10n.payEntree),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => context.push(AppRoutes.driverPayouts),
+                  ),
                   ListTile(
                     contentPadding: EdgeInsets.zero,
                     leading: const Icon(Icons.report_outlined),
