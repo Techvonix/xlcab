@@ -3,7 +3,7 @@
 //  - réservation de Léa sur la ligne Paris–Beauvais annulée (sièges 4 et 5 libérés) ;
 //  - sa note du trajet d'hier retirée (il redevient « à noter ») ;
 //  - ses partages de trajet effacés (la proposition automatique se rouvre).
-// Usage : node demo/reset-video.js    (base locale uniquement)
+// Usage : node demo/reset-video.js [--garder-reservation]    (base locale uniquement)
 const { PrismaClient } = require('../xlcab_backend/node_modules/@prisma/client');
 
 (async () => {
@@ -15,7 +15,9 @@ const { PrismaClient } = require('../xlcab_backend/node_modules/@prisma/client')
   if (!lea) throw new Error('Compte de démo de Léa introuvable : relancer prisma/seed-demo.ts');
 
   // 1. Réservation de ligne de Léa.
-  const lineTrips = await prisma.trip.findMany({ where: { passengerId: lea.id, source: 'line' }, include: { passengerBooking: true } });
+  // --garder-reservation : pour refaire seulement la seconde partie de la vidéo passager.
+  const keepBooking = process.argv.includes('--garder-reservation');
+  const lineTrips = keepBooking ? [] : await prisma.trip.findMany({ where: { passengerId: lea.id, source: 'line' }, include: { passengerBooking: true } });
   for (const t of lineTrips) {
     const seats = t.passengerBooking?.seats ?? 0;
     await prisma.lineSeat.deleteMany({ where: { tripId: t.id } });

@@ -364,6 +364,18 @@ référence — les exigences de la Partie 8 priment.
   ni défis (barème non défini). (3) Stripe : le porteur de projet a un compte ; Connect À FAIRE dès que les clés
   de test sont dans `.env.local` (jamais dans le chat). (4) Préférence « conductrice » : à traiter comme une
   PRÉFÉRENCE non exclusive ; base technique à décider (on ne stocke pas le genre ; `roseEligible` ?).
+- Préférence « conductrice » (2026-10-13, migration `prefer_woman_driver`, appuyée sur l'habilitation Navette Rose par
+  décision du porteur de projet) : `UserPreference.preferWomanDriver`, `MatchCriteria.preferRose` (habilitées
+  d'abord, tri stable par proximité, AUCUN chauffeur écarté), lue par `DispatchService.prefersWomanDriver` (illisible
+  = non) ; app : second interrupteur de `trusted_contacts_screen.dart` sous « Mes préférences de sécurité », texte
+  « ce n'est pas une garantie ». Conformité juridique non validée par un conseil.
+- Tournage vidéo, leçons du 2026-10-13 : faire activer le MODE AVION par le porteur de projet (vérifiable :
+  `settings get global airplane_mode_on` = 1 ; les applis passent par `adb reverse`) — une bannière de notification
+  absorbe les touchers et se retrouve dans la vidéo sans faire quitter l'appli du premier plan ; « Ne pas déranger »
+  s'est révélé inactif trois fois (`dumpsys notification` → mZenMode). Contrôle de chaque vidéo : bande du haut
+  seconde par seconde (`fps=1,crop=iw:200:0:60,scale=240:-1,tile=7x26`). `reset-video.js --garder-reservation`
+  pour refaire seulement la 2e partie. Les données du seed vieillissent : relancé la veille, les sièges 1-3 de
+  Thomas ne sont plus sur le départ du lendemain (relancer `seed-demo.ts` le jour même, puis se reconnecter).
 - Migrations : `init_xlcab` appliquée sur la base locale ; toute modification de
   `prisma/schema.prisma` demande désormais `npx prisma migrate dev --name <nom>`. Référentiel :
   `npx prisma db seed` (config FR uniquement).
