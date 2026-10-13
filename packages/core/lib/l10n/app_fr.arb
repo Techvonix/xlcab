@@ -2087,5 +2087,8 @@
   },
   "impAucun": "Votre bilan apparaîtra ici après votre premier trajet terminé.",
   "impIndisponible": "Bilan indisponible pour le moment.",
-  "impChargement": "Calcul de votre bilan"
+  "impChargement": "Calcul de votre bilan",
+  "secConductrice": "Préférer une conductrice",
+  "secConductriceAide": "Quand une conductrice est disponible près de vous, elle est sollicitée en premier. Ce n’est pas une garantie : sinon, un autre chauffeur prend votre course.",
+  "secPreferences": "Mes préférences de sécurité"
 }

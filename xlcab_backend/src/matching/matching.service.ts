@@ -35,6 +35,11 @@ export interface MatchCriteria {
   durationMin?: number | null;
   /** Arrivée de la course : un chauffeur qui rentre par ce trajet reste sollicitable. */
   destination?: { lat: number; lng: number };
+  /**
+   * Préférence du passager : les conductrices habilitées Navette Rose sont
+   * sollicitées en premier. Aucun chauffeur n'est écarté pour autant.
+   */
+  preferRose?: boolean;
 }
 
 /** Trajet d'une course candidate (départ → arrivée). */
@@ -111,7 +116,7 @@ export class MatchingService {
         // Partie 1.3 : Navette Rose = conductrice, habilitée par un admin.
         ...(criteria.shuttleType === 'rose' ? { roseEligible: true } : {}),
       },
-      select: { id: true },
+      select: { id: true, roseEligible: true },
     });
     if (drivers.length === 0) return [];
 
@@ -143,8 +148,14 @@ export class MatchingService {
       }
     }
 
-    // 5. On conserve l'ordre de proximité de l'étape 1.
-    return available
+    // 5. On conserve l'ordre de proximité de l'étape 1. Préférence « conductrice » :
+    // les habilitées Navette Rose passent devant, toujours par proximité (tri stable) ;
+    // les autres chauffeurs suivent, personne n'est retiré de la liste.
+    const rose = new Set(drivers.filter((d) => d.roseEligible).map((d) => d.id));
+    const ordered = criteria.preferRose
+      ? [...available.filter((a) => rose.has(a.driverId)), ...available.filter((a) => !rose.has(a.driverId))]
+      : available;
+    return ordered
       .filter((a) => vehicleByDriver.has(a.driverId))
       .slice(0, MAX_CANDIDATES)
       .map((a) => ({

@@ -128,7 +128,7 @@ export class UsersService {
       this.prisma.vehicle.findMany({ where: { driverId: user.sub }, select: { brand: true, model: true, color: true, plate: true, capacity: true, shuttleType: true } }),
       this.prisma.driverDocument.findMany({ where: { userId: user.sub }, select: { type: true, status: true, uploadedAt: true } }),
       this.prisma.savedAddress.findMany({ where: { userId: user.sub }, select: { label: true, address: true, lat: true, lng: true, createdAt: true } }),
-      this.prisma.userPreference.findUnique({ where: { userId: user.sub }, select: { notifyPush: true, notifyEmail: true, notifySms: true, marketing: true, autoShareTrips: true, updatedAt: true } }),
+      this.prisma.userPreference.findUnique({ where: { userId: user.sub }, select: { notifyPush: true, notifyEmail: true, notifySms: true, marketing: true, autoShareTrips: true, preferWomanDriver: true, updatedAt: true } }),
       this.prisma.tripRating.findMany({ where: { passengerId: user.sub }, select: { tripId: true, stars: true, comment: true, createdAt: true } }),
       this.prisma.trustedContact.findMany({ where: { userId: user.sub }, select: { name: true, phone: true, createdAt: true } }),
     ]);

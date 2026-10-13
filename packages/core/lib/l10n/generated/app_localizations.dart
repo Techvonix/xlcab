@@ -6182,6 +6182,24 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Calcul de votre bilan'**
   String get impChargement;
+
+  /// No description provided for @secConductrice.
+  ///
+  /// In fr, this message translates to:
+  /// **'Préférer une conductrice'**
+  String get secConductrice;
+
+  /// No description provided for @secConductriceAide.
+  ///
+  /// In fr, this message translates to:
+  /// **'Quand une conductrice est disponible près de vous, elle est sollicitée en premier. Ce n’est pas une garantie : sinon, un autre chauffeur prend votre course.'**
+  String get secConductriceAide;
+
+  /// No description provided for @secPreferences.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mes préférences de sécurité'**
+  String get secPreferences;
 }
 
 class _AppLocalizationsDelegate

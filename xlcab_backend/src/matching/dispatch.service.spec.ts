@@ -89,6 +89,8 @@ describe('DispatchService', () => {
     it('relit tous les critères en base (position, navette, places)', async () => {
       await service.startMatching(owner, TRIP_ID);
       expect(matching.findEligibleDrivers).toHaveBeenCalledWith({
+        // Sans préférence « conductrice » enregistrée : ordre de proximité simple.
+        preferRose: false,
         lat: 48.85, lng: 2.35, shuttleType: 'bleue', jurisdiction: 'FR', seats: 3, scheduledAt: null,
         durationMin: undefined, destination: { lat: 49.44, lng: 1.09 },
       });

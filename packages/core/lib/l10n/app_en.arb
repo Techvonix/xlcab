@@ -1013,5 +1013,8 @@
   "impMethode": "This is an estimate. We compare your trip with the same trip driven alone in a petrol or diesel car ({car} kg of CO₂e per km, source: ADEME). The shuttle ({shuttle} kg per km) is shared between the travellers on board. Alone on board, nothing is counted.",
   "impAucun": "Your figures will appear here after your first completed trip.",
   "impIndisponible": "Your impact is unavailable for now.",
-  "impChargement": "Calculating your impact"
+  "impChargement": "Calculating your impact",
+  "secConductrice": "Prefer a woman driver",
+  "secConductriceAide": "When a woman driver is available near you, she is asked first. This is not a guarantee: otherwise another driver takes your trip.",
+  "secPreferences": "My safety preferences"
 }

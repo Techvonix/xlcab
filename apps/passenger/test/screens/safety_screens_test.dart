@@ -128,18 +128,31 @@ void main() {
 
     testWidgets('partage à chaque trajet : enregistré sur le compte ; échec → retour à l’état précédent', (tester) async {
       await pump(tester, const TrustedContactsScreen());
-      await tester.tap(find.byType(Switch));
+      await tester.tap(find.byType(Switch).first);
       await tester.pumpAndSettle();
       expect(prefs.changes, [
         {'autoShareTrips': true},
       ]);
-      expect(tester.widget<Switch>(find.byType(Switch)).value, isTrue);
+      expect(tester.widget<Switch>(find.byType(Switch).first).value, isTrue);
 
       prefs.updateError = const ApiException('Service indisponible');
-      await tester.tap(find.byType(Switch));
+      await tester.tap(find.byType(Switch).first);
       await tester.pumpAndSettle();
-      expect(tester.widget<Switch>(find.byType(Switch)).value, isTrue);
+      expect(tester.widget<Switch>(find.byType(Switch).first).value, isTrue);
       expect(find.text('Service indisponible'), findsOneWidget);
+    });
+
+    testWidgets('« Préférer une conductrice » : présentée comme une préférence, enregistrée sur le compte', (tester) async {
+      await pump(tester, const TrustedContactsScreen());
+      expect(find.textContaining('Ce n’est pas une garantie'), findsOneWidget);
+      expect(tester.widget<Switch>(find.byType(Switch).last).value, isFalse);
+      await tester.tap(find.byType(Switch).last);
+      await tester.pumpAndSettle();
+      expect(prefs.changes, [
+        {'preferWomanDriver': true},
+      ]);
+      expect(tester.widget<Switch>(find.byType(Switch).last).value, isTrue);
+      expect(tester.widget<Switch>(find.byType(Switch).first).value, isFalse); // l'autre réglage ne bouge pas
     });
 
     testWidgets('erreur d’ajout affichée (ex. 5 contacts déjà enregistrés ailleurs)', (tester) async {

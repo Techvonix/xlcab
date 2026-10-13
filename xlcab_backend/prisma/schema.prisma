@@ -477,6 +477,8 @@ model UserPreference {
   marketing   Boolean  @default(false)
   // Espace sécurité : proposer d'envoyer le lien de suivi à mes contacts à chaque trajet.
   autoShareTrips Boolean @default(false)
+  // Préférence (jamais une exigence) : solliciter d'abord une conductrice habilitée Navette Rose.
+  preferWomanDriver Boolean @default(false)
   updatedAt   DateTime @updatedAt
 }
 

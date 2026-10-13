@@ -3585,4 +3585,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get impChargement => 'Calculating your impact';
+
+  @override
+  String get secConductrice => 'Prefer a woman driver';
+
+  @override
+  String get secConductriceAide =>
+      'When a woman driver is available near you, she is asked first. This is not a guarantee: otherwise another driver takes your trip.';
+
+  @override
+  String get secPreferences => 'My safety preferences';
 }

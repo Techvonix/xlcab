@@ -3608,4 +3608,14 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get impChargement => 'Calcul de votre bilan';
+
+  @override
+  String get secConductrice => 'Préférer une conductrice';
+
+  @override
+  String get secConductriceAide =>
+      'Quand une conductrice est disponible près de vous, elle est sollicitée en premier. Ce n’est pas une garantie : sinon, un autre chauffeur prend votre course.';
+
+  @override
+  String get secPreferences => 'Mes préférences de sécurité';
 }

@@ -134,6 +134,7 @@ export class DispatchService implements OnModuleDestroy {
     await this.redis.set(dispatchRetryKey(tripId), '1', 'EX', NO_DRIVER_RETRY_SECONDS);
 
     const candidates = await this.matching.findEligibleDrivers({
+      preferRose: await this.prefersWomanDriver(trip.passengerId),
       lat: trip.originLat,
       lng: trip.originLng,
       shuttleType: trip.shuttleType as ShuttleType,
@@ -450,5 +451,16 @@ export class DispatchService implements OnModuleDestroy {
   private async cleanup(tripId: string) {
     this.clearTimer(tripId);
     await this.redis.del(dispatchQueueKey(tripId), vehicleKey(tripId), offerPayloadKey(tripId));
+  }
+
+  /** Préférence « conductrice » du passager. Une préférence ne bloque jamais une course : illisible = non. */
+  private async prefersWomanDriver(passengerId: string | null): Promise<boolean> {
+    if (!passengerId) return false;
+    try {
+      const pref = await this.prisma.userPreference.findUnique({ where: { userId: passengerId }, select: { preferWomanDriver: true } });
+      return pref?.preferWomanDriver === true;
+    } catch {
+      return false;
+    }
   }
 }

@@ -157,6 +157,22 @@ describe('MatchingService', () => {
     expect(prisma.driverProfile.findMany.mock.calls[0][0].where).not.toHaveProperty('roseEligible');
   });
 
+  it('préférence « conductrice » : les habilitées Navette Rose d’abord, par proximité ; personne n’est écarté', async () => {
+    online(['d-near', 1], ['d-mid', 4], ['d-rose-near', 6], ['d-rose-far', 9]);
+    prisma.driverProfile.findMany.mockImplementation(async ({ where }: any) =>
+      where.id.in.map((id: string) => ({ id, roseEligible: id.startsWith('d-rose') })),
+    );
+    const ids = async (preferRose?: boolean) => (await service.findEligibleDrivers(criteria({ preferRose }))).map((c) => c.driverId);
+
+    expect(await ids(true)).toEqual(['d-rose-near', 'd-rose-far', 'd-near', 'd-mid']);
+    // Sans préférence : simple ordre de proximité.
+    expect(await ids()).toEqual(['d-near', 'd-mid', 'd-rose-near', 'd-rose-far']);
+    // La préférence n'ajoute aucun filtre : aucune conductrice disponible = mêmes chauffeurs.
+    prisma.driverProfile.findMany.mockImplementation(async ({ where }: any) => where.id.in.map((id: string) => ({ id, roseEligible: false })));
+    expect(await ids(true)).toEqual(['d-near', 'd-mid', 'd-rose-near', 'd-rose-far']);
+    expect(prisma.driverProfile.findMany.mock.calls.at(-1)[0].where).not.toHaveProperty('roseEligible');
+  });
+
   it('Navette Accessibilité : chauffeur formé PMR et véhicule équipé', async () => {
     online(['d1', 1]);
     await service.findEligibleDrivers(criteria({ shuttleType: 'accessibility' }));

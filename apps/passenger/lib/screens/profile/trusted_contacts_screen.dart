@@ -22,8 +22,9 @@ class TrustedContactsScreen extends ConsumerStatefulWidget {
 class _TrustedContactsScreenState extends ConsumerState<TrustedContactsScreen> {
   bool _busy = false;
 
-  /// Choix affiché tout de suite, avant la réponse du serveur.
+  /// Choix affichés tout de suite, avant la réponse du serveur.
   bool? _autoSharePending;
+  bool? _womanDriverPending;
 
   void _toast(String message) => ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
 
@@ -74,10 +75,23 @@ class _TrustedContactsScreenState extends ConsumerState<TrustedContactsScreen> {
     }
   }
 
+  Future<void> _setWomanDriver(bool value) async {
+    setState(() => _womanDriverPending = value);
+    try {
+      await ref.read(feedbackServiceProvider).updatePreferences({'preferWomanDriver': value});
+      ref.invalidate(notificationPreferencesProvider);
+    } on ApiException catch (e) {
+      if (mounted) setState(() => _womanDriverPending = null);
+      _toast(e.message);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final contacts = ref.watch(trustedContactsProvider);
-    final autoShare = _autoSharePending ?? ref.watch(notificationPreferencesProvider).valueOrNull?.autoShareTrips ?? false;
+    final prefs = ref.watch(notificationPreferencesProvider).valueOrNull;
+    final autoShare = _autoSharePending ?? prefs?.autoShareTrips ?? false;
+    final womanDriver = _womanDriverPending ?? prefs?.preferWomanDriver ?? false;
     final onSurface = Theme.of(context).colorScheme.onSurface;
     final muted = onSurface.withValues(alpha: 0.75);
 
@@ -120,12 +134,21 @@ class _TrustedContactsScreenState extends ConsumerState<TrustedContactsScreen> {
             else
               Text(l10n.secContactsMax, textAlign: TextAlign.center, style: AppTypography.caption.copyWith(color: onSurface)),
             const SizedBox(height: AppSpacing.lg),
+            Semantics(header: true, child: Text(l10n.secPreferences, style: AppTypography.bodyBold.copyWith(color: onSurface))),
             SwitchListTile(
               contentPadding: EdgeInsets.zero,
               title: Text(l10n.secPartageAuto),
               subtitle: Text(l10n.secPartageAutoAide),
               value: autoShare,
               onChanged: _setAutoShare,
+            ),
+            // Une préférence, jamais une exigence : aucun chauffeur n'est écarté.
+            SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              title: Text(l10n.secConductrice),
+              subtitle: Text(l10n.secConductriceAide),
+              value: womanDriver,
+              onChanged: _setWomanDriver,
             ),
           ],
         ),

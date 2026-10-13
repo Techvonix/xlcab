@@ -52,17 +52,19 @@ class FakePreferencesService extends FeedbackService {
   FakePreferencesService({this.autoShare = false}) : super(Dio());
 
   bool autoShare;
+  bool womanDriver = false;
   final List<Map<String, bool>> changes = [];
   ApiException? updateError;
 
   @override
-  Future<NotificationPreferences> preferences() async => NotificationPreferences(autoShareTrips: autoShare);
+  Future<NotificationPreferences> preferences() async => NotificationPreferences(autoShareTrips: autoShare, preferWomanDriver: womanDriver);
 
   @override
   Future<NotificationPreferences> updatePreferences(Map<String, bool> changes) async {
     if (updateError != null) throw updateError!;
     this.changes.add(changes);
     autoShare = changes['autoShareTrips'] ?? autoShare;
+    womanDriver = changes['preferWomanDriver'] ?? womanDriver;
     return preferences();
   }
 }

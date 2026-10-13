@@ -171,7 +171,7 @@ class SavedAddress {
 
 /// GET/PATCH /users/me/preferences.
 class NotificationPreferences {
-  const NotificationPreferences({this.push = true, this.email = true, this.sms = false, this.marketing = false, this.autoShareTrips = false});
+  const NotificationPreferences({this.push = true, this.email = true, this.sms = false, this.marketing = false, this.autoShareTrips = false, this.preferWomanDriver = false});
 
   final bool push;
   final bool email;
@@ -179,6 +179,9 @@ class NotificationPreferences {
 
   /// Espace sécurité : proposer le partage du trajet aux contacts de confiance à chaque course.
   final bool autoShareTrips;
+
+  /// Préférence (pas une exigence) : une conductrice est sollicitée en premier quand il y en a une.
+  final bool preferWomanDriver;
 
   /// Offres et nouveautés : consentement explicite, jamais coché par défaut.
   final bool marketing;
@@ -189,5 +192,6 @@ class NotificationPreferences {
         sms: json['notifySms'] == true,
         marketing: json['marketing'] == true,
         autoShareTrips: json['autoShareTrips'] == true,
+        preferWomanDriver: json['preferWomanDriver'] == true,
       );
 }

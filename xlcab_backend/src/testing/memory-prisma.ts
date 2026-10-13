@@ -197,7 +197,7 @@ export function memoryPrisma() {
     trackingPoint: new Table(() => ({ recordedAt: new Date() })),
     payment: new Table(() => ({ currency: 'EUR', refundedCents: 0, method: null, createdAt: new Date() })),
     savedAddress: new Table(() => ({ createdAt: new Date() })),
-    userPreference: new Table(() => ({ notifyPush: true, notifyEmail: true, notifySms: false, marketing: false, autoShareTrips: false, updatedAt: new Date() })),
+    userPreference: new Table(() => ({ notifyPush: true, notifyEmail: true, notifySms: false, marketing: false, autoShareTrips: false, preferWomanDriver: false, updatedAt: new Date() })),
     trustedContact: new Table(() => ({ createdAt: new Date() })),
     lineSeat: new Table(() => ({ createdAt: new Date() })),
     tripShare: new Table(() => ({ createdAt: new Date(), revokedAt: null })),

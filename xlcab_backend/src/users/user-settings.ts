@@ -25,7 +25,7 @@ const trim = ({ value }: { value: unknown }) => (typeof value === 'string' ? val
 /** Au-delà, la liste n'est plus « favorite » et la saisie devient pénible. */
 export const MAX_SAVED_ADDRESSES = 10;
 
-export const DEFAULT_PREFERENCES = { notifyPush: true, notifyEmail: true, notifySms: false, marketing: false, autoShareTrips: false };
+export const DEFAULT_PREFERENCES = { notifyPush: true, notifyEmail: true, notifySms: false, marketing: false, autoShareTrips: false, preferWomanDriver: false };
 
 export class UpdatePreferencesDto {
   @IsOptional() @IsBoolean() notifyPush?: boolean;
@@ -35,6 +35,8 @@ export class UpdatePreferencesDto {
   @IsOptional() @IsBoolean() marketing?: boolean;
   /** Espace sécurité : proposer le partage du trajet à mes contacts de confiance à chaque course. */
   @IsOptional() @IsBoolean() autoShareTrips?: boolean;
+  /** Préférence, pas exigence : une conductrice habilitée est sollicitée en premier quand il y en a une. */
+  @IsOptional() @IsBoolean() preferWomanDriver?: boolean;
 }
 
 export class SaveAddressDto {
@@ -107,6 +109,7 @@ const pick = (p: typeof DEFAULT_PREFERENCES) => ({
   notifySms: p.notifySms,
   marketing: p.marketing,
   autoShareTrips: p.autoShareTrips,
+  preferWomanDriver: p.preferWomanDriver,
 });
 
 @Controller('api/v1/users/me')

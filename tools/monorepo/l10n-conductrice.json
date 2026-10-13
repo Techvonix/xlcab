@@ -1,0 +1,5 @@
+{
+  "secConductrice": { "fr": "Préférer une conductrice", "en": "Prefer a woman driver" },
+  "secConductriceAide": { "fr": "Quand une conductrice est disponible près de vous, elle est sollicitée en premier. Ce n’est pas une garantie : sinon, un autre chauffeur prend votre course.", "en": "When a woman driver is available near you, she is asked first. This is not a guarantee: otherwise another driver takes your trip." },
+  "secPreferences": { "fr": "Mes préférences de sécurité", "en": "My safety preferences" }
+}
