@@ -554,10 +554,13 @@ model Payout {
   tripId           String    @unique
   driverId         String // celui qui a assuré la course (titulaire ou secours)
   paymentId        String? // encaissement du passager dont provient le virement
-  amountCents      Int // prix HT − commission XLCAB
+  grossCents       Int       @default(0) // prix HT − commission XLCAB
+  withheldCents    Int       @default(0) // pénalités d'annulation retenues
+  amountCents      Int // viré : grossCents − withheldCents
   currency         String    @default("EUR")
-  // pending : à virer ; paid : viré ; blocked : compte de versement pas prêt ;
-  // failed : incident Stripe (repris automatiquement) ; void : rien à verser.
+  // draft : en préparation (retenues) ; pending : à virer ; paid : viré ;
+  // blocked : compte de versement pas prêt ; failed : incident Stripe (repris
+  // automatiquement) ; withheld : entièrement retenu ; void : rien à verser.
   status           String    @default("pending")
   stripeTransferId String?
   stripeAccountId  String?
@@ -569,6 +572,18 @@ model Payout {
 
   @@index([driverId, createdAt])
   @@index([status, nextAttemptAt])
+}
+
+// Part d'une pénalité d'annulation retenue sur un reversement.
+model PayoutDeduction {
+  id          String   @id @default(uuid())
+  payoutId    String
+  penaltyId   String
+  amountCents Int
+  createdAt   DateTime @default(now())
+
+  @@index([payoutId])
+  @@index([penaltyId])
 }
 
 // Ligne régulière : trajet type + calendrier. Le trajet (origine,
@@ -717,9 +732,13 @@ model DriverPenalty {
   decidedBy      String?
   decisionReason String?
   decidedAt      DateTime?
+  // Recouvrement : retenues sur les reversements du chauffeur (PayoutDeduction).
+  collectedCents Int       @default(0)
+  collectedAt    DateTime? // entièrement recouvrée
   createdAt      DateTime  @default(now())
 
   @@index([status, contestUntil])
+  @@index([driverId, status])
 }
 
 // Bonus de reprise versé au chauffeur de secours (financé par la pénalité).

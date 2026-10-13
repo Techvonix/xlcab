@@ -219,6 +219,7 @@ export function memoryPrisma() {
     rescueOffer: new Table(() => ({ status: 'pending', vehicleId: null, respondedAt: null, createdAt: new Date() })),
     driverCancellation: new Table(() => ({ reason: null, justification: null, reviewedBy: null, reviewedAt: null, createdAt: new Date() })),
     driverPenalty: new Table(() => ({
+      collectedCents: 0, collectedAt: null,
       status: 'pending', contestReason: null, decidedBy: null, decisionReason: null, decidedAt: null, createdAt: new Date(),
     })),
     driverBonus: new Table(() => ({ penaltyId: null, createdAt: new Date() })),
@@ -232,8 +233,9 @@ export function memoryPrisma() {
       includesReturn: false, conditions: null, status: 'pending', confirmDeadline: null, respondedAt: null, createdAt: new Date(),
     })),
     offerMessage: new Table(() => ({ createdAt: new Date() })),
+    payoutDeduction: new Table(() => ({ createdAt: new Date() })),
     payout: new Table(() => ({
-      paymentId: null, currency: 'EUR', status: 'pending', stripeTransferId: null, stripeAccountId: null, attempts: 0, nextAttemptAt: null, lastError: null,
+      grossCents: 0, withheldCents: 0, paymentId: null, currency: 'EUR', status: 'pending', stripeTransferId: null, stripeAccountId: null, attempts: 0, nextAttemptAt: null, lastError: null,
       createdAt: new Date(), paidAt: null,
     })),
     payoutAccount: new Table(() => ({

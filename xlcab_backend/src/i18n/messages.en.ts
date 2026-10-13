@@ -540,6 +540,11 @@ export const MESSAGES_EN: Record<string, string> = {
     '€{} is waiting for you: open or complete your payout account to receive it.',
   'Revenu versé': 'Earnings paid out',
   '{} € ont été versés sur votre compte de versement.': '€{} has been paid to your payout account.',
+  'Pénalité retenue': 'Penalty withheld',
+  '{} € ont été retenus sur votre revenu au titre d’une pénalité d’annulation. Reste dû : {} €.':
+    '€{} was withheld from your earnings for a cancellation penalty. Still due: €{}.',
+  '{} € ont été retenus sur votre revenu au titre d’une pénalité d’annulation. Elle est maintenant soldée.':
+    '€{} was withheld from your earnings for a cancellation penalty. It is now settled.',
   'Réservation annulée': 'Booking cancelled',
   'Ce départ n’est plus disponible : vous êtes remboursé intégralement.': 'This departure is no longer available: you are refunded in full.',
 };

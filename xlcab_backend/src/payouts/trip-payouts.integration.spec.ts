@@ -236,7 +236,7 @@ describe('Reversement à l’opérateur en fin de trajet (intégration)', () => 
 
     // Revérifié chaque heure, sans le relancer à chaque fois.
     expect(await payouts.tick(new Date(Date.now() + 30 * MIN))).toMatchObject({ paid: 0, blocked: 0 });
-    expect(await payouts.tick(new Date(Date.now() + 61 * MIN))).toMatchObject({ blocked: 1 });
+    expect(await payouts.tick(new Date(Date.now() + 90 * MIN))).toMatchObject({ blocked: 1 });
     expect(notified(DJAMEL, 'payout.blocked')).toBe(1);
 
     account(DJAMEL).payoutsEnabled = true;
@@ -253,8 +253,10 @@ describe('Reversement à l’opérateur en fin de trajet (intégration)', () => 
     // Pour l'opérateur c'est « en cours » : il n'a rien à faire.
     expect((await mine(DJAMEL)).body.items[0].status).toBe('pending');
 
-    expect(await payouts.tick(new Date(Date.now() + 4 * MIN))).toMatchObject({ paid: 0 });
-    expect(await payouts.tick(new Date(Date.now() + 6 * MIN))).toMatchObject({ paid: 1 });
+    // Reprise 5 minutes après l'échec (mesuré depuis l'échec, pas depuis l'horloge du test).
+    const retryAt = payoutOf(tripId).nextAttemptAt.getTime();
+    expect(await payouts.tick(new Date(retryAt - MIN))).toMatchObject({ paid: 0 });
+    expect(await payouts.tick(new Date(retryAt + MIN))).toMatchObject({ paid: 1 });
     await payouts.tick(new Date(Date.now() + 2 * HOUR));
     await payouts.onTripCompleted(tripId);
     expect(stripe.transfersCreated).toHaveLength(1);
@@ -341,6 +343,139 @@ describe('Reversement à l’opérateur en fin de trajet (intégration)', () => 
     expect(payoutOf(tripId)).toMatchObject({ status: 'paid', amountCents: 16200 });
     expect(await payouts.tick()).toMatchObject({ registered: 0, paid: 0 });
     expect(stripe.transfersCreated).toHaveLength(1);
+  });
+
+  describe('pénalités d’annulation retenues sur les reversements', () => {
+    let seq = 0;
+    /** Pénalité de 260 € ; « applied » = délai de contestation passé, due. */
+    function penalty(over: Record<string, unknown> = {}) {
+      const row = {
+        id: id(300 + ++seq), driverId: DJAMEL, cancellationId: id(400 + seq), amountCents: 26000, status: 'applied',
+        contestUntil: new Date(Date.now() - HOUR), createdAt: new Date(Date.now() - (100 - seq) * HOUR), collectedCents: 0, collectedAt: null, ...over,
+      };
+      db.driverPenalty.rows.push(row);
+      return db.driverPenalty.rows.find((p: any) => p.id === row.id);
+    }
+    const deductionsOf = (tripId: string) => db.payoutDeduction.rows.filter((d: any) => d.payoutId === payoutOf(tripId).id);
+
+    afterEach(() => {
+      delete process.env.PENALTY_WITHHOLD_PERCENT;
+    });
+
+    it('un reversement plus petit que la pénalité est entièrement retenu : aucun virement', async () => {
+      const p = penalty();
+      const tripId = await paidBooking(); // part de l'opérateur : 45 €
+      await runDeparture();
+      expect(stripe.transfersCreated).toHaveLength(0);
+      expect(payoutOf(tripId)).toMatchObject({ status: 'withheld', grossCents: 4500, withheldCents: 4500, amountCents: 0 });
+      expect(p).toMatchObject({ collectedCents: 4500, collectedAt: null });
+      expect(deductionsOf(tripId)).toMatchObject([{ penaltyId: p.id, amountCents: 4500 }]);
+      const note = db.notification.rows.find((n: any) => n.userId === DJAMEL && n.type === 'payout.withheld');
+      expect(note.body).toContain('45,00 €');
+      expect(note.body).toContain('Reste dû : 215,00 €');
+      expect(db.auditLog.rows.some((l: any) => l.action === 'payout.penalty_withheld' && l.entityId === p.id)).toBe(true);
+
+      const res = await mine(DJAMEL);
+      expect(res.body).toMatchObject({ paidCents: 0, pendingCents: 0, withheldCents: 4500 });
+      expect(res.body.items[0]).toMatchObject({ status: 'withheld', grossCents: 4500, withheldCents: 4500, amountCents: 0 });
+    });
+
+    it('la pénalité se recouvre sur plusieurs reversements, puis les revenus reprennent en entier', async () => {
+      const p = penalty();
+      const a = completedTrip(); // part : 162 €
+      const b = completedTrip();
+      const c = completedTrip();
+      await payouts.onTripCompleted(a);
+      expect(payoutOf(a)).toMatchObject({ status: 'withheld', withheldCents: 16200, amountCents: 0 });
+      expect(p.collectedCents).toBe(16200);
+
+      await payouts.onTripCompleted(b);
+      // 98 € restaient dus : retenus, le reste (64 €) est viré.
+      expect(payoutOf(b)).toMatchObject({ status: 'paid', grossCents: 16200, withheldCents: 9800, amountCents: 6400 });
+      expect(p.collectedCents).toBe(26000);
+      expect(p.collectedAt).toBeInstanceOf(Date);
+      expect(stripe.transfersCreated.map((t) => t.params.amount)).toEqual([6400]);
+      const settled = db.notification.rows.filter((n: any) => n.type === 'payout.withheld').at(-1);
+      expect(settled.body).toContain('soldée');
+
+      await payouts.onTripCompleted(c);
+      expect(payoutOf(c)).toMatchObject({ status: 'paid', withheldCents: 0, amountCents: 16200 });
+      // Jamais plus que la pénalité.
+      expect(db.payoutDeduction.rows.reduce((s: number, d: any) => s + d.amountCents, 0)).toBe(26000);
+    });
+
+    it('rien n’est retenu tant que la pénalité est contestable, contestée ou annulée', async () => {
+      const pending = penalty({ status: 'pending', contestUntil: new Date(Date.now() + 5 * 24 * HOUR) });
+      const contested = penalty({ status: 'contested' });
+      const cancelled = penalty({ status: 'cancelled' });
+      const tripId = completedTrip();
+      await payouts.onTripCompleted(tripId);
+      expect(payoutOf(tripId)).toMatchObject({ status: 'paid', withheldCents: 0, amountCents: 16200 });
+      for (const p of [pending, contested, cancelled]) expect(p.collectedCents ?? 0).toBe(0);
+      expect(db.payoutDeduction.rows).toHaveLength(0);
+    });
+
+    it('la pénalité d’un autre chauffeur ne touche pas mes revenus', async () => {
+      const other = penalty({ driverId: KARIM });
+      const tripId = completedTrip();
+      await payouts.onTripCompleted(tripId);
+      expect(payoutOf(tripId)).toMatchObject({ status: 'paid', withheldCents: 0 });
+      expect(other.collectedCents ?? 0).toBe(0);
+    });
+
+    it('deux pénalités : la plus ancienne est recouvrée d’abord', async () => {
+      const old = penalty({ amountCents: 10000 });
+      const recent = penalty({ amountCents: 26000 });
+      const tripId = completedTrip();
+      await payouts.onTripCompleted(tripId);
+      expect(old.collectedCents).toBe(10000);
+      expect(old.collectedAt).toBeInstanceOf(Date);
+      expect(recent).toMatchObject({ collectedCents: 6200, collectedAt: null });
+      expect(payoutOf(tripId)).toMatchObject({ status: 'withheld', withheldCents: 16200 });
+      expect(deductionsOf(tripId).map((d: any) => d.amountCents)).toEqual([10000, 6200]);
+    });
+
+    it('plafond réglable : avec 50 %, la moitié du reversement reste versée', async () => {
+      process.env.PENALTY_WITHHOLD_PERCENT = '50';
+      const p = penalty();
+      const tripId = completedTrip();
+      await payouts.onTripCompleted(tripId);
+      expect(payoutOf(tripId)).toMatchObject({ status: 'paid', grossCents: 16200, withheldCents: 8100, amountCents: 8100 });
+      expect(p.collectedCents).toBe(8100);
+      expect(stripe.transfersCreated[0].params.amount).toBe(8100);
+    });
+
+    it('traiter deux fois la même fin de course ne retient pas deux fois', async () => {
+      const p = penalty();
+      const tripId = completedTrip();
+      await payouts.onTripCompleted(tripId);
+      await payouts.onTripCompleted(tripId);
+      await payouts.tick(new Date(Date.now() + 2 * HOUR));
+      expect(p.collectedCents).toBe(16200);
+      expect(deductionsOf(tripId)).toHaveLength(1);
+    });
+
+    it('calcul des retenues interrompu (arrêt du serveur) : repris par le planificateur, sans double retenue', async () => {
+      const p = penalty({ amountCents: 5000, collectedCents: 2000 });
+      const tripId = completedTrip();
+      const paymentId = db.payment.rows.at(-1).id;
+      // État laissé par un arrêt en plein calcul : 20 € déjà retenus, montant pas encore fixé.
+      const draftId = id(500);
+      db.payout.rows.push({
+        id: draftId, tripId, driverId: DJAMEL, paymentId, grossCents: 16200, withheldCents: 0, amountCents: 16200, currency: 'EUR', status: 'draft',
+        attempts: 0, nextAttemptAt: null, lastError: null, stripeTransferId: null, stripeAccountId: null, createdAt: new Date(Date.now() - 10 * MIN), paidAt: null,
+      });
+      db.payoutDeduction.rows.push({ id: id(501), payoutId: draftId, penaltyId: p.id, amountCents: 2000, createdAt: new Date() });
+
+      // Tant qu'il est en préparation, rien n'est viré.
+      await payouts.onTripCompleted(tripId);
+      expect(stripe.transfersCreated).toHaveLength(0);
+
+      await payouts.tick();
+      expect(p.collectedCents).toBe(5000);
+      expect(payoutOf(tripId)).toMatchObject({ status: 'paid', withheldCents: 5000, amountCents: 11200 });
+      expect(stripe.transfersCreated.map((t) => t.params.amount)).toEqual([11200]);
+    });
   });
 
   it('une course annulée ne donne lieu à aucun reversement', async () => {

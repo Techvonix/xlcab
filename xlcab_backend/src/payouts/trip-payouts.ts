@@ -47,8 +47,20 @@ const FAILED_MAX_RETRY_MS = 6 * HOUR;
 export const PAYOUT_MAX_ATTEMPTS = 10;
 /** Filet de sécurité : courses terminées depuis moins de 7 jours sans reversement enregistré. */
 const SWEEP_DAYS = 7;
+/** Reversement resté « en préparation » (arrêt du serveur au mauvais moment) : repris après ce délai. */
+const DRAFT_STALE_MS = 5 * 60_000;
 
-export const PAYOUT_STATUSES = ['pending', 'paid', 'blocked', 'failed', 'void'] as const;
+/**
+ * Part maximale d'un reversement qui peut être retenue pour une pénalité
+ * d'annulation (PENALTY_WITHHOLD_PERCENT, 100 par défaut : la pénalité est
+ * recouvrée sur les premiers reversements). À VALIDER par le porteur de projet.
+ */
+export function penaltyWithholdPercent(): number {
+  const value = Number(process.env.PENALTY_WITHHOLD_PERCENT);
+  return Number.isFinite(value) && value >= 0 && value <= 100 ? value : 100;
+}
+
+export const PAYOUT_STATUSES = ['draft', 'pending', 'paid', 'blocked', 'failed', 'withheld', 'void'] as const;
 export type PayoutStatus = (typeof PAYOUT_STATUSES)[number];
 
 const euros = (cents: number) => (cents / 100).toFixed(2).replace('.', ',');
@@ -57,6 +69,8 @@ type PayoutRow = {
   id: string;
   tripId: string;
   driverId: string;
+  grossCents: number;
+  withheldCents: number;
   amountCents: number;
   status: string;
   attempts: number;
@@ -112,16 +126,74 @@ export class TripPayoutsService {
     if (!payment) return null; // réservation sans encaissement en ligne (paiement différé)
 
     // Jamais plus que ce qui reste encaissé (remboursement accordé entre-temps par l'équipe).
-    const amountCents = Math.min(operatorShareCents(trip), Math.max(0, payment.amountCents - payment.refundedCents));
+    const grossCents = Math.min(operatorShareCents(trip), Math.max(0, payment.amountCents - payment.refundedCents));
     try {
-      return (await this.prisma.payout.create({
-        data: { tripId, driverId: trip.driverId, paymentId: payment.id, amountCents, currency: 'EUR', status: amountCents > 0 ? 'pending' : 'void' },
+      // « draft » : rien ne peut être viré tant que les retenues ne sont pas calculées.
+      const draft = (await this.prisma.payout.create({
+        data: { tripId, driverId: trip.driverId, paymentId: payment.id, grossCents, withheldCents: 0, amountCents: grossCents, currency: 'EUR', status: 'draft' },
       })) as PayoutRow;
+      return await this.finalize(draft);
     } catch (err: any) {
       // Deux fins de course simultanées : la contrainte d'unicité garde un seul reversement.
       if (err?.code === 'P2002') return (await this.prisma.payout.findUnique({ where: { tripId } })) as PayoutRow;
       throw err;
     }
+  }
+
+  /**
+   * Retient sur ce reversement les pénalités d'annulation dues par le
+   * chauffeur (appliquées, donc hors délai de contestation et non
+   * contestées), les plus anciennes d'abord, puis fixe le montant à virer.
+   * Rejouable : reprend là où une exécution interrompue s'était arrêtée.
+   */
+  private async finalize(draft: PayoutRow): Promise<PayoutRow> {
+    const already = (await this.prisma.payoutDeduction.findMany({ where: { payoutId: draft.id }, select: { amountCents: true } })).reduce(
+      (sum: number, d: { amountCents: number }) => sum + d.amountCents, 0,
+    );
+    const ceiling = Math.floor((draft.grossCents * penaltyWithholdPercent()) / 100);
+    let withheld = already;
+
+    const penalties = await this.prisma.driverPenalty.findMany({ where: { driverId: draft.driverId, status: 'applied', collectedAt: null }, orderBy: { createdAt: 'asc' } });
+    for (const penalty of penalties) {
+      const room = ceiling - withheld;
+      if (room <= 0) break;
+      const part = Math.min(room, penalty.amountCents - penalty.collectedCents);
+      if (part <= 0) continue;
+      const collected = penalty.collectedCents + part;
+      const taken = await this.prisma.$transaction(async (tx) => {
+        // Écriture conditionnelle : deux reversements simultanés ne retiennent pas deux fois la même somme.
+        const { count } = await tx.driverPenalty.updateMany({
+          where: { id: penalty.id, status: 'applied', collectedCents: penalty.collectedCents },
+          data: { collectedCents: collected, collectedAt: collected >= penalty.amountCents ? new Date() : null },
+        });
+        if (count === 0) return false;
+        await tx.payoutDeduction.create({ data: { payoutId: draft.id, penaltyId: penalty.id, amountCents: part } });
+        return true;
+      });
+      if (!taken) continue;
+      withheld += part;
+      await this.audit.log({
+        action: 'payout.penalty_withheld', entity: 'DriverPenalty', entityId: penalty.id,
+        metadata: { payoutId: draft.id, amountCents: part, collectedCents: collected, penaltyCents: penalty.amountCents },
+      });
+    }
+
+    const amountCents = draft.grossCents - withheld;
+    const status = amountCents > 0 ? 'pending' : withheld > 0 ? 'withheld' : 'void';
+    const payout = (await this.prisma.payout.update({ where: { id: draft.id }, data: { withheldCents: withheld, amountCents, status } })) as PayoutRow;
+    if (withheld > already) {
+      const stillDue = (await this.prisma.driverPenalty.findMany({ where: { driverId: draft.driverId, status: 'applied', collectedAt: null } })).reduce(
+        (sum: number, p: { amountCents: number; collectedCents: number }) => sum + p.amountCents - p.collectedCents, 0,
+      );
+      await this.notifications.notify(
+        draft.driverId, 'payout.withheld', 'Pénalité retenue',
+        stillDue > 0
+          ? `${euros(withheld)} € ont été retenus sur votre revenu au titre d’une pénalité d’annulation. Reste dû : ${euros(stillDue)} €.`
+          : `${euros(withheld)} € ont été retenus sur votre revenu au titre d’une pénalité d’annulation. Elle est maintenant soldée.`,
+        { tripId: draft.tripId },
+      );
+    }
+    return payout;
   }
 
   /** Tente le virement. Compte de versement absent : en attente, l'opérateur est prévenu une fois. */
@@ -217,6 +289,16 @@ export class TripPayoutsService {
       }
     }
 
+    // Reversements restés en préparation (serveur arrêté pendant le calcul des retenues).
+    const drafts = (await this.prisma.payout.findMany({ where: { status: 'draft', createdAt: { lte: new Date(now.getTime() - DRAFT_STALE_MS) } }, take: 100 })) as PayoutRow[];
+    for (const draft of drafts) {
+      try {
+        await this.finalize(draft);
+      } catch (err) {
+        this.logger.error(`Reversement ${draft.id} non finalisé : ${(err as Error).message}`);
+      }
+    }
+
     const due = (await this.prisma.payout.findMany({
       where: { status: { in: ['pending', 'blocked', 'failed'] }, nextAttemptAt: { lte: now } },
       orderBy: { createdAt: 'asc' },
@@ -243,7 +325,9 @@ export class TripPayoutsService {
     const sum = (statuses: string[]) => rows.filter((r) => statuses.includes(r.status)).reduce((s, r) => s + r.amountCents, 0);
     return {
       paidCents: sum(['paid']),
-      pendingCents: sum(['pending', 'blocked', 'failed']),
+      pendingCents: sum(['draft', 'pending', 'blocked', 'failed']),
+      // Pénalités d'annulation retenues sur ces reversements.
+      withheldCents: rows.reduce((s, r) => s + r.withheldCents, 0),
       items: rows
         .filter((r) => r.status !== 'void')
         .map((r) => {
@@ -252,8 +336,10 @@ export class TripPayoutsService {
             id: r.id,
             tripId: r.tripId,
             amountCents: r.amountCents,
+            grossCents: r.grossCents,
+            withheldCents: r.withheldCents,
             // Un incident technique est « en cours » pour l'opérateur : il n'a rien à faire.
-            status: r.status === 'failed' ? 'pending' : r.status,
+            status: r.status === 'failed' || r.status === 'draft' ? 'pending' : r.status,
             paidAt: r.paidAt,
             createdAt: r.createdAt,
             originAddress: trip?.originAddress ?? null,
@@ -275,7 +361,7 @@ export class TripPayoutsService {
     return rows.map((r) => {
       const u = users.find((x) => x.id === r.driverId);
       return {
-        id: r.id, tripId: r.tripId, driverId: r.driverId, amountCents: r.amountCents, status: r.status, attempts: r.attempts,
+        id: r.id, tripId: r.tripId, driverId: r.driverId, amountCents: r.amountCents, grossCents: r.grossCents, withheldCents: r.withheldCents, status: r.status, attempts: r.attempts,
         lastError: r.lastError, nextAttemptAt: r.nextAttemptAt, createdAt: r.createdAt, paidAt: r.paidAt,
         driverName: [u?.firstName, u?.lastName].filter(Boolean).join(' ') || null,
         driverEmail: u?.email ?? null,

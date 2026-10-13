@@ -594,7 +594,7 @@ export class RescueService {
       return {
         id: r.id, departureId: r.departureId, trigger: r.trigger, minutesBefore: r.minutesBefore, lastMinute: r.lastMinute,
         status: r.status, createdAt: r.createdAt,
-        penalty: p ? { id: p.id, amountCents: p.amountCents, status: p.status, contestUntil: p.contestUntil } : null,
+        penalty: p ? { id: p.id, amountCents: p.amountCents, status: p.status, contestUntil: p.contestUntil, collectedCents: p.collectedCents } : null,
       };
     });
   }

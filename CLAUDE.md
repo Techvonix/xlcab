@@ -419,10 +419,19 @@ référence — les exigences de la Partie 8 priment.
   l'équipe ; filet : courses terminées < 7 j sans Payout. `GET /operators/me/payouts` (failed montré `pending`,
   aucun identifiant Stripe), admin 2FA `GET /admin/payouts`, `POST /admin/payouts/:id/retry`. NON traité : frais
   d'annulation retenus (gardés par XLCAB, à décider), remboursement admin APRÈS reversement (à la charge de
-  XLCAB, pas de reprise chez l'opérateur). Tests : `payouts/trip-payouts.integration.spec.ts`. Restent : 5
-  pénalités retenues sur les reversements, écrans (appli chauffeur : compte de versement et reversements ;
-  passager : feuilles de paiement ligne et bourse — `BookLineSheet` ignore encore `payment`, le statut d'offre
-  `authorizing` n'est pas connu de l'appli ; admin : page des reversements).
+  XLCAB, pas de reprise chez l'opérateur). Tests : `payouts/trip-payouts.integration.spec.ts`. Étape 5 faite
+  (2026-10-13, migration `payout_penalties`) : pénalités d'annulation RETENUES sur les reversements. Le Payout naît
+  `draft` (jamais viré), `finalize` retient les `DriverPenalty` `applied` non soldées du chauffeur (jamais
+  pending / contested / cancelled), les plus anciennes d'abord, par écriture conditionnelle sur `collectedCents` +
+  `PayoutDeduction` dans une transaction, puis fixe `grossCents` / `withheldCents` / `amountCents` et le statut
+  (pending, `withheld` = tout retenu, void). Plafond `PENALTY_WITHHOLD_PERCENT` (100 par défaut, À VALIDER).
+  `DriverPenalty.collectedCents` / `collectedAt` (soldée). Brouillon de plus de 5 min repris par `tick` sans double
+  retenue. Notification `payout.withheld` (reste dû). NON fait : paiement Stripe du `DriverBonus` de 160 € au
+  secours (ligne en base seulement), facture de pénalité à 30 j faute de reversements. Tests sensibles à
+  l'horloge : mesurer depuis `nextAttemptAt`, pas depuis `Date.now()` (suite lente sous charge). Restent : écrans
+  (appli chauffeur : compte de versement et reversements ; passager : feuilles de paiement ligne et bourse —
+  `BookLineSheet` ignore encore `payment`, le statut d'offre `authorizing` n'est pas connu de l'appli ; admin :
+  page des reversements), puis essai réel avec les clés de test.
 - Migrations : `init_xlcab` appliquée sur la base locale ; toute modification de
   `prisma/schema.prisma` demande désormais `npx prisma migrate dev --name <nom>`. Référentiel :
   `npx prisma db seed` (config FR uniquement).
