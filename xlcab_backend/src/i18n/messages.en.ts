@@ -65,6 +65,7 @@ export const MESSAGES_EN: Record<string, string> = {
   'Étiquette inconnue': 'Unknown tag',
 
   // ── Choix du siège (lignes vendues à la place) ───────────────────────
+  'Vous assurez ce départ : vous ne pouvez pas y réserver de place': 'You are operating this departure: you cannot book a seat on it',
   'Sièges invalides': 'Invalid seats',
   'Un même siège ne peut pas être choisi deux fois': 'The same seat cannot be chosen twice',
   'Ce départ se réserve en entier : pas de choix de siège': 'This departure is booked as a whole: no seat choice',

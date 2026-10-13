@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   ConflictException,
+  ForbiddenException,
   HttpException,
   HttpStatus,
   Injectable,
@@ -77,6 +78,9 @@ export class LineBookingsService {
     if (!departure) throw new NotFoundException('Départ introuvable');
     const line = await this.prisma.recurringLine.findUnique({ where: { id: departure.lineId } });
     if (!line) throw new NotFoundException('Départ introuvable');
+    if (assignedDriver(departure, line) === userId || line.operatorId === userId) {
+      throw new ForbiddenException('Vous assurez ce départ : vous ne pouvez pas y réserver de place');
+    }
     if (dto.luggage !== undefined && dto.luggage > line.luggage) {
       throw new BadRequestException(`${line.luggage} bagages au maximum sur ce départ`);
     }

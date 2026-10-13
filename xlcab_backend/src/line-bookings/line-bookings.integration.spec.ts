@@ -600,7 +600,9 @@ describe('Réservations sur ligne et protocole d’annulation (intégration)', (
       await book(PAX1, 2);
       expect((await cancelBy(KARIM)).status).toBe(404);
       expect((await http().get('/api/v1/operators/me/rescues').set('Authorization', as(PAX1, 'passenger'))).status).toBe(403);
-      expect((await http().post('/api/v1/lines/bookings').set('Authorization', driver(KARIM)).send({ departureId: departure().id, seats: 1 })).status).toBe(403);
+      // Un chauffeur voyage comme tout le monde… sauf sur un départ qu'il assure lui-même.
+      expect((await http().post('/api/v1/lines/bookings').set('Authorization', driver(KARIM)).send({ departureId: departure().id, seats: 1 })).status).toBe(201);
+      expect((await http().post('/api/v1/lines/bookings').set('Authorization', driver(DJAMEL)).send({ departureId: departure().id, seats: 1 })).status).toBe(403);
     });
 
     it('départ sans réservation annulé : simplement fermé, aucun protocole ni sanction', async () => {

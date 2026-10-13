@@ -283,15 +283,16 @@ describe('Bourse : demandes et propositions (intégration)', () => {
   });
 
   describe('scénario H et règles', () => {
-    it('cloisonnement : un client ne voit pas la demande d’un autre ; un chauffeur ne crée pas de demande', async () => {
+    it('cloisonnement : un client ne voit pas la demande d’un autre ; un chauffeur ne lit pas les propositions faites à un autre', async () => {
       const { requestId, djamelOffer } = await withOffers();
       const other = as(PAX2, 'passenger');
       expect((await http().get(`/api/v1/market/requests/${requestId}`).set('Authorization', other)).status).toBe(404);
       expect((await http().get(`/api/v1/market/requests/${requestId}/offers`).set('Authorization', other)).status).toBe(404);
       expect((await http().post(`/api/v1/market/offers/${djamelOffer}/accept`).set('Authorization', other)).status).toBe(404);
       expect((await http().post(`/api/v1/market/offers/${djamelOffer}/confirm`).set('Authorization', drv(CHRIS))).status).toBe(404);
-      expect((await http().get(`/api/v1/market/requests/${requestId}/offers`).set('Authorization', drv(DJAMEL))).status).toBe(403);
-      expect((await http().post('/api/v1/market/requests').set('Authorization', drv(DJAMEL)).send({})).status).toBe(403);
+      expect((await http().get(`/api/v1/market/requests/${requestId}/offers`).set('Authorization', drv(DJAMEL))).status).toBe(404);
+      // Un chauffeur peut demander des devis comme tout voyageur : sa demande vide est refusée pour son contenu, pas pour son rôle.
+      expect((await http().post('/api/v1/market/requests').set('Authorization', drv(DJAMEL)).send({})).status).toBe(400);
       expect((await http().get('/api/v1/market/requests').set('Authorization', other)).body).toEqual([]);
     });
 

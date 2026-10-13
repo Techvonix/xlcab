@@ -89,8 +89,8 @@ describe('Avis passager (intégration)', () => {
       expect((await http().get(`/api/v1/trips/${TRIP}/driver`).set('Authorization', as('p1'))).status).toBe(404);
     });
 
-    it('un chauffeur ne passe pas par ces routes (rôle)', async () => {
-      expect((await http().get(`/api/v1/trips/${TRIP}/driver`).set('Authorization', as('d1', 'driver'))).status).toBe(403);
+    it('le chauffeur de la course n’en est pas le passager : il n’y accède pas', async () => {
+      expect((await http().get(`/api/v1/trips/${TRIP}/driver`).set('Authorization', as('d1', 'driver'))).status).toBe(404);
     });
 
     it('course terminée : plaque masquée, notation proposée', async () => {

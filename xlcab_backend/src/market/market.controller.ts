@@ -5,7 +5,9 @@ import { TwoFactorGuard } from '../two-factor/two-factor.guard';
 import { CreateOfferDto, CreateRequestDto, MarketQueryDto, MessageDto } from './dto';
 import { MarketService } from './market.service';
 
-const CLIENTS = ['passenger', 'corporate_member', 'corporate_admin'];
+// Un chauffeur peut aussi voyager : il réserve et demande des devis comme tout client
+// (décision du 2026-10-13). Il ne peut pas répondre à sa propre demande (MarketService.propose).
+const CLIENTS = ['passenger', 'corporate_member', 'corporate_admin', 'driver'];
 
 /** Bourse côté client : demandes, propositions reçues, choix. */
 @Controller('api/v1/market')

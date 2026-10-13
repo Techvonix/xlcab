@@ -9,7 +9,8 @@ import { RescueService } from './rescue.service';
 /** Réservation d'une place sur un départ de ligne régulière. */
 @Controller('api/v1/lines/bookings')
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles('passenger', 'corporate_member', 'corporate_admin')
+// Un chauffeur peut réserver une place comme tout voyageur, sauf sur un départ qu'il assure.
+@Roles('passenger', 'corporate_member', 'corporate_admin', 'driver')
 export class LineBookingsController {
   constructor(private bookings: LineBookingsService) {}
 

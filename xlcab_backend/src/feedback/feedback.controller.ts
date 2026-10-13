@@ -42,7 +42,8 @@ export class ReportDriverDto {
 /** Écran 10 : profil du chauffeur, note et signalement (passager de la course). */
 @Controller('api/v1/trips/:id')
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles('passenger', 'corporate_member', 'corporate_admin')
+// Tout voyageur, chauffeur compris quand il est passager ; le service vérifie qu'il est LE passager de la course.
+@Roles('passenger', 'corporate_member', 'corporate_admin', 'driver')
 export class FeedbackController {
   constructor(private feedback: FeedbackService) {}
 
