@@ -517,4 +517,17 @@ export const MESSAGES_EN: Record<string, string> = {
   'Vous avez reçu un message à propos d’une demande de transport.': 'You have received a message about a transport request.',
   'Demande expirée': 'Request expired',
   'Aucune réservation n’a pu être confirmée à temps pour votre demande.': 'No booking could be confirmed in time for your request.',
+
+  // ── Compte de versement des opérateurs (Stripe Connect) ──────────────
+  'Votre compte chauffeur doit être validé par XLCAB avant d’ouvrir un compte de versement':
+    'Your driver account must be approved by XLCAB before you open a payout account',
+  'Complétez d’abord votre profil opérateur': 'Complete your operator profile first',
+  'Terminez d’abord l’ouverture de votre compte de versement': 'Finish opening your payout account first',
+  'Ouvrez votre compte de versement avant de proposer vos services': 'Open your payout account before offering your services',
+  'Compte de versement validé': 'Payout account approved',
+  'Vous pouvez ouvrir vos départs à la réservation et répondre aux demandes de la bourse.':
+    'You can open your departures for booking and reply to marketplace requests.',
+  'Compte de versement à compléter': 'Payout account needs attention',
+  'Stripe a besoin d’informations supplémentaires pour continuer à vous verser vos revenus.':
+    'Stripe needs more information to keep paying out your earnings.',
 };

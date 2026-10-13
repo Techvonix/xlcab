@@ -15,6 +15,7 @@ import { AuditService } from '../audit/audit.service';
 import { driverCommissionPercent } from '../driver-mode/driver-mode.service';
 import { TRACKING_LEAD_MIN, TripStatus } from '../matching/matching.constants';
 import { NotificationsService } from '../notifications/notifications.service';
+import { linePaymentMode } from '../payouts/payment-mode';
 import { LinesService } from '../operators/lines.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { RedisService } from '../redis/redis.service';
@@ -24,13 +25,9 @@ import { BookLineDto } from './dto';
 const BOOKINGS_MAX_PER_HOUR = 10;
 const ACTIVE = [TripStatus.ACCEPTED, TripStatus.STARTED] as string[];
 
-/**
- * Paiement des réservations sur ligne. « deferred » (seul mode actuel) :
- * réservation confirmée sans encaissement en ligne, en attendant Stripe
- * Connect (décision du 2026-10-09 : XLCAB ne détient pas les fonds des
- * opérateurs). Refusé en production : pas de vente réelle avant Connect.
- */
-export const linePaymentMode = () => process.env.LINE_PAYMENT_MODE || 'deferred';
+// Mode de paiement des lignes et de la bourse : voir payouts/payment-mode.ts.
+// « deferred » = réservation sans encaissement (tests), refusé en production.
+export { linePaymentMode };
 
 /** Chauffeur qui assure le départ : affecté (secours) sinon titulaire de la ligne. */
 export const assignedDriver = (d: LineDeparture, line: RecurringLine) => d.driverId ?? line.operatorId;

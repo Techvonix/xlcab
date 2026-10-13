@@ -526,6 +526,21 @@ model OperatorProfile {
   updatedAt        DateTime  @updatedAt
 }
 
+// Compte de versement d'un opérateur (Stripe Connect « Express »). Stripe
+// recueille l'identité et l'IBAN sur ses pages : XLCAB ne garde que
+// l'identifiant du compte et son état, recopié depuis Stripe.
+model PayoutAccount {
+  userId           String   @id // = User.id (rôle driver)
+  stripeAccountId  String   @unique
+  detailsSubmitted Boolean  @default(false)
+  payoutsEnabled   Boolean  @default(false)
+  transfersActive  Boolean  @default(false)
+  requirementsDue  Int      @default(0) // informations encore attendues par Stripe
+  disabledReason   String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
 // Ligne régulière : trajet type + calendrier. Le trajet (origine,
 // destination) ne se modifie pas : on ferme la ligne et on en crée une
 // autre, les départs déjà réservés gardent ainsi leur historique.

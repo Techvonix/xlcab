@@ -34,6 +34,9 @@ export function validateEnv(env: Record<string, unknown>): Record<string, unknow
     if (str('STRIPE_SECRET_KEY') && !str('STRIPE_WEBHOOK_SECRET')) {
       problems.push('STRIPE_WEBHOOK_SECRET manquant alors que Stripe est configuré');
     }
+    if (str('LINE_PAYMENT_MODE') === 'connect' && (!str('STRIPE_SECRET_KEY') || !str('STRIPE_CONNECT_WEBHOOK_SECRET'))) {
+      problems.push('LINE_PAYMENT_MODE=connect : STRIPE_SECRET_KEY et STRIPE_CONNECT_WEBHOOK_SECRET requis');
+    }
   }
 
   if (problems.length > 0) {

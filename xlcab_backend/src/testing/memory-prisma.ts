@@ -232,6 +232,9 @@ export function memoryPrisma() {
       includesReturn: false, conditions: null, status: 'pending', confirmDeadline: null, respondedAt: null, createdAt: new Date(),
     })),
     offerMessage: new Table(() => ({ createdAt: new Date() })),
+    payoutAccount: new Table(() => ({
+      detailsSubmitted: false, payoutsEnabled: false, transfersActive: false, requirementsDue: 0, disabledReason: null, createdAt: new Date(), updatedAt: new Date(),
+    })),
   };
   db.trip = new Table(
     () => ({ status: 'pending', vatCents: 0, createdAt: new Date(), source: 'instant', lineDepartureId: null, commissionCents: null }),

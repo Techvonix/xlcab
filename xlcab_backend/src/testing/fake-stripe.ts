@@ -92,6 +92,57 @@ export class FakeStripe {
     create: async (params: any) => ({ id: `seti_${++this.seq}`, client_secret: `seti_secret_${params.customer}` }),
   };
 
+  // ── Stripe Connect : comptes de versement des opérateurs ──
+  accounts_ = new Map<string, any>();
+  accountCreates: { params: any; options: any }[] = [];
+  accountLinksCreated: any[] = [];
+
+  accounts = {
+    create: async (params: any, options: any) => {
+      // Même clé d'idempotence = même compte, comme chez Stripe.
+      const same = this.accountCreates.find((c) => options?.idempotencyKey && c.options?.idempotencyKey === options.idempotencyKey);
+      this.accountCreates.push({ params, options });
+      if (same) return [...this.accounts_.values()].find((a) => a.metadata?.userId === params.metadata?.userId);
+      const account = {
+        id: `acct_${++this.seq}`,
+        object: 'account',
+        type: params.type,
+        country: params.country,
+        email: params.email,
+        metadata: params.metadata,
+        details_submitted: false,
+        payouts_enabled: false,
+        capabilities: { transfers: 'inactive' },
+        requirements: { currently_due: ['external_account', 'individual.verification.document'], disabled_reason: 'requirements.past_due' },
+      };
+      this.accounts_.set(account.id, account);
+      return account;
+    },
+    retrieve: async (id: string) => {
+      const a = this.accounts_.get(id);
+      if (!a) throw new Error('No such account');
+      return a;
+    },
+    createLoginLink: async (id: string) => ({ object: 'login_link', url: `https://connect.stripe.test/express/${id}` }),
+  };
+
+  accountLinks = {
+    create: async (params: any) => {
+      this.accountLinksCreated.push(params);
+      return { object: 'account_link', url: `https://connect.stripe.test/setup/${params.account}/${++this.seq}`, expires_at: Math.floor(Date.now() / 1000) + 300 };
+    },
+  };
+
+  /** Simule la fin de l'ouverture du compte : dossier complet, versements activés par Stripe. */
+  completeOnboarding(accountId: string) {
+    const a = this.accounts_.get(accountId)!;
+    a.details_submitted = true;
+    a.payouts_enabled = true;
+    a.capabilities = { transfers: 'active' };
+    a.requirements = { currently_due: [], disabled_reason: null };
+    return a;
+  }
+
   webhooks = {
     /** Signature factice : "valid:<secret>". Toute autre valeur est rejetée. */
     constructEvent: (raw: Buffer | string, signature: string, secret: string) => {

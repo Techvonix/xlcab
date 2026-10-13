@@ -376,6 +376,22 @@ référence — les exigences de la Partie 8 priment.
   seconde par seconde (`fps=1,crop=iw:200:0:60,scale=240:-1,tile=7x26`). `reset-video.js --garder-reservation`
   pour refaire seulement la 2e partie. Les données du seed vieillissent : relancé la veille, les sièges 1-3 de
   Thomas ne sont plus sur le départ du lendemain (relancer `seed-demo.ts` le jour même, puis se reconnecter).
+- Stripe Connect (décisions du 2026-10-13 : le passager paie à la réservation sur la plateforme, la part de
+  l'opérateur est REVERSÉE APRÈS LE TRAJET — « separate charges and transfers », le secours qui reprend un départ
+  est celui qu'on paie — ; lignes et bourse d'abord, courses instantanées inchangées ; compte de versement EXIGÉ
+  pour vendre). `LINE_PAYMENT_MODE` = `deferred` (défaut, tests, 503 en production) | `connect`
+  (`src/payouts/payment-mode.ts`, réexporté par line-bookings). Étape 1 faite, `src/payouts/payout-accounts.ts`
+  (migration `payout_accounts`) : `PayoutAccount` (userId, `stripeAccountId`, état recopié de Stripe : jamais
+  d'identité ni d'IBAN chez XLCAB), compte Stripe Express « transfers » seulement (idempotence
+  `payout-account-{userId}`), `GET /operators/me/payout-account` = { required, state none|incomplete|pending|ready,
+  ready, requirementsDue } (relu chez Stripe tant que pas prêt), `POST …/onboarding-link` (chauffeur validé + profil
+  opérateur, 10/h), `POST …/dashboard-link`, webhook `POST /api/v1/webhooks/stripe-connect` (secret DISTINCT
+  `STRIPE_CONNECT_WEBHOOK_SECRET`, `account.updated`), pages de retour publiques `/versements/retour|reprise`.
+  `PayoutAccountsService.assertReady` (403 `PAYOUT_ACCOUNT_REQUIRED`, sans effet en `deferred`) dans
+  `LinesService.confirm`, réouverture d'un départ, `MarketService.propose` / confirmation. `readyAccountId` pour le
+  reversement. Restent : 2 encaissement à la réservation de ligne, 3 bourse, 4 reversement en fin de trajet +
+  remboursements + secours, 5 pénalités retenues, écrans (appli chauffeur : compte de versement ; passager :
+  feuille de paiement sur une ligne). En mode `connect`, réservation de ligne et bourse répondent 503 d'ici là.
 - Migrations : `init_xlcab` appliquée sur la base locale ; toute modification de
   `prisma/schema.prisma` demande désormais `npx prisma migrate dev --name <nom>`. Référentiel :
   `npx prisma db seed` (config FR uniquement).

@@ -210,7 +210,8 @@ async function main() {
   });
 
   // Lignes créées par le vrai service : départs générés sur 30 jours, puis confirmés sur 7 jours.
-  const lines = new LinesService(prisma as never, { log: async () => undefined } as never);
+  // Démo en paiement différé : aucun compte de versement exigé.
+  const lines = new LinesService(prisma as never, { log: async () => undefined } as never, { assertReady: async () => undefined } as never);
   const tomorrow = addDays(localDateOf(new Date(), 'Europe/Paris'), 1);
   const everyDay = [1, 2, 3, 4, 5, 6, 7];
   const beauvaisLine = await lines.create(djamel.id, {

@@ -3,6 +3,7 @@ import { LineDeparture, RecurringLine } from '@prisma/client';
 import { AuditService } from '../audit/audit.service';
 import { TIMEZONES, addDays, localDateOf, localTimeOf, minutesOf } from '../common/local-time';
 import { haversineKm } from '../parcels/parcels.constants';
+import { PayoutAccountsService } from '../payouts/payout-accounts';
 import { PrismaService } from '../prisma/prisma.service';
 import {
   ConfirmDeparturesDto,
@@ -58,6 +59,7 @@ export class LinesService {
   constructor(
     private prisma: PrismaService,
     private audit: AuditService,
+    private payouts: PayoutAccountsService,
   ) {}
 
   // ── Profil opérateur ────────────────────────────────────────────────
@@ -266,6 +268,8 @@ export class LinesService {
 
   /** Confirmation groupée : « j'assure ces départs jusqu'au … ». */
   async confirm(userId: string, dto: ConfirmDeparturesDto, now = new Date()) {
+    // Paiement en ligne activé : pas de mise en vente sans compte de versement validé.
+    await this.payouts.assertReady(userId);
     const lineIds = dto.lineId ? [(await this.ownedLine(userId, dto.lineId)).id] : await this.lineIdsOf(userId);
     const { count } = await this.prisma.lineDeparture.updateMany({
       where: { lineId: { in: lineIds }, status: 'to_confirm', localDate: { lte: dto.until }, departureAt: { gt: now } },
@@ -284,6 +288,7 @@ export class LinesService {
     if (!departure || !line) throw new NotFoundException('Départ introuvable');
     if (new Date(departure.departureAt) <= now) throw new ConflictException('Ce départ est déjà passé');
     if (!closed && line.status === 'closed') throw new ConflictException('Ligne fermée : créez-en une nouvelle');
+    if (!closed) await this.payouts.assertReady(userId);
     const updated = await this.prisma.lineDeparture.update({
       where: { id: departureId },
       // Rouvrir un départ vaut confirmation de la capacité.

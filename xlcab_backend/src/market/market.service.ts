@@ -13,7 +13,8 @@ import { randomUUID } from 'crypto';
 import { AuditService } from '../audit/audit.service';
 import { localDateOf, localTimeOf } from '../common/local-time';
 import { driverCommissionPercent } from '../driver-mode/driver-mode.service';
-import { linePaymentMode } from '../line-bookings/line-bookings.service';
+import { linePaymentMode } from '../payouts/payment-mode';
+import { PayoutAccountsService } from '../payouts/payout-accounts';
 import { TripStatus } from '../matching/matching.constants';
 import { MatchingService } from '../matching/matching.service';
 import { NotificationsService } from '../notifications/notifications.service';
@@ -72,6 +73,7 @@ export class MarketService {
     private matching: MatchingService,
     private notifications: NotificationsService,
     private audit: AuditService,
+    private payouts: PayoutAccountsService,
   ) {}
 
   // ── Demandes (client) ───────────────────────────────────────────────
@@ -253,6 +255,8 @@ export class MarketService {
       throw new NotFoundException('Demande introuvable ou close');
     }
     await this.assertOperator(operatorId);
+    // Paiement en ligne activé : pas de proposition sans compte de versement validé.
+    await this.payouts.assertReady(operatorId);
     const vehicle = (await this.eligibleVehiclesOf(operatorId)).find((v) => v.id === dto.vehicleId);
     if (!vehicle) throw new NotFoundException('Véhicule introuvable');
     if (!this.fits(vehicle, request)) throw new BadRequestException('Ce véhicule ne convient pas à cette demande (places, accessibilité ou documents)');
@@ -309,6 +313,7 @@ export class MarketService {
     const request = await this.prisma.transportRequest.findUnique({ where: { id: offer.requestId } });
     if (!request || request.status !== 'accepted' || request.acceptedOfferId !== offer.id) throw new ConflictException('Proposition expirée ou déjà traitée');
     await this.assertOperator(operatorId);
+    await this.payouts.assertReady(operatorId);
     const vehicle = (await this.eligibleVehiclesOf(operatorId)).find((v) => v.id === offer.vehicleId);
     if (!vehicle || !this.fits(vehicle, request)) throw new ConflictException('Véhicule plus disponible pour cette demande');
     const duration = estimatedMinutes(request);
