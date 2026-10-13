@@ -474,8 +474,10 @@ référence — les exigences de la Partie 8 priment.
   `src/invoices/bank-details.ts` (contrôle modulo 97 : un IBAN faux n'est JAMAIS imprimé), figé dans
   `Invoice.seller.bank` pour toute facture `due` (pénalités ET factures mensuelles d'entreprise), mention
   `paymentInstruction` du PDF (IBAN, BIC, numéro de facture à rappeler) ; absent → AuditLog
-  `invoice.bank_details_missing` et `sellerComplete` faux (alerte de la page Factures de l'admin). Reste : essai
-  réel avec les clés de test
+  `invoice.bank_details_missing` et `sellerComplete` faux (alerte de la page Factures de l'admin). Guide du porteur
+  de projet : `GUIDE_STRIPE_CONNECT.md` (mode test, relais `stripe listen` = téléchargement à faire valider, scénario
+  d'essai : les formulaires d'identité Stripe et la saisie de carte sont faits PAR LUI). Reste : essai réel avec
+  les clés de test
   (`STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_CONNECT_WEBHOOK_SECRET`,
   `--dart-define=STRIPE_PUBLISHABLE_KEY`, `LINE_PAYMENT_MODE=connect`).
 - Migrations : `init_xlcab` appliquée sur la base locale ; toute modification de
