@@ -352,6 +352,18 @@ référence — les exigences de la Partie 8 priment.
   `scratchpad/demo/takes.sh p1|p2|d1 <langue>` (en anglais : `CHIP1="225 752" CHIP2="283 1064"` pour p2) ; entre
   deux séries `node demo/reset-video.js` (annule la réservation, la note et le partage de Léa sans régénérer les
   comptes : les applis restent connectées). Langue changée dans le profil de chaque appli, puis remise sur « Téléphone ».
+- Décisions du 2026-10-13 : (1) un chauffeur peut voyager — rôle `driver` ajouté aux routes clients
+  `/lines/bookings`, `/market/*` (CLIENTS) et `/trips/:id/{driver,rating,report}` ; 403 s'il réserve sur un départ
+  qu'il assure ; il ne répond pas à sa propre demande. (2) Impact CO₂ « comme tu veux » : `src/impact/impact.ts`,
+  `GET /users/me/impact` = { savedKg, trips, distanceKm, method } sur les courses passager terminées ;
+  `savedKg(km, seats, onBoard)` = seats × (0,218 − 0,29 / à bord) × km, jamais négatif (seul à bord = 0) ;
+  0,218 kgCO₂e/km = voiture thermique ADEME (Impact CO₂) ; 0,29 = minibus diesel 8 places (CO2 Emissiefactoren,
+  pas de fiche ADEME trouvée : À CONFIRMER sur la Base Empreinte) ; `CO2_CAR_KG_PER_KM` / `CO2_SHUTTLE_KG_PER_KM`.
+  Lignes : à bord = `LineDeparture.seatsBooked`. Sans `distanceKm` : vol d'oiseau × 1,3. App :
+  `screens/impact/impact_screen.dart` (`impactProvider`), chiffre TOUJOURS affiché avec sa méthode ; ni niveaux
+  ni défis (barème non défini). (3) Stripe : le porteur de projet a un compte ; Connect À FAIRE dès que les clés
+  de test sont dans `.env.local` (jamais dans le chat). (4) Préférence « conductrice » : à traiter comme une
+  PRÉFÉRENCE non exclusive ; base technique à décider (on ne stocke pas le genre ; `roseEligible` ?).
 - Migrations : `init_xlcab` appliquée sur la base locale ; toute modification de
   `prisma/schema.prisma` demande désormais `npx prisma migrate dev --name <nom>`. Référentiel :
   `npx prisma db seed` (config FR uniquement).
