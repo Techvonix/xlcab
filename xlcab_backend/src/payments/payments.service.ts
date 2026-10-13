@@ -19,6 +19,7 @@ import { DispatchService, SYSTEM_USER } from '../matching/dispatch.service';
 import { TripStatus } from '../matching/matching.constants';
 import { STRIPE_CLIENT } from './stripe.provider';
 import { InvoicesService } from '../invoices/invoices.service';
+import { LinesService } from '../operators/lines.service';
 
 // Version d'API des clés éphémères attendue par les SDK mobiles Stripe
 // (PaymentSheet). À aligner sur la version de flutter_stripe utilisée.
@@ -29,6 +30,9 @@ const EVENT_DEDUP_SECONDS = 7 * 24 * 3600;
 
 // Réservation passager non payée : annulée au bout de 30 min.
 const DEFAULT_UNPAID_EXPIRY_MIN = 30;
+
+/** Groupe Stripe qui relie le paiement d'une course à son reversement (Connect). */
+export const transferGroupOf = (tripId: string) => `trip_${tripId}`;
 
 export interface PaymentSheetParams {
   tripId: string;
@@ -63,7 +67,13 @@ export class PaymentsService {
     private audit: AuditService,
     // Optionnel : certains tests construisent ce service sans facturation.
     @Optional() private invoices?: InvoicesService,
+    @Optional() private lines?: LinesService,
   ) {}
+
+  /** Stripe configuré : à vérifier avant de retenir quoi que ce soit pour un paiement. */
+  available(): boolean {
+    return this.stripe !== null;
+  }
 
   // ── Paiement d'une course ───────────────────────────────────────────
 
@@ -76,7 +86,7 @@ export class PaymentsService {
     const stripe = this.client();
     const trip = await this.prisma.trip.findUnique({
       where: { id: tripId },
-      select: { id: true, passengerId: true, status: true, totalPriceCents: true, corporateId: true },
+      select: { id: true, passengerId: true, status: true, totalPriceCents: true, corporateId: true, source: true },
     });
     if (!trip || trip.passengerId !== userId) throw new NotFoundException('Trajet introuvable');
     if (trip.status !== TripStatus.AWAITING_PAYMENT || trip.corporateId) {
@@ -103,6 +113,9 @@ export class PaymentsService {
           automatic_payment_methods: { enabled: true },
           description: `Course XLCAB ${tripId}`,
           metadata: { tripId, userId },
+          // Ligne ou bourse (Stripe Connect) : le reversement à l'opérateur, après le
+          // trajet, sera rattaché à ce paiement par ce groupe.
+          ...(trip.source && trip.source !== 'instant' ? { transfer_group: transferGroupOf(tripId) } : {}),
         },
         // Idempotence : un double appel ne crée jamais deux paiements.
         { idempotencyKey: `trip-payment-${tripId}` },
@@ -220,6 +233,12 @@ export class PaymentsService {
     const parcel = await this.prisma.parcelBooking.findUnique({ where: { tripId: payment.tripId }, select: { carrierTripId: true, onReturnLeg: true } });
     if (parcel?.carrierTripId) return this.attachPaidParcel(payment.tripId, parcel.carrierTripId, parcel.onReturnLeg, payment.userId);
 
+    // Place sur une ligne régulière : confirmée auprès du chauffeur du départ, sans recherche.
+    const paidTrip = await this.prisma.trip.findUnique({ where: { id: payment.tripId }, select: { source: true, lineDepartureId: true } });
+    if (paidTrip?.source === 'line' && paidTrip.lineDepartureId) {
+      return this.confirmPaidLineBooking(payment.tripId, paidTrip.lineDepartureId, payment.userId);
+    }
+
     const updated = await this.prisma.trip.updateMany({
       where: { id: payment.tripId, status: TripStatus.AWAITING_PAYMENT },
       data: { status: TripStatus.PENDING },
@@ -262,7 +281,7 @@ export class PaymentsService {
     const expiryMin = Number(this.config.get<string>('UNPAID_BOOKING_EXPIRY_MIN')) || DEFAULT_UNPAID_EXPIRY_MIN;
     const stale = await this.prisma.trip.findMany({
       where: { status: TripStatus.AWAITING_PAYMENT, createdAt: { lt: new Date(now.getTime() - expiryMin * 60_000) } },
-      select: { id: true, passengerId: true },
+      select: { id: true, passengerId: true, lineDepartureId: true },
       take: 50,
     });
 
@@ -285,6 +304,8 @@ export class PaymentsService {
         });
         if (updated.count === 0) continue;
         await this.prisma.parcelBooking.updateMany({ where: { tripId: trip.id }, data: { status: 'cancelled' } });
+        // Place sur une ligne : rendue à la vente.
+        if (trip.lineDepartureId) await this.releaseLineSeats(trip.id, trip.lineDepartureId);
         await this.refundForCancellation(trip.id, 0); // annule la demande de paiement Stripe
         expired++;
         if (trip.passengerId) {
@@ -338,6 +359,56 @@ export class PaymentsService {
     if (userId) {
       await this.notifications.notify(userId, 'parcel.cancelled', 'Envoi de colis annulé', 'La navette prévue n’est plus disponible : vous êtes remboursé intégralement.', { tripId });
     }
+  }
+
+  /**
+   * Réservation de ligne payée : la course devient « acceptée » par le
+   * chauffeur qui assure le départ À CET INSTANT (titulaire, ou secours qui
+   * l'a repris pendant le paiement). Départ parti ou annulé entre-temps :
+   * réservation annulée et remboursée intégralement.
+   */
+  private async confirmPaidLineBooking(tripId: string, departureId: string, userId: string | null, now = new Date()) {
+    const departure = await this.prisma.lineDeparture.findUnique({ where: { id: departureId } });
+    const line = departure && (await this.prisma.recurringLine.findUnique({ where: { id: departure.lineId } }));
+
+    if (!departure || !line || departure.rescueStatus === 'failed' || new Date(departure.departureAt) <= now) {
+      const cancelled = await this.prisma.trip.updateMany({
+        where: { id: tripId, status: { in: [TripStatus.AWAITING_PAYMENT, TripStatus.CANCELLED] } },
+        data: { status: TripStatus.CANCELLED, cancelledAt: now, cancellationReason: 'Départ indisponible', cancellationFeeCents: 0 },
+      });
+      if (cancelled.count === 0) return;
+      await this.releaseLineSeats(tripId, departureId);
+      await this.refundForCancellation(tripId, 0);
+      if (userId) {
+        await this.notifications.notify(userId, 'line.booking_cancelled', 'Réservation annulée', 'Ce départ n’est plus disponible : vous êtes remboursé intégralement.', { tripId });
+      }
+      return;
+    }
+
+    // Chauffeur en cours de remplacement : la réservation attend le secours, comme les autres.
+    const searching = departure.rescueStatus === 'searching';
+    const driverId = searching ? null : departure.driverId ?? line.operatorId;
+    const vehicleId = searching ? null : departure.vehicleId ?? line.vehicleId;
+    const updated = await this.prisma.trip.updateMany({
+      where: { id: tripId, status: TripStatus.AWAITING_PAYMENT },
+      data: { status: TripStatus.ACCEPTED, acceptedAt: now, driverId, vehicleId },
+    });
+    if (updated.count === 0) {
+      // Réservation expirée ou annulée pendant la saisie de la carte : remboursement.
+      const trip = await this.prisma.trip.findUnique({ where: { id: tripId }, select: { status: true } });
+      if (trip?.status === TripStatus.CANCELLED) await this.refundForCancellation(tripId, 0);
+      return;
+    }
+    if (userId) await this.notifications.notify(userId, 'line.booked', 'Réservation confirmée', 'Votre place sur la ligne est réservée.', { tripId });
+    if (driverId) {
+      await this.notifications.notify(driverId, 'line.new_booking', 'Nouvelle réservation', 'Un passager a réservé sur votre ligne.', { departureId });
+    }
+  }
+
+  /** Rend à la vente les places (et sièges numérotés) d'une réservation de ligne abandonnée. */
+  private async releaseLineSeats(tripId: string, departureId: string) {
+    const booking = await this.prisma.passengerBooking.findUnique({ where: { tripId }, select: { seats: true } });
+    await this.lines?.releaseSeats(departureId, booking?.seats ?? 0, tripId);
   }
 
   private async markFailed(intent: Stripe.PaymentIntent) {

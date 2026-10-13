@@ -17,6 +17,7 @@ import { TRACKING_LEAD_MIN, TripStatus } from '../matching/matching.constants';
 import { NotificationsService } from '../notifications/notifications.service';
 import { linePaymentMode } from '../payouts/payment-mode';
 import { LinesService } from '../operators/lines.service';
+import { PaymentsService } from '../payments/payments.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { RedisService } from '../redis/redis.service';
 import { AuditCtx, RequestUser, TripsService } from '../trips/trips.service';
@@ -50,17 +51,19 @@ export class LineBookingsService {
     private trips: TripsService,
     private notifications: NotificationsService,
     private audit: AuditService,
+    private payments: PaymentsService,
   ) {}
 
   // ── Réservation (passager) ──────────────────────────────────────────
 
   async book(userId: string, dto: BookLineDto, now = new Date()) {
-    if (linePaymentMode() !== 'deferred') {
-      throw new ServiceUnavailableException('Paiement des lignes régulières pas encore disponible');
-    }
-    if (process.env.NODE_ENV === 'production') {
+    // « connect » : le passager paie à la réservation (Stripe). « deferred » : sans
+    // encaissement, pour les tests seulement — jamais de vente réelle ainsi.
+    const online = linePaymentMode() === 'connect';
+    if (!online && process.env.NODE_ENV === 'production') {
       throw new ServiceUnavailableException('Réservation sur les lignes régulières bientôt disponible');
     }
+    if (online && !this.payments.available()) throw new ServiceUnavailableException('Paiement momentanément indisponible');
     const key = `line:booking:rate:${userId}`;
     const count = await this.redis.incr(key);
     if (count === 1) await this.redis.expire(key, 3600);
@@ -82,7 +85,8 @@ export class LineBookingsService {
       throw new BadRequestException(`${line.luggage} bagages au maximum sur ce départ`);
     }
     const mine = await this.prisma.trip.count({
-      where: { lineDepartureId: departure.id, passengerId: userId, status: { in: ACTIVE } },
+      // Une réservation en attente de paiement compte : elle retient déjà des places.
+      where: { lineDepartureId: departure.id, passengerId: userId, status: { in: [...ACTIVE, TripStatus.AWAITING_PAYMENT] } },
     });
     if (mine > 0) throw new ConflictException('Vous avez déjà une réservation sur ce départ');
 
@@ -116,13 +120,14 @@ export class LineBookingsService {
         const created = await tx.trip.create({
           data: {
             type: 'passenger',
-            status: TripStatus.ACCEPTED,
+            // Paiement en ligne : confirmée (« acceptée ») seulement une fois payée.
+            status: online ? TripStatus.AWAITING_PAYMENT : TripStatus.ACCEPTED,
             source: 'line',
             lineDepartureId: departure.id,
             passengerId: userId,
             driverId,
             vehicleId,
-            acceptedAt: now,
+            acceptedAt: online ? null : now,
             shuttleType: vehicle?.shuttleType ?? 'bleue',
             originAddress: outbound ? line.originAddress : line.destinationAddress,
             originLat: outbound ? line.originLat : line.destinationLat,
@@ -155,6 +160,8 @@ export class LineBookingsService {
         return { ...created, seatNumbers };
       });
 
+      if (online) return await this.awaitingPayment(userId, trip, departure, dto.seats, total);
+
       await this.notifications.notify(userId, 'line.booked', 'Réservation confirmée', 'Votre place sur la ligne est réservée.', { tripId: trip.id });
       await this.notifications.notify(driverId, 'line.new_booking', 'Nouvelle réservation', 'Un passager a réservé sur votre ligne.', {
         departureId: departure.id,
@@ -176,6 +183,41 @@ export class LineBookingsService {
       await this.lines.releaseSeats(departure.id, dto.seats);
       throw err;
     }
+  }
+
+  /**
+   * Paiement en ligne : la réservation retient ses places et attend son
+   * paiement (feuille Stripe renvoyée à l'app). Confirmée par
+   * PaymentsService.markPaid ; non payée au bout de 30 min, elle est
+   * annulée par le planificateur et ses places reviennent à la vente.
+   */
+  private async awaitingPayment(userId: string, trip: { id: string; seatNumbers: number[] }, departure: LineDeparture, seats: number, total: number) {
+    let payment;
+    try {
+      payment = await this.payments.paymentSheet(userId, trip.id);
+    } catch (err) {
+      // Stripe en panne : la réservation est annulée tout de suite (le bloc
+      // appelant rend les places), le passager peut réessayer sans attendre.
+      await this.prisma.trip.updateMany({
+        where: { id: trip.id, status: TripStatus.AWAITING_PAYMENT },
+        data: { status: TripStatus.CANCELLED, cancelledAt: new Date(), cancellationReason: 'Paiement indisponible', cancellationFeeCents: 0 },
+      });
+      await this.prisma.lineSeat.deleteMany({ where: { departureId: departure.id, tripId: trip.id } });
+      throw err;
+    }
+    await this.audit.log({
+      userId, action: 'line.book', entity: 'Trip', entityId: trip.id, metadata: { departureId: departure.id, seats, totalCents: total, payment: 'connect' },
+    });
+    return {
+      tripId: trip.id,
+      status: TripStatus.AWAITING_PAYMENT,
+      departureAt: departure.departureAt,
+      seats,
+      seatNumbers: trip.seatNumbers,
+      totalPriceCents: total,
+      paymentMode: 'connect',
+      payment,
+    };
   }
 
   /**

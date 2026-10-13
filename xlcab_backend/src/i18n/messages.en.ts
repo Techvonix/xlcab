@@ -530,4 +530,6 @@ export const MESSAGES_EN: Record<string, string> = {
   'Compte de versement à compléter': 'Payout account needs attention',
   'Stripe a besoin d’informations supplémentaires pour continuer à vous verser vos revenus.':
     'Stripe needs more information to keep paying out your earnings.',
+  'Réservation annulée': 'Booking cancelled',
+  'Ce départ n’est plus disponible : vous êtes remboursé intégralement.': 'This departure is no longer available: you are refunded in full.',
 };

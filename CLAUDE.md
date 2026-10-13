@@ -389,9 +389,16 @@ référence — les exigences de la Partie 8 priment.
   `STRIPE_CONNECT_WEBHOOK_SECRET`, `account.updated`), pages de retour publiques `/versements/retour|reprise`.
   `PayoutAccountsService.assertReady` (403 `PAYOUT_ACCOUNT_REQUIRED`, sans effet en `deferred`) dans
   `LinesService.confirm`, réouverture d'un départ, `MarketService.propose` / confirmation. `readyAccountId` pour le
-  reversement. Restent : 2 encaissement à la réservation de ligne, 3 bourse, 4 reversement en fin de trajet +
-  remboursements + secours, 5 pénalités retenues, écrans (appli chauffeur : compte de versement ; passager :
-  feuille de paiement sur une ligne). En mode `connect`, réservation de ligne et bourse répondent 503 d'ici là.
+  reversement. Étape 2 faite (2026-10-13) : en `connect`, `POST /lines/bookings` crée la course en `awaiting_payment`
+  (places et sièges RETENUS, une seule par passager et départ même non payée) et renvoie `payment` (feuille Stripe,
+  `transfer_group` = `transferGroupOf(tripId)` = `trip_{id}`) ; `PaymentsService.markPaid` → `confirmPaidLineBooking` :
+  `accepted` auprès du chauffeur qui assure le départ À CET INSTANT (secours compris ; `searching` = sans chauffeur ;
+  départ `failed` ou parti = annulée + remboursée), jamais de dispatch ; `expireUnpaid` (30 min) et l'abandon rendent
+  places et sièges ; Stripe en panne à la réservation = rien de retenu. `PaymentsService.available()`.
+  PaymentsModule importe OperatorsModule (LinesService en 9e paramètre @Optional). Tests :
+  `line-bookings/line-payments.integration.spec.ts`. Restent : 3 bourse (encore 503 en `connect`), 4 reversement en
+  fin de trajet + remboursements + secours, 5 pénalités retenues, écrans (appli chauffeur : compte de versement ;
+  passager : feuille de paiement sur une ligne — `BookLineSheet` ignore encore `payment`).
 - Migrations : `init_xlcab` appliquée sur la base locale ; toute modification de
   `prisma/schema.prisma` demande désormais `npx prisma migrate dev --name <nom>`. Référentiel :
   `npx prisma db seed` (config FR uniquement).
