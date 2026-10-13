@@ -735,6 +735,9 @@ model DriverPenalty {
   // Recouvrement : retenues sur les reversements du chauffeur (PayoutDeduction).
   collectedCents Int       @default(0)
   collectedAt    DateTime? // entièrement recouvrée
+  // Facture du solde, émise quand les reversements n'ont pas suffi (30 jours).
+  invoiceId      String?
+  invoicedAt     DateTime?
   createdAt      DateTime  @default(now())
 
   @@index([status, contestUntil])

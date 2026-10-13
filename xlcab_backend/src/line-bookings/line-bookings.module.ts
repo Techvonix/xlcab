@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { InvoicesModule } from '../invoices/invoices.module';
 import { MatchingModule } from '../matching/matching.module';
 import { OperatorsModule } from '../operators/operators.module';
 import { PaymentsModule } from '../payments/payments.module';
@@ -17,7 +18,8 @@ import { RescueService } from './rescue.service';
   // réservations ; MatchingModule : créneau libre d'un secours ; Payments :
   // remboursement quand aucun secours n'est trouvé.
   // TwoFactorModule : 2FA des routes admin du protocole.
-  imports: [OperatorsModule, TripsModule, MatchingModule, PaymentsModule, TwoFactorModule],
+  // InvoicesModule : facture du solde d'une pénalité non recouvrée.
+  imports: [OperatorsModule, TripsModule, MatchingModule, PaymentsModule, TwoFactorModule, InvoicesModule],
   controllers: [LineBookingsController, LineOperationsController, AdminLineProtocolController],
   providers: [LineBookingsService, RescueService],
   exports: [LineBookingsService, RescueService],

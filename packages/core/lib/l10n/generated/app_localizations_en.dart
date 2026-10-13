@@ -3741,4 +3741,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get payBonusEnAttente => 'Waiting for the penalty to be recovered';
+
+  @override
+  String payFacturePenalite(String number, String amount, String date) {
+    return 'Invoice $number: $amount still to pay by $date';
+  }
 }

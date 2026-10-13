@@ -219,7 +219,7 @@ export function memoryPrisma() {
     rescueOffer: new Table(() => ({ status: 'pending', vehicleId: null, respondedAt: null, createdAt: new Date() })),
     driverCancellation: new Table(() => ({ reason: null, justification: null, reviewedBy: null, reviewedAt: null, createdAt: new Date() })),
     driverPenalty: new Table(() => ({
-      collectedCents: 0, collectedAt: null,
+      collectedCents: 0, collectedAt: null, invoiceId: null, invoicedAt: null,
       status: 'pending', contestReason: null, decidedBy: null, decisionReason: null, decidedAt: null, createdAt: new Date(),
     })),
     driverBonus: new Table(() => ({

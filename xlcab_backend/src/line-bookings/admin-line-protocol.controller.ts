@@ -2,7 +2,7 @@ import { Body, Controller, Get, HttpCode, HttpStatus, Param, ParseUUIDPipe, Patc
 import { IsIn, IsOptional } from 'class-validator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { Roles, RolesGuard } from '../auth/guards/roles.guard';
-import { AssignDepartureDto, PenaltyDecisionDto, ReviewCancellationDto } from './dto';
+import { AssignDepartureDto, PenaltyDecisionDto, PenaltyPaymentDto, ReviewCancellationDto } from './dto';
 import { RescueService } from './rescue.service';
 import { TwoFactorGuard } from '../two-factor/two-factor.guard';
 
@@ -63,5 +63,12 @@ export class AdminLineProtocolController {
   @Patch('penalties/:id')
   decide(@Req() req: any, @Param('id', ParseUUIDPipe) id: string, @Body() dto: PenaltyDecisionDto) {
     return this.rescue.decidePenalty(req.user.sub, id, dto.decision, dto.reason);
+  }
+
+  /** Paiement d'une pénalité reçu par virement (facture de pénalité). */
+  @Post('penalties/:id/payment')
+  @HttpCode(HttpStatus.OK)
+  payment(@Req() req: any, @Param('id', ParseUUIDPipe) id: string, @Body() dto: PenaltyPaymentDto) {
+    return this.rescue.recordPenaltyPayment(req.user.sub, id, dto.amountCents, dto.reference);
   }
 }

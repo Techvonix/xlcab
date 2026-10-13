@@ -201,6 +201,11 @@ export const api = {
   penalties: (status?: string) => apiJson<AdminPenalty[]>(`/api/v1/admin/penalties${qs({ status })}`),
   decidePenalty: (id: string, decision: 'uphold' | 'cancel', reason: string) =>
     apiJson(`/api/v1/admin/penalties/${encodeURIComponent(id)}`, { method: 'PATCH', body: { decision, reason } }),
+  /** Paiement d'une pénalité reçu par virement (facture de pénalité). */
+  recordPenaltyPayment: (id: string, amountCents: number, reference: string) =>
+    apiJson<{ id: string; collectedCents: number; remainingCents: number; settled: boolean }>(`/api/v1/admin/penalties/${encodeURIComponent(id)}/payment`, {
+      method: 'POST', body: { amountCents, reference },
+    }),
   marketRequests: (q: { status?: string; page?: number }) => apiJson<Paged<AdminMarketRequest>>(`/api/v1/admin/market/requests${qs(q)}`),
   /** Reversements aux opérateurs ; sans statut : ceux qui ne sont pas encore partis. */
   payouts: (status?: string) => apiJson<AdminPayout[]>(`/api/v1/admin/payouts${qs({ status })}`),

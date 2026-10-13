@@ -6440,6 +6440,12 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'En attente du recouvrement de la pénalité'**
   String get payBonusEnAttente;
+
+  /// No description provided for @payFacturePenalite.
+  ///
+  /// In fr, this message translates to:
+  /// **'Facture {number} : {amount} restent à régler avant le {date}'**
+  String payFacturePenalite(String number, String amount, String date);
 }
 
 class _AppLocalizationsDelegate

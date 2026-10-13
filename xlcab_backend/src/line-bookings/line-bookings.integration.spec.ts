@@ -525,6 +525,71 @@ describe('Réservations sur ligne et protocole d’annulation (intégration)', (
       expect(notified(DJAMEL, 'line.penalty.applied')).toBe(true);
     });
 
+    it('pénalité non recouvrée en 30 jours : facture du solde payable sous 30 jours, puis paiement enregistré par l’équipe', async () => {
+      seedPastCancellations(2);
+      moveDeparture(5 * 60);
+      await book(PAX1, 3);
+      const start = Date.now();
+      expect((await cancelBy(DJAMEL)).body.penaltyId).toEqual(expect.any(String));
+      const penalty = db.driverPenalty.rows[0];
+      await rescue.tick(new Date(start + 8 * DAY)); // appliquée au 8e jour
+      expect(penalty.status).toBe('applied');
+      penalty.collectedCents = 4500; // 45 € déjà retenus sur un reversement
+
+      // 22 jours après l'application : la retenue sur reversements a encore sa chance.
+      expect((await rescue.tick(new Date(start + 30 * DAY))).penaltiesInvoiced).toBe(0);
+      expect(db.invoice.rows).toHaveLength(0);
+
+      const issuedAt = new Date(start + 39 * DAY);
+      expect((await rescue.tick(issuedAt)).penaltiesInvoiced).toBe(1);
+      const invoice = db.invoice.rows[0];
+      expect(invoice).toMatchObject({ kind: 'invoice', customerUserId: DJAMEL, totalCents: 21500, vatCents: 0, paymentStatus: 'due' });
+      expect(invoice.number).toMatch(/^FA-\d{4}-\d{6}$/);
+      expect(invoice.dueDate.getTime()).toBe(issuedAt.getTime() + 30 * DAY);
+      expect(invoice.lines[0].description).toContain('Pénalité d’annulation tardive');
+      expect(penalty.invoiceId).toBe(invoice.id);
+      expect(notified(DJAMEL, 'line.penalty.invoiced')).toBe(true);
+      // Jamais deux factures pour la même pénalité.
+      expect((await rescue.tick(new Date(start + 45 * DAY))).penaltiesInvoiced).toBe(0);
+      expect(db.invoice.rows).toHaveLength(1);
+
+      // Le chauffeur et l'équipe voient la facture.
+      const mine = await http().get('/api/v1/operators/me/cancellations').set('Authorization', driver(DJAMEL));
+      expect(mine.body[0].penalty).toMatchObject({ collectedCents: 4500, invoice: { number: invoice.number, totalCents: 21500 } });
+      const list = await http().get('/api/v1/admin/penalties?status=applied').set(admin);
+      expect(list.body[0]).toMatchObject({ driverName: 'Djamel', collectedCents: 4500, invoice: { number: invoice.number } });
+
+      // Paiement par virement, enregistré par l'équipe (2FA) : jamais plus que le solde.
+      const pay = (body: object, auth: Record<string, string> = admin) => http().post(`/api/v1/admin/penalties/${penalty.id}/payment`).set(auth).send(body);
+      expect((await pay({ amountCents: 10000, reference: 'VIR 123' }, { Authorization: driver(DJAMEL) })).status).toBe(403);
+      expect((await pay({ amountCents: 10000 })).status).toBe(400); // référence obligatoire
+      expect((await pay({ amountCents: 30000, reference: 'VIR 123' })).status).toBe(400); // plus que le solde
+      const part = await pay({ amountCents: 10000, reference: 'VIR 123' });
+      expect(part.body).toEqual({ id: penalty.id, collectedCents: 14500, remainingCents: 11500, settled: false });
+      const rest = await pay({ amountCents: 11500, reference: 'VIR 456' });
+      expect(rest.body).toMatchObject({ collectedCents: 26000, remainingCents: 0, settled: true });
+      expect(penalty.collectedAt).toBeInstanceOf(Date);
+      expect((await pay({ amountCents: 100, reference: 'VIR 789' })).status).toBe(409);
+      expect(db.auditLog.rows.filter((r: any) => r.action === 'line.penalty.payment').map((r: any) => r.metadata.reference)).toEqual(['VIR 123', 'VIR 456']);
+      expect(db.notification.rows.filter((n: any) => n.userId === DJAMEL && n.type === 'line.penalty.payment')).toHaveLength(2);
+    });
+
+    it('pénalité entièrement recouvrée par les reversements : aucune facture ; pénalité en délai de contestation : aucun paiement', async () => {
+      seedPastCancellations(2);
+      moveDeparture(5 * 60);
+      await book(PAX1, 3);
+      const start = Date.now();
+      await cancelBy(DJAMEL);
+      const penalty = db.driverPenalty.rows[0];
+      const early = await http().post(`/api/v1/admin/penalties/${penalty.id}/payment`).set(admin).send({ amountCents: 1000, reference: 'VIR 1' });
+      expect(early.status).toBe(409); // pas encore due
+
+      await rescue.tick(new Date(start + 8 * DAY));
+      Object.assign(penalty, { collectedCents: 26000, collectedAt: new Date() });
+      expect((await rescue.tick(new Date(start + 60 * DAY))).penaltiesInvoiced).toBe(0);
+      expect(db.invoice.rows).toHaveLength(0);
+    });
+
     it('les annulations de plus de 12 mois ne comptent plus', async () => {
       seedPastCancellations(2);
       for (const c of db.driverCancellation.rows) c.createdAt = new Date(Date.now() - 400 * DAY);

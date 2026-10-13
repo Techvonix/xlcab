@@ -3764,4 +3764,9 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get payBonusEnAttente => 'En attente du recouvrement de la pénalité';
+
+  @override
+  String payFacturePenalite(String number, String amount, String date) {
+    return 'Facture $number : $amount restent à régler avant le $date';
+  }
 }

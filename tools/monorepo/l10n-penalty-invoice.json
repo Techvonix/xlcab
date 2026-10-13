@@ -1,0 +1,7 @@
+{
+  "payFacturePenalite": {
+    "fr": "Facture {number} : {amount} restent à régler avant le {date}",
+    "en": "Invoice {number}: {amount} still to pay by {date}",
+    "p": { "number": "String", "amount": "String", "date": "String" }
+  }
+}

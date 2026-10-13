@@ -2154,5 +2154,19 @@
   "mkcCarteNonValidee": "Carte non validée : votre choix n’est pas encore transmis. Vous avez 15 minutes pour la valider.",
   "payBonus": "Bonus de reprise",
   "payBonusAide": "Pour un départ que vous avez sauvé. Le bonus est versé dès que la pénalité du chauffeur remplacé a été recouvrée.",
-  "payBonusEnAttente": "En attente du recouvrement de la pénalité"
+  "payBonusEnAttente": "En attente du recouvrement de la pénalité",
+  "payFacturePenalite": "Facture {number} : {amount} restent à régler avant le {date}",
+  "@payFacturePenalite": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  }
 }

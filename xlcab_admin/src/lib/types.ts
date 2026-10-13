@@ -290,8 +290,10 @@ export interface AdminPenalty {
   status: 'pending' | 'contested' | 'applied' | 'cancelled';
   contestUntil: string;
   contestReason: string | null;
-  /** Part déjà retenue sur les reversements du chauffeur. */
+  /** Part déjà recouvrée (retenues sur reversements et paiements enregistrés). */
   collectedCents?: number;
+  /** Facture du solde, émise quand les reversements n'ont pas suffi. */
+  invoice?: { id: string; number: string; totalCents: number; dueDate: string | null } | null;
   createdAt: string;
 }
 

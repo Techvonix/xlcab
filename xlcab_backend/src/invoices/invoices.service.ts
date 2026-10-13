@@ -99,6 +99,32 @@ export class InvoicesService {
   }
 
   /**
+   * Facture du solde d'une pénalité d'annulation (protocole des lignes) que
+   * les reversements du chauffeur n'ont pas permis de recouvrer. Payable
+   * sous 30 jours ; indemnité contractuelle, hors champ de la TVA (à valider,
+   * comme les frais d'annulation).
+   */
+  async issuePenalty(input: { penaltyId: string; driverId: string; amountCents: number; jurisdiction: string; departureAt: Date | null; dueDate: Date }) {
+    if (input.amountCents <= 0) return null;
+    try {
+      return await this.issue({
+        kind: 'invoice',
+        jurisdiction: input.jurisdiction,
+        customerUserId: input.driverId,
+        buyer: await this.personBuyer(input.driverId),
+        lines: [{
+          description: `Pénalité d’annulation tardive (conditions générales opérateur)${input.departureAt ? ` — départ du ${day(input.departureAt)}` : ''}`,
+          quantity: 1, unitCents: input.amountCents, regime: 'penalty', vatRate: 0, vatCents: 0, totalCents: input.amountCents,
+        }],
+        paymentStatus: 'due',
+        dueDate: input.dueDate,
+      });
+    } catch (err) {
+      return this.failed('penalty', input.penaltyId, err);
+    }
+  }
+
+  /**
    * Remboursement après facturation : avoir du montant remboursé, réparti
    * sur les lignes de la facture d'origine au prorata (TVA juste par taux).
    */

@@ -81,6 +81,15 @@ class _CancellationsScreenState extends ConsumerState<CancellationsScreen> {
                     ),
                     if (c.penalty!.collectedCents > 0)
                       Text(l10n.payPenaliteRecouvree(formatPrice(c.penalty!.collectedCents, locale: locale)), style: AppTypography.caption),
+                    if (c.penalty!.invoiceNumber != null && c.penalty!.collectedCents < c.penalty!.amountCents)
+                      Text(
+                        l10n.payFacturePenalite(
+                          c.penalty!.invoiceNumber!,
+                          formatPrice(c.penalty!.amountCents - c.penalty!.collectedCents, locale: locale),
+                          c.penalty!.invoiceDueDate == null ? '—' : formatTripDate(c.penalty!.invoiceDueDate!, locale: locale),
+                        ),
+                        style: AppTypography.caption,
+                      ),
                   ],
                   Wrap(spacing: AppSpacing.sm, children: [
                     if (c.status == CancellationStatus.counted)

@@ -19,6 +19,11 @@ export const passengerShareCents = () => amount('LINE_PASSENGER_SHARE_CENTS', 10
 export const FAILED_RESCUE_CREDIT_PERCENT = 20;
 export const CREDIT_VALIDITY_DAYS = 365;
 
+/** Pénalité non recouvrée sur les reversements au bout de ce délai : facture du solde. */
+export const penaltyInvoiceAfterDays = () => amount('LINE_PENALTY_INVOICE_AFTER_DAYS', 30);
+/** Délai de paiement de la facture de pénalité. */
+export const PENALTY_INVOICE_DUE_DAYS = 30;
+
 export const PENALTY_FROM_COUNT = 3;
 export const PENALTY_WINDOW_DAYS = 365;
 export const CONTEST_DAYS = 7;

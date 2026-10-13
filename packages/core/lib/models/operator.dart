@@ -581,7 +581,16 @@ enum PenaltyStatus {
 }
 
 class DriverPenalty {
-  const DriverPenalty({required this.id, required this.amountCents, required this.status, required this.contestUntil, this.collectedCents = 0});
+  const DriverPenalty({
+    required this.id,
+    required this.amountCents,
+    required this.status,
+    required this.contestUntil,
+    this.collectedCents = 0,
+    this.invoiceNumber,
+    this.invoiceCents,
+    this.invoiceDueDate,
+  });
 
   final String id;
   final int amountCents;
@@ -590,6 +599,11 @@ class DriverPenalty {
 
   /// Part déjà retenue sur les reversements du chauffeur.
   final int collectedCents;
+
+  /// Facture du solde (émise si les reversements n'ont pas suffi en 30 jours).
+  final String? invoiceNumber;
+  final int? invoiceCents;
+  final DateTime? invoiceDueDate;
 }
 
 class DriverCancellation {
@@ -626,6 +640,9 @@ class DriverCancellation {
               status: PenaltyStatus.fromApi(_str(p['status'])),
               contestUntil: _date(p['contestUntil']),
               collectedCents: _int(p['collectedCents']) ?? 0,
+              invoiceNumber: p['invoice'] is Map ? _str((p['invoice'] as Map)['number']) : null,
+              invoiceCents: p['invoice'] is Map ? _int((p['invoice'] as Map)['totalCents']) : null,
+              invoiceDueDate: p['invoice'] is Map ? _date((p['invoice'] as Map)['dueDate']) : null,
             )
           : null,
     );

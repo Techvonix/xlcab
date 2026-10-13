@@ -412,4 +412,9 @@ export const en: Record<MessageKey, string> = {
   rvAucunBonus: "No rescue bonuses.",
   rvBonusEnAttentePenalite: "Waiting for the penalty to be recovered",
   rvRelancerLeBonus: "Retry the bonus transfer",
+  boFacturePenalite: "Invoice {number} for {amount}, due by {date}",
+  boPaiementRecu: "Payment received by bank transfer (balance due: {remaining})",
+  boMontantRecu: "Amount received (€)",
+  boReferenceDuVirement: "Transfer reference",
+  boEnregistrerLePaiement: "Record the payment",
 };

@@ -1,6 +1,7 @@
-import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, NotFoundException, Optional } from '@nestjs/common';
 import { DriverPenalty, LineDeparture, RecurringLine } from '@prisma/client';
 import { AuditService } from '../audit/audit.service';
+import { InvoicesService } from '../invoices/invoices.service';
 import { localTimeOf } from '../common/local-time';
 import { SYSTEM_USER } from '../matching/dispatch.service';
 import { MatchingService } from '../matching/matching.service';
@@ -18,6 +19,7 @@ import {
   FAILED_RESCUE_CREDIT_PERCENT,
   OPEN_CALL_MAX,
   PENALTY_FROM_COUNT,
+  PENALTY_INVOICE_DUE_DAYS,
   PENALTY_WINDOW_DAYS,
   POSITION_CHECK_MIN,
   READY_DEADLINE_MIN,
@@ -28,6 +30,7 @@ import {
   isLastMinute,
   passengerShareCents,
   penaltyCents,
+  penaltyInvoiceAfterDays,
   rescueBonusCents,
   responseDeadline,
   splitCents,
@@ -69,6 +72,8 @@ export class RescueService {
     private payments: PaymentsService,
     private notifications: NotificationsService,
     private audit: AuditService,
+    // Optionnel : certains tests construisent ce service sans facturation.
+    @Optional() private invoices?: InvoicesService,
   ) {}
 
   // ── Chauffeurs de réserve ───────────────────────────────────────────
@@ -486,7 +491,7 @@ export class RescueService {
   // ── Contrôles du planificateur (chaque minute) ──────────────────────
 
   async tick(now = new Date()) {
-    const report = { advanced: 0, failed: 0, reminders: 0, failures: 0, penaltiesApplied: 0 };
+    const report = { advanced: 0, failed: 0, reminders: 0, failures: 0, penaltiesApplied: 0, penaltiesInvoiced: 0 };
 
     // 1. Offres expirées : étape suivante quand plus aucune n'est en attente.
     const expired = await this.prisma.rescueOffer.findMany({ where: { status: 'pending', expiresAt: { lte: now } } });
@@ -549,6 +554,9 @@ export class RescueService {
     // 4. Pénalités non contestées dans le délai : appliquées.
     const due = await this.prisma.driverPenalty.findMany({ where: { status: 'pending', contestUntil: { lte: now } } });
     for (const p of due) report.penaltiesApplied += await this.applyPenalty(p, now, SYSTEM_USER.sub, null);
+
+    // 5. Pénalités que les reversements n'ont pas recouvrées en 30 jours : facture du solde.
+    report.penaltiesInvoiced = await this.invoiceOverduePenalties(now);
     return report;
   }
 
@@ -586,15 +594,78 @@ export class RescueService {
     return 1;
   }
 
+  /**
+   * « À défaut de retenue, facture de pénalité payable sous 30 jours »
+   * (protocole). La retenue sur les reversements continue ensuite : jamais
+   * plus que le solde n'est recouvré, quel que soit le moyen.
+   */
+  private async invoiceOverduePenalties(now: Date): Promise<number> {
+    if (!this.invoices) return 0;
+    const since = new Date(now.getTime() - penaltyInvoiceAfterDays() * DAY_MS);
+    const overdue = await this.prisma.driverPenalty.findMany({
+      where: { status: 'applied', collectedAt: null, invoiceId: null, decidedAt: { lte: since } },
+      take: 50,
+    });
+    let issued = 0;
+    for (const p of overdue) {
+      const remaining = p.amountCents - p.collectedCents;
+      if (remaining <= 0) continue;
+      const cancellation = await this.prisma.driverCancellation.findUnique({ where: { id: p.cancellationId } });
+      const departure = cancellation && (await this.prisma.lineDeparture.findUnique({ where: { id: cancellation.departureId } }));
+      const line = departure && (await this.prisma.recurringLine.findUnique({ where: { id: departure.lineId } }));
+      const dueDate = new Date(now.getTime() + PENALTY_INVOICE_DUE_DAYS * DAY_MS);
+      const invoice = await this.invoices.issuePenalty({
+        penaltyId: p.id, driverId: p.driverId, amountCents: remaining, jurisdiction: line?.jurisdiction ?? 'FR', departureAt: departure?.departureAt ?? null, dueDate,
+      });
+      if (!invoice) continue; // émission échouée (tracée) : nouvel essai au tour suivant
+      await this.prisma.driverPenalty.update({ where: { id: p.id }, data: { invoiceId: invoice.id, invoicedAt: now } });
+      await this.notifications.notify(p.driverId, 'line.penalty.invoiced', 'Facture de pénalité',
+        `Une facture de ${euros(remaining)} € (pénalité d’annulation) est à régler sous ${PENALTY_INVOICE_DUE_DAYS} jours.`, { penaltyId: p.id, invoiceId: invoice.id });
+      await this.audit.log({ userId: SYSTEM_USER.sub, action: 'line.penalty.invoice', entity: 'DriverPenalty', entityId: p.id, metadata: { invoiceId: invoice.id, number: invoice.number, amountCents: remaining } });
+      issued++;
+    }
+    return issued;
+  }
+
+  /**
+   * L'équipe enregistre un paiement reçu hors application (virement de la
+   * facture de pénalité). Jamais plus que le solde ; la pénalité soldée
+   * finance le bonus du chauffeur de secours.
+   */
+  async recordPenaltyPayment(adminId: string, id: string, amountCents: number, reference: string, now = new Date()) {
+    const p = await this.prisma.driverPenalty.findUnique({ where: { id } });
+    if (!p) throw new NotFoundException('Pénalité introuvable');
+    if (p.status !== 'applied') throw new ConflictException('Seule une pénalité appliquée peut être réglée');
+    const remaining = p.amountCents - p.collectedCents;
+    if (remaining <= 0) throw new ConflictException('Cette pénalité est déjà soldée');
+    if (amountCents > remaining) throw new BadRequestException(`Montant supérieur au solde dû (${euros(remaining)} €)`);
+    const collected = p.collectedCents + amountCents;
+    // Écriture conditionnelle : une retenue sur reversement au même instant ne se cumule pas au-delà du solde.
+    const { count } = await this.prisma.driverPenalty.updateMany({
+      where: { id, status: 'applied', collectedCents: p.collectedCents },
+      data: { collectedCents: collected, collectedAt: collected >= p.amountCents ? now : null },
+    });
+    if (count === 0) throw new ConflictException('Le solde de cette pénalité vient de changer : rechargez la page');
+    await this.audit.log({ userId: adminId, action: 'line.penalty.payment', entity: 'DriverPenalty', entityId: id, metadata: { amountCents, reference, collectedCents: collected } });
+    await this.notifications.notify(p.driverId, 'line.penalty.payment', 'Paiement reçu',
+      collected >= p.amountCents
+        ? `Votre paiement de ${euros(amountCents)} € est enregistré : votre pénalité est soldée.`
+        : `Votre paiement de ${euros(amountCents)} € est enregistré. Reste dû : ${euros(p.amountCents - collected)} €.`, { penaltyId: id });
+    return { id, collectedCents: collected, remainingCents: p.amountCents - collected, settled: collected >= p.amountCents };
+  }
+
   async myCancellations(driverId: string) {
     const rows = await this.prisma.driverCancellation.findMany({ where: { driverId }, orderBy: { createdAt: 'desc' }, take: 50 });
     const penalties = await this.prisma.driverPenalty.findMany({ where: { cancellationId: { in: rows.map((r) => r.id) } } });
+    const invoices = await this.invoicesOf(penalties);
     return rows.map((r) => {
       const p = penalties.find((x) => x.cancellationId === r.id);
       return {
         id: r.id, departureId: r.departureId, trigger: r.trigger, minutesBefore: r.minutesBefore, lastMinute: r.lastMinute,
         status: r.status, createdAt: r.createdAt,
-        penalty: p ? { id: p.id, amountCents: p.amountCents, status: p.status, contestUntil: p.contestUntil, collectedCents: p.collectedCents } : null,
+        penalty: p
+          ? { id: p.id, amountCents: p.amountCents, status: p.status, contestUntil: p.contestUntil, collectedCents: p.collectedCents, invoice: invoices.get(p.invoiceId ?? '') ?? null }
+          : null,
       };
     });
   }
@@ -685,10 +756,19 @@ export class RescueService {
     return rows.map((r) => ({ ...r, driverName: names.get(r.driverId) ?? null }));
   }
 
+  /** Factures de pénalité (numéro, échéance) par identifiant. */
+  private async invoicesOf(penalties: { invoiceId: string | null }[]) {
+    const ids = penalties.map((p) => p.invoiceId).filter((x): x is string => !!x);
+    if (ids.length === 0) return new Map<string, { id: string; number: string; totalCents: number; dueDate: Date | null }>();
+    const rows = await this.prisma.invoice.findMany({ where: { id: { in: ids } }, select: { id: true, number: true, totalCents: true, dueDate: true } });
+    return new Map(rows.map((i) => [i.id, i]));
+  }
+
   async listPenalties(status?: string) {
     const rows = await this.prisma.driverPenalty.findMany({ where: { status }, orderBy: { createdAt: 'desc' }, take: 100 });
     const names = await this.names(rows.map((r) => r.driverId));
-    return rows.map((r) => ({ ...r, driverName: names.get(r.driverId) ?? null }));
+    const invoices = await this.invoicesOf(rows);
+    return rows.map((r) => ({ ...r, driverName: names.get(r.driverId) ?? null, invoice: invoices.get(r.invoiceId ?? '') ?? null }));
   }
 
   private async names(ids: (string | null)[]): Promise<Map<string, string>> {

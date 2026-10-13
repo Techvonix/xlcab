@@ -13,7 +13,7 @@ vi.mock('@/lib/api', async (importOriginal) => {
     ...actual,
     api: {
       operators: vi.fn(), reviewOperator: vi.fn(), atRiskDepartures: vi.fn(), rescueCandidates: vi.fn(), assignDeparture: vi.fn(),
-      cancellations: vi.fn(), reviewCancellation: vi.fn(), penalties: vi.fn(), decidePenalty: vi.fn(), marketRequests: vi.fn(),
+      cancellations: vi.fn(), reviewCancellation: vi.fn(), penalties: vi.fn(), decidePenalty: vi.fn(), marketRequests: vi.fn(), recordPenaltyPayment: vi.fn(),
     },
   };
 });
@@ -137,5 +137,30 @@ describe('Bourse et lignes', () => {
     expect(await screen.findByText('Paris → Rouen')).toBeInTheDocument();
     expect(screen.getByText('À surveiller')).toBeInTheDocument();
     expect(screen.getByText('Aucun départ en danger.')).toBeInTheDocument();
+  });
+
+  it('pénalité appliquée : facture du solde affichée, paiement par virement enregistré (jamais plus que le solde)', async () => {
+    m.penalties.mockResolvedValue([{
+      id: 'pen1', driverId: 'd1', driverName: 'Djamel Haddad', amountCents: 26000, status: 'applied', contestUntil: '2026-09-20T00:00:00.000Z', contestReason: null,
+      collectedCents: 4500, invoice: { id: 'inv1', number: 'FA-2026-000042', totalCents: 21500, dueDate: '2026-11-20T00:00:00.000Z' }, createdAt: '2026-09-13T00:00:00.000Z',
+    }]);
+    m.recordPenaltyPayment.mockResolvedValue({ id: 'pen1', collectedCents: 14500, remainingCents: 11500, settled: false });
+    const { container } = renderWithProviders(<MarketPage />);
+
+    expect(await screen.findByText(/Facture FA-2026-000042 de 215,00 €/)).toBeInTheDocument();
+    expect(screen.getByText('Recouvré sur les reversements : 45,00 € sur 260,00 €')).toBeInTheDocument();
+    const record = screen.getByRole('button', { name: 'Enregistrer le paiement' });
+    expect(record).toBeDisabled();
+    expect(await axe(container)).toHaveNoViolations();
+
+    // Plus que le solde dû (215 €) : refusé avant même l'envoi.
+    await userEvent.type(screen.getByLabelText('Montant reçu (€)'), '300');
+    await userEvent.type(screen.getByLabelText('Référence du virement'), 'VIR 123');
+    expect(record).toBeDisabled();
+
+    await userEvent.clear(screen.getByLabelText('Montant reçu (€)'));
+    await userEvent.type(screen.getByLabelText('Montant reçu (€)'), '100,00');
+    await userEvent.click(record);
+    await waitFor(() => expect(m.recordPenaltyPayment).toHaveBeenCalledWith('pen1', 10000, 'VIR 123'));
   });
 });

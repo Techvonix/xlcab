@@ -411,6 +411,11 @@ export const fr = {
   rvAucunBonus: "Aucun bonus de reprise.",
   rvBonusEnAttentePenalite: "En attente du recouvrement de la pénalité",
   rvRelancerLeBonus: "Relancer le virement du bonus",
+  boFacturePenalite: "Facture {number} de {amount}, à régler avant le {date}",
+  boPaiementRecu: "Paiement reçu par virement (solde dû : {remaining})",
+  boMontantRecu: "Montant reçu (€)",
+  boReferenceDuVirement: "Référence du virement",
+  boEnregistrerLePaiement: "Enregistrer le paiement",
 };
 
 export type MessageKey = keyof typeof fr;

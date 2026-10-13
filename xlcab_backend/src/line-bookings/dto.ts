@@ -103,6 +103,21 @@ export class ReviewCancellationDto {
   reason!: string;
 }
 
+/** Paiement d'une pénalité reçu hors application (virement bancaire). */
+export class PenaltyPaymentDto {
+  @IsInt({ message: 'Montant en centimes' })
+  @Min(1, { message: 'Montant en centimes' })
+  @Max(10_000_000, { message: 'Montant en centimes' })
+  amountCents!: number;
+
+  /** Référence du virement (libellé bancaire) : tracée au journal d'audit. */
+  @Transform(trim)
+  @IsString()
+  @MinLength(3, { message: 'Référence du paiement : 3 caractères minimum' })
+  @MaxLength(120, { message: 'Référence du paiement limitée à 120 caractères' })
+  reference!: string;
+}
+
 export class PenaltyDecisionDto {
   @IsIn(['uphold', 'cancel'], { message: 'Décision invalide' })
   decision!: 'uphold' | 'cancel';

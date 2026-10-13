@@ -221,6 +221,62 @@ function CancellationsSection() {
 
 // ── Pénalités ─────────────────────────────────────────────────────────
 
+/** Enregistre un paiement reçu par virement pour une pénalité (jamais plus que le solde). */
+function PenaltyPayment({ penaltyId, remainingCents }: { penaltyId: string; remainingCents: number }) {
+  const queryClient = useQueryClient();
+  const amountId = useId();
+  const referenceId = useId();
+  const [amount, setAmount] = useState('');
+  const [reference, setReference] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  // « 115,00 » ou « 115.00 » → centimes ; NaN si ce n'est pas un montant.
+  const cents = Math.round(Number(amount.replace(',', '.')) * 100);
+  const valid = Number.isFinite(cents) && cents >= 1 && cents <= remainingCents && reference.trim().length >= 3;
+  const record = useMutation({
+    mutationFn: () => api.recordPenaltyPayment(penaltyId, cents, reference.trim()),
+    onSuccess: () => {
+      setError(null);
+      setAmount('');
+      setReference('');
+      queryClient.invalidateQueries({ queryKey: ['penalties'] });
+      queryClient.invalidateQueries({ queryKey: ['bonuses'] });
+    },
+    onError: (e) => setError(e.message),
+  });
+
+  return (
+    <div className="mt-3 flex flex-col gap-2">
+      <p className="font-semibold">{t('boPaiementRecu', { remaining: formatEuros(remainingCents) })}</p>
+      <div className="flex flex-wrap items-end gap-3">
+        <div className="flex flex-col gap-1">
+          <label htmlFor={amountId}>{t('boMontantRecu')}</label>
+          <input
+            id={amountId}
+            inputMode="decimal"
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+            className="h-11 w-36 rounded-input border border-line bg-white px-3 focus:border-2 focus:border-bleu focus:outline-none"
+          />
+        </div>
+        <div className="flex flex-col gap-1">
+          <label htmlFor={referenceId}>{t('boReferenceDuVirement')}</label>
+          <input
+            id={referenceId}
+            value={reference}
+            maxLength={120}
+            onChange={(e) => setReference(e.target.value)}
+            className="h-11 w-64 rounded-input border border-line bg-white px-3 focus:border-2 focus:border-bleu focus:outline-none"
+          />
+        </div>
+        <Button variant="outline" disabled={!valid || record.isPending} onClick={() => record.mutate()}>
+          {t('boEnregistrerLePaiement')}
+        </Button>
+      </div>
+      {error && <Alert>{error}</Alert>}
+    </div>
+  );
+}
+
 function PenaltiesSection() {
   const queryClient = useQueryClient();
   const [status, setStatus] = useState('contested');
@@ -263,6 +319,14 @@ function PenaltiesSection() {
               <p className="text-muted">{t('boContestableJusquAu', { date: formatDateTime(p.contestUntil) })}</p>
               {p.status === 'applied' && (
                 <p className="tabular text-muted">{t('rvPenaliteRecouvree', { collected: formatEuros(p.collectedCents ?? 0), total: formatEuros(p.amountCents) })}</p>
+              )}
+              {p.invoice && (
+                <p className="tabular text-muted">
+                  {t('boFacturePenalite', { number: p.invoice.number, amount: formatEuros(p.invoice.totalCents), date: formatDateTime(p.invoice.dueDate) })}
+                </p>
+              )}
+              {p.status === 'applied' && (p.collectedCents ?? 0) < p.amountCents && (
+                <PenaltyPayment penaltyId={p.id} remainingCents={p.amountCents - (p.collectedCents ?? 0)} />
               )}
               {p.contestReason && <blockquote className="mt-2 border-l-4 border-line pl-3 italic">{p.contestReason}</blockquote>}
               {(p.status === 'contested' || p.status === 'pending') && (
