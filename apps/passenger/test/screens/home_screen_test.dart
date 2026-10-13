@@ -93,8 +93,10 @@ Future<void> pumpHome(
 }
 
 Future<void> scrollTo(WidgetTester tester, Finder finder) async {
-  // ensureVisible fait défiler jusqu'à ce que le widget soit réellement à l'écran (scrollUntilVisible
-  // s'arrête dès qu'il existe dans l'arbre, même sous le bord : le toucher tombait alors dans le vide).
+  // Deux temps : scrollUntilVisible fait exister le widget (liste paresseuse) mais s'arrête dès qu'il est dans
+  // l'arbre, même sous le bord de l'écran ; ensureVisible l'amène ensuite réellement à l'écran, pour qu'un
+  // toucher ne tombe pas dans le vide.
+  await tester.scrollUntilVisible(finder, 200, scrollable: find.byType(Scrollable).first);
   await tester.ensureVisible(finder);
   await tester.pumpAndSettle();
 }
