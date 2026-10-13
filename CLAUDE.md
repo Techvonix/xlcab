@@ -494,13 +494,23 @@ référence — les exigences de la Partie 8 priment.
   Revenus → « Compte de versement et reversements » (tuile en 360 730, mêmes coordonnées en anglais) avec le
   bonus de reprise de démo, puis Profil. Volet de notifications resté ouvert après le mode Avion : le refermer par
   `adb shell cmd statusbar collapse` (jamais la touche Retour).
-- Tests automatiques (2026-10-13, `.github/workflows/tests.yml`, PAS ENCORE ENVOYÉ : aucun dépôt distant, `gh`
-  absent) : GitHub Actions sur push `main` / PR / lancement manuel — Flutter 3.47.5 (analyse + tests de
-  `packages/core`, `packages/ui`, `apps/passenger`, `apps/driver`, journal en artefact), serveur (Node 24 — Jest exige >= 24.9 pour require(esm) —, `npm ci`,
-  `prisma generate`, tests, build), portails admin et entreprise. Aucun secret requis. Avant tout envoi : dépôt
-  PRIVÉ créé par le porteur de projet, accord explicite pour le `git push`. Historique vérifié le 2026-10-13 : aucun
-  secret (seulement des valeurs d'exemple) ; CLAUDE.md cite l'adresse Gmail du compte Google Cloud. Les tests
-  Flutter n'ayant jamais tourné, s'attendre à des échecs au premier passage.
+- Tests automatiques (2026-10-13, `.github/workflows/tests.yml`) : dépôt PRIVÉ `https://github.com/Techvonix/xlcab`
+  (remote `origin`, branche `main`). GitHub Actions sur push / PR / lancement manuel : Flutter 3.47.5 (analyse +
+  tests de `packages/core`, `packages/ui`, `apps/passenger`, `apps/driver`, journal en artefact
+  `journal-flutter-N`), serveur (Node 24 — Jest exige >= 24.9 pour require(esm) —, `npm ci`, `prisma generate`,
+  tests, build), portails admin et entreprise. Aucun secret requis. TOUT EST VERT depuis le 3e passage
+  (2026-10-13) : 188 tests passager, 92 chauffeur, 606 serveur, 46 admin, 42 entreprise. C'est désormais LE moyen
+  de faire tourner les tests Flutter (impossibles sur ce PC).
+  `git push` est REFUSÉ à Claude par le garde-fou de l'application (sortie de données) : le porteur de projet le
+  lance lui-même (bouton Run ou PowerShell ouvert dans le dossier du projet). Résultats : il colle la page, envoie une capture, ou
+  télécharge l'artefact du passage dans `Téléchargements` (`journal-flutter-2*.zip` = passager, `-3` = chauffeur ;
+  prendre le plus récent, à décompresser dans un dossier vide du scratchpad). `gh` absent, extension Chrome non
+  reliée. Leçons du premier passage (tests jamais exécutés auparavant) : `pump()` entre deux touchers sur le même
+  widget (sinon le second voit l'ancien état) ; `scrollUntilVisible` s'arrête dès que le widget existe, même sous
+  le bord → enchaîner `ensureVisible` + `pumpAndSettle` avant un toucher ; montants à comparer avec
+  `formatPrice(...)` (espace insécable avant « € ») ; formulaire en liste paresseuse plus haut que l'écran de test
+  → `pump(..., height:)` ; chemins de fichiers relatifs au dossier de l'appli (`../../packages/...`). `showToast`
+  REMPLACE le message affiché (`removeCurrentSnackBar`) au lieu de le mettre en file.
 - Migrations : `init_xlcab` appliquée sur la base locale ; toute modification de
   `prisma/schema.prisma` demande désormais `npx prisma migrate dev --name <nom>`. Référentiel :
   `npx prisma db seed` (config FR uniquement).
