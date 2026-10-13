@@ -85,7 +85,9 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          # 24 comme le poste de développement : les tests du serveur chargent les paquets ESM de
+          # NestJS par require(esm), que Jest ne sait faire qu'à partir de Node 24.9.
+          node-version: 24
           cache: npm
           cache-dependency-path: xlcab_backend/package-lock.json
 
@@ -118,7 +120,9 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          # 24 comme le poste de développement : les tests du serveur chargent les paquets ESM de
+          # NestJS par require(esm), que Jest ne sait faire qu'à partir de Node 24.9.
+          node-version: 24
           cache: npm
           cache-dependency-path: ${{ matrix.app }}/package-lock.json
 
