@@ -10,6 +10,8 @@ class PaymentSheetParams {
     required this.currency,
   });
 
+  /// Course payée. Vide pour une empreinte de carte de la bourse : la course
+  /// n'existe qu'une fois la proposition confirmée par l'opérateur.
   final String tripId;
   final String paymentIntentClientSecret;
   final String customerId;
@@ -35,6 +37,49 @@ class PaymentSheetParams {
       ephemeralKeySecret: data['ephemeralKeySecret'] as String,
       amountCents: data['amountCents'] as int,
       currency: data['currency'] is String ? data['currency'] as String : 'EUR',
+    );
+  }
+}
+
+/// Réservation d'une place de ligne. [payment] est présent quand le paiement
+/// en ligne est activé : la réservation n'est confirmée qu'une fois payée.
+class LineBooking {
+  const LineBooking({required this.tripId, this.payment});
+
+  final String tripId;
+  final PaymentSheetParams? payment;
+
+  factory LineBooking.fromJson(Object? data) {
+    if (data is! Map || data['tripId'] is! String) throw const FormatException('Réservation sans identifiant');
+    return LineBooking(tripId: data['tripId'] as String, payment: data['payment'] == null ? null : PaymentSheetParams.fromJson(data['payment']));
+  }
+}
+
+/// Choix d'une proposition de la bourse. [payment] est présent quand le
+/// paiement en ligne est activé : la carte doit être autorisée (empreinte,
+/// sans débit) pour que le choix soit transmis à l'opérateur.
+class OfferChoice {
+  const OfferChoice({this.payment});
+
+  final PaymentSheetParams? payment;
+
+  bool get needsCard => payment != null;
+
+  factory OfferChoice.fromJson(Object? data) {
+    final p = data is Map ? data['payment'] : null;
+    if (p == null) return const OfferChoice();
+    if (p is! Map || p['paymentIntentClientSecret'] is! String || p['customerId'] is! String || p['ephemeralKeySecret'] is! String || p['amountCents'] is! int) {
+      throw const FormatException('Paramètres de paiement incomplets');
+    }
+    return OfferChoice(
+      payment: PaymentSheetParams(
+        tripId: '',
+        paymentIntentClientSecret: p['paymentIntentClientSecret'] as String,
+        customerId: p['customerId'] as String,
+        ephemeralKeySecret: p['ephemeralKeySecret'] as String,
+        amountCents: p['amountCents'] as int,
+        currency: p['currency'] is String ? p['currency'] as String : 'EUR',
+      ),
     );
   }
 }

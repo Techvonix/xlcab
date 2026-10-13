@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:xlcab_core/models/market.dart';
+import 'package:xlcab_core/models/payment.dart';
 import 'package:xlcab_core/models/place.dart';
 import 'package:xlcab_core/providers/clock_provider.dart';
 import '../../providers/home_provider.dart';
@@ -9,6 +10,7 @@ import 'package:xlcab_core/providers/market_provider.dart';
 import 'package:xlcab_core/routes.dart';
 import 'package:xlcab_core/services/api_service.dart';
 import 'package:xlcab_core/services/market_service.dart';
+import 'package:xlcab_core/services/trip_service.dart';
 import 'package:xlcab_ui/theme/app_spacing.dart';
 import 'package:xlcab_ui/theme/app_typography.dart';
 import 'package:xlcab_core/utils/formatters.dart';
@@ -18,6 +20,7 @@ import 'package:xlcab_ui/widgets/async_widgets.dart';
 import 'package:xlcab_core/l10n/l10n.dart';
 
 import '../../models/return_trip.dart';
+import '../../services/payment_service.dart';
 import 'seat_picker.dart';
 
 /// Recherche d'un départ de ligne régulière et réservation de places.
@@ -265,7 +268,7 @@ class _BookLineSheetState extends ConsumerState<BookLineSheet> {
     final router = GoRouter.of(context);
     final navigator = Navigator.of(context);
     try {
-      final tripId = await ref.read(marketServiceProvider).bookLine(
+      final booking = await ref.read(marketServiceProvider).bookLine(
             widget.result.departureId,
             seats: _seats,
             childSeats: _childSeats,
@@ -273,6 +276,9 @@ class _BookLineSheetState extends ConsumerState<BookLineSheet> {
             notes: _notes.text.trim(),
             seatNumbers: _picked.isEmpty ? null : _picked,
           );
+      final tripId = booking.tripId;
+      // Paiement en ligne : la réservation n'est confirmée qu'une fois payée.
+      if (booking.payment != null && !await _pay(tripId, booking.payment!)) return;
       ref.invalidate(recentTripsProvider);
       navigator.pop();
       // Écran 8 : récapitulatif et QR d'embarquement de la réservation.
@@ -289,6 +295,36 @@ class _BookLineSheetState extends ConsumerState<BookLineSheet> {
     } finally {
       if (mounted) setState(() => _busy = false);
     }
+  }
+
+  /// Feuille de paiement Stripe. Abandon ou refus : la réservation est
+  /// annulée tout de suite (places rendues), rien n'est débité.
+  Future<bool> _pay(String tripId, PaymentSheetParams params) async {
+    final presenter = ref.read(paymentSheetPresenterProvider);
+    final result = presenter.isAvailable
+        ? await presenter.present(params)
+        : PaymentSheetResult(PaymentSheetOutcome.failed, l10n.paiementMomentanementIndisponibleReessayezPlus);
+    if (result.outcome == PaymentSheetOutcome.completed) {
+      try {
+        await ref.read(paymentServiceProvider).confirm(tripId);
+      } on ApiException {
+        // Le serveur confirmera seul à la notification de Stripe.
+      }
+      return true;
+    }
+    try {
+      await ref.read(tripServiceProvider).cancel(tripId, 'Paiement non finalisé');
+    } on ApiException {
+      // Sans paiement, la réservation tombe d'elle-même au bout de 30 minutes.
+    }
+    ref.invalidate(seatMapProvider(widget.result.departureId));
+    if (mounted) {
+      setState(() {
+        _error = result.outcome == PaymentSheetOutcome.canceled ? l10n.mkcPaiementAbandonne : (result.message ?? l10n.paiementRefuse);
+        _picked = [];
+      });
+    }
+    return false;
   }
 
   @override

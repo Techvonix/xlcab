@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:xlcab_core/models/market.dart';
+import 'package:xlcab_core/models/payment.dart';
 import 'package:xlcab_core/providers/market_provider.dart';
 import 'package:xlcab_core/routes.dart';
+import 'package:xlcab_core/services/api_service.dart';
 import 'package:xlcab_core/services/market_service.dart';
 import 'package:xlcab_ui/theme/app_spacing.dart';
 import 'package:xlcab_ui/theme/app_typography.dart';
@@ -11,6 +13,7 @@ import 'package:xlcab_core/utils/formatters.dart';
 import 'package:xlcab_ui/widgets/primary_button.dart';
 import 'package:xlcab_ui/widgets/offer_messages_sheet.dart';
 import 'package:xlcab_ui/widgets/async_widgets.dart';
+import '../../services/payment_service.dart';
 import 'line_search_screen.dart' show LineResultCard;
 import 'market_home_screen.dart' show requestStatusLabel;
 import 'package:xlcab_core/l10n/l10n.dart';
@@ -57,7 +60,40 @@ class _RequestDetailScreenState extends ConsumerState<RequestDetailScreen> {
       body: l10n.mkcChoisirExplication(offer.operatorName ?? l10n.mkcLOperateur, formatPrice(offer.priceCents, locale: locale)),
       action: l10n.mkcChoisir,
     );
-    if (ok) await _do(() => ref.read(marketServiceProvider).acceptOffer(offer.id), success: l10n.mkcPropositionChoisie);
+    if (ok) await _accept(offer);
+  }
+
+  /// Choisit la proposition. Paiement en ligne : la carte est d'abord
+  /// autorisée (empreinte, sans débit) ; l'opérateur n'est prévenu qu'ensuite
+  /// et le débit n'a lieu qu'à sa confirmation.
+  Future<void> _accept(MarketOffer offer) async {
+    if (_busy) return;
+    setState(() => _busy = true);
+    final market = ref.read(marketServiceProvider);
+    String message;
+    try {
+      final choice = await market.acceptOffer(offer.id);
+      if (!choice.needsCard) {
+        message = l10n.mkcPropositionChoisie;
+      } else {
+        final presenter = ref.read(paymentSheetPresenterProvider);
+        final result = presenter.isAvailable
+            ? await presenter.present(choice.payment!)
+            : PaymentSheetResult(PaymentSheetOutcome.failed, l10n.paiementMomentanementIndisponibleReessayezPlus);
+        if (result.outcome == PaymentSheetOutcome.completed) {
+          await market.authorizeOffer(offer.id);
+          message = l10n.mkcCarteAutorisee;
+        } else {
+          message = result.outcome == PaymentSheetOutcome.canceled ? l10n.mkcCarteNonValidee : (result.message ?? l10n.carteRefusee);
+        }
+      }
+    } on ApiException catch (e) {
+      message = e.message;
+    }
+    if (!mounted) return;
+    setState(() => _busy = false);
+    showToast(context, message);
+    _refresh();
   }
 
   Future<void> _cancel() async {
@@ -110,7 +146,8 @@ class _RequestDetailScreenState extends ConsumerState<RequestDetailScreen> {
                   ),
               ],
 
-              if (_open.contains(r.status) || r.status == RequestStatus.accepted) _Offers(requestId: r.id, canChoose: _open.contains(r.status) && !_busy, onChoose: _choose),
+              if (_open.contains(r.status) || r.status == RequestStatus.accepted)
+                _Offers(requestId: r.id, canChoose: _open.contains(r.status) && !_busy, onChoose: _choose, onAuthorize: _busy ? null : _accept),
               if (_open.contains(r.status)) _Lines(requestId: r.id, seats: r.passengers),
 
               if (_cancellable.contains(r.status)) ...[
@@ -139,11 +176,14 @@ class _RequestDetailScreenState extends ConsumerState<RequestDetailScreen> {
 }
 
 class _Offers extends ConsumerWidget {
-  const _Offers({required this.requestId, required this.canChoose, required this.onChoose});
+  const _Offers({required this.requestId, required this.canChoose, required this.onChoose, required this.onAuthorize});
 
   final String requestId;
   final bool canChoose;
   final ValueChanged<MarketOffer> onChoose;
+
+  /// Rouvre la feuille de paiement d'une proposition dont la carte reste à valider (null : action en cours).
+  final ValueChanged<MarketOffer>? onAuthorize;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -156,12 +196,12 @@ class _Offers extends ConsumerWidget {
         loadingLabel: l10n.mkChargementDesPropositions,
         onRetry: () => ref.invalidate(requestOffersProvider(requestId)),
         data: (list) {
-          final shown = list.where((o) => [OfferStatus.pending, OfferStatus.accepted, OfferStatus.confirmed].contains(o.status)).toList();
+          final shown = list.where((o) => [OfferStatus.pending, OfferStatus.authorizing, OfferStatus.accepted, OfferStatus.confirmed].contains(o.status)).toList();
           if (shown.isEmpty) return Text(l10n.mkcAucunePropositionPourLInstant);
           return Column(children: [
             for (final o in shown)
               OpCard(
-                highlight: o.status == OfferStatus.accepted,
+                highlight: o.status == OfferStatus.accepted || o.status == OfferStatus.authorizing,
                 child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
                   Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
                     Expanded(
@@ -189,10 +229,14 @@ class _Offers extends ConsumerWidget {
                     if (o.operatorVerified) StatusPill(icon: Icons.verified_outlined, label: l10n.mkcRaisonOperateurVerifie),
                     if (o.vehicleAccessible) StatusPill(icon: Icons.accessible, label: l10n.mkAccessible),
                     if (o.status == OfferStatus.accepted) StatusPill(icon: Icons.hourglass_top, label: l10n.mkcEnAttenteDeConfirmation),
+                    if (o.status == OfferStatus.authorizing) StatusPill(icon: Icons.credit_card, label: l10n.mkcCarteAValider),
                   ]),
                   const SizedBox(height: AppSpacing.sm),
                   Wrap(spacing: AppSpacing.sm, runSpacing: AppSpacing.xs, children: [
                     if (o.status == OfferStatus.pending) FilledButton(onPressed: canChoose ? () => onChoose(o) : null, child: Text(l10n.mkcChoisir)),
+                    // Feuille de paiement fermée avant la fin : le client la rouvre (même empreinte).
+                    if (o.status == OfferStatus.authorizing)
+                      FilledButton(onPressed: onAuthorize == null ? null : () => onAuthorize!(o), child: Text(l10n.mkcValiderMaCarte)),
                     TextButton.icon(
                       onPressed: () => showOfferMessages(context, o.id),
                       icon: const Icon(Icons.chat_bubble_outline),

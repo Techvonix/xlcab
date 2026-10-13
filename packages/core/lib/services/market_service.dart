@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/market.dart';
+import '../models/payment.dart';
 import '../models/place.dart';
 import 'api_service.dart';
 
@@ -85,7 +86,15 @@ class MarketService {
       });
 
   /// Je choisis cette proposition : l'opérateur doit encore la reconfirmer.
-  Future<void> acceptOffer(String offerId) => guardOperatorCall(() => _dio.post<void>('$_base/offers/${_id(offerId)}/accept'));
+  /// Choisit une proposition. Paiement en ligne activé : renvoie la feuille de
+  /// paiement de l'empreinte de carte (rappelable : la même tant qu'elle est en cours).
+  Future<OfferChoice> acceptOffer(String offerId) => guardOperatorCall(() async {
+        final res = await _dio.post<Map<String, dynamic>>('$_base/offers/${_id(offerId)}/accept');
+        return OfferChoice.fromJson(res.data);
+      });
+
+  /// Après la feuille de paiement : la carte est autorisée, le choix part chez l'opérateur.
+  Future<void> authorizeOffer(String offerId) => guardOperatorCall(() => _dio.post<void>('$_base/offers/${_id(offerId)}/authorize'));
 
   Future<void> cancelRequest(String requestId) => guardOperatorCall(() => _dio.post<void>('$_base/requests/${_id(requestId)}/cancel'));
 
@@ -111,8 +120,9 @@ class MarketService {
         return (res.data ?? const []).map(LineSearchResult.fromJson).whereType<LineSearchResult>().toList();
       });
 
-  /// Réserve des places sur un départ ; renvoie l'identifiant de la course créée.
-  Future<String> bookLine(
+  /// Réserve des places sur un départ ; renvoie la course créée et, si le
+  /// paiement en ligne est activé, sa feuille de paiement.
+  Future<LineBooking> bookLine(
     String departureId, {
     required int seats,
     int childSeats = 0,
@@ -130,9 +140,7 @@ class MarketService {
           // Sièges choisis ; absents : le serveur attribue les premiers libres.
           if (seatNumbers != null && seatNumbers.isNotEmpty) 'seatNumbers': seatNumbers,
         });
-        final id = res.data?['tripId'];
-        if (id is! String) throw const FormatException('Réservation sans identifiant');
-        return id;
+        return LineBooking.fromJson(res.data);
       });
 
   /// Sièges déjà pris sur un départ (choix du siège à la réservation).

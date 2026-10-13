@@ -3736,4 +3736,22 @@ class AppLocalizationsFr extends AppLocalizations {
   String payPenaliteRecouvree(String amount) {
     return 'Déjà retenu sur vos reversements : $amount';
   }
+
+  @override
+  String get mkcPaiementAbandonne =>
+      'Paiement non finalisé : votre réservation n’est pas enregistrée et rien n’a été débité.';
+
+  @override
+  String get mkcCarteAValider => 'Carte à valider';
+
+  @override
+  String get mkcValiderMaCarte => 'Valider ma carte';
+
+  @override
+  String get mkcCarteAutorisee =>
+      'Carte autorisée. L’opérateur a 2 heures pour confirmer : vous ne serez débité qu’à ce moment-là.';
+
+  @override
+  String get mkcCarteNonValidee =>
+      'Carte non validée : votre choix n’est pas encore transmis. Vous avez 15 minutes pour la valider.';
 }

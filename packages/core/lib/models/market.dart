@@ -82,6 +82,8 @@ class MarketFeedItem {
 
 enum OfferStatus {
   pending,
+  /// Choisie par le client, carte à valider (empreinte) : l'opérateur n'est pas encore prévenu.
+  authorizing,
   /// Choisie par le client : l'opérateur doit reconfirmer.
   accepted,
   confirmed,

@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:xlcab_core/models/market.dart';
+import 'package:xlcab_core/models/payment.dart';
 import 'package:xlcab_core/models/operator.dart';
 import 'package:xlcab_core/models/payouts.dart';
 import 'package:xlcab_core/models/place.dart';
@@ -269,7 +270,17 @@ class FakeMarketService extends MarketService {
   Future<List<LineSearchResult>> lineMatches(String requestId) async => lineResults;
 
   @override
-  Future<void> acceptOffer(String offerId) async => _act('acceptOffer:$offerId');
+  Future<OfferChoice> acceptOffer(String offerId) async {
+    _act('acceptOffer:$offerId');
+    return OfferChoice(payment: choicePayment);
+  }
+
+  @override
+  Future<void> authorizeOffer(String offerId) async => _act('authorizeOffer:$offerId');
+
+  /// Paiement en ligne activé : feuille de paiement renvoyée au choix d'une proposition / à la réservation.
+  PaymentSheetParams? choicePayment;
+  PaymentSheetParams? bookingPayment;
 
   @override
   Future<void> cancelRequest(String requestId) async => _act('cancelRequest:$requestId');
@@ -287,7 +298,7 @@ class FakeMarketService extends MarketService {
   }
 
   @override
-  Future<String> bookLine(
+  Future<LineBooking> bookLine(
     String departureId, {
     required int seats,
     int childSeats = 0,
@@ -297,7 +308,7 @@ class FakeMarketService extends MarketService {
   }) async {
     _act('bookLine:$departureId:$seats:$childSeats:$luggage');
     bookedSeatNumbers = seatNumbers;
-    return 'trip-1';
+    return LineBooking(tripId: 'trip-1', payment: bookingPayment);
   }
 
   /// Sièges demandés à la dernière réservation (null = attribution automatique).

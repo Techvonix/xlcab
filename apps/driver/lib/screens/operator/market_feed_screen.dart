@@ -40,7 +40,8 @@ class MarketFeedScreen extends ConsumerWidget {
 }
 
 String offerStatusLabel(OfferStatus s) => switch (s) {
-      OfferStatus.pending => l10n.mkEnAttenteDuClient,
+      // « authorizing » (carte du client à valider) n'est jamais montré à l'opérateur : le serveur renvoie « pending ».
+      OfferStatus.pending || OfferStatus.authorizing => l10n.mkEnAttenteDuClient,
       OfferStatus.accepted => l10n.mkChoisieAConfirmer,
       OfferStatus.confirmed => l10n.mkConfirmee,
       OfferStatus.declined => l10n.mkRefuseeParVous,

@@ -1048,5 +1048,10 @@
   "payStatutRetenu": "Withheld for a penalty",
   "payDetailRetenue": "Earnings {gross} · {withheld} withheld for a cancellation penalty",
   "payBanniere": "Open your payout account to put your departures on sale and reply to requests.",
-  "payPenaliteRecouvree": "Already withheld from your payouts: {amount}"
+  "payPenaliteRecouvree": "Already withheld from your payouts: {amount}",
+  "mkcPaiementAbandonne": "Payment not completed: your booking was not saved and nothing was charged.",
+  "mkcCarteAValider": "Card to confirm",
+  "mkcValiderMaCarte": "Confirm my card",
+  "mkcCarteAutorisee": "Card authorised. The operator has 2 hours to confirm: you will only be charged then.",
+  "mkcCarteNonValidee": "Card not confirmed: your choice has not been sent yet. You have 15 minutes to confirm it."
 }

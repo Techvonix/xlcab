@@ -3713,4 +3713,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String payPenaliteRecouvree(String amount) {
     return 'Already withheld from your payouts: $amount';
   }
+
+  @override
+  String get mkcPaiementAbandonne =>
+      'Payment not completed: your booking was not saved and nothing was charged.';
+
+  @override
+  String get mkcCarteAValider => 'Card to confirm';
+
+  @override
+  String get mkcValiderMaCarte => 'Confirm my card';
+
+  @override
+  String get mkcCarteAutorisee =>
+      'Card authorised. The operator has 2 hours to confirm: you will only be charged then.';
+
+  @override
+  String get mkcCarteNonValidee =>
+      'Card not confirmed: your choice has not been sent yet. You have 15 minutes to confirm it.';
 }

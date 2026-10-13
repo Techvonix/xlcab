@@ -6392,6 +6392,36 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Déjà retenu sur vos reversements : {amount}'**
   String payPenaliteRecouvree(String amount);
+
+  /// No description provided for @mkcPaiementAbandonne.
+  ///
+  /// In fr, this message translates to:
+  /// **'Paiement non finalisé : votre réservation n’est pas enregistrée et rien n’a été débité.'**
+  String get mkcPaiementAbandonne;
+
+  /// No description provided for @mkcCarteAValider.
+  ///
+  /// In fr, this message translates to:
+  /// **'Carte à valider'**
+  String get mkcCarteAValider;
+
+  /// No description provided for @mkcValiderMaCarte.
+  ///
+  /// In fr, this message translates to:
+  /// **'Valider ma carte'**
+  String get mkcValiderMaCarte;
+
+  /// No description provided for @mkcCarteAutorisee.
+  ///
+  /// In fr, this message translates to:
+  /// **'Carte autorisée. L’opérateur a 2 heures pour confirmer : vous ne serez débité qu’à ce moment-là.'**
+  String get mkcCarteAutorisee;
+
+  /// No description provided for @mkcCarteNonValidee.
+  ///
+  /// In fr, this message translates to:
+  /// **'Carte non validée : votre choix n’est pas encore transmis. Vous avez 15 minutes pour la valider.'**
+  String get mkcCarteNonValidee;
 }
 
 class _AppLocalizationsDelegate
