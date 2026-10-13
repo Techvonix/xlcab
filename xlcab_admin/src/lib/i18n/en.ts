@@ -149,7 +149,7 @@ export const en: Record<MessageKey, string> = {
   prendreEnCharge: "Take in charge",
   compteRenduDeResolution: "Resolution report",
   cloturerLIncident: "Close incident",
-  mentionsLegalesDuVendeurIncompletes: "Seller legal details incomplete: invoices show “[à compléter]” (legal form, share capital, address, SIREN, RCS, EU VAT number, REVTC no.). Set the server's INVOICE_SELLER_* variables before any real invoicing.",
+  mentionsLegalesDuVendeurIncompletes: "Seller legal details incomplete: invoices show “[à compléter]” (legal form, share capital, address, SIREN, RCS, EU VAT number, REVTC no.) or IBAN missing from invoices payable by bank transfer. Set the server's INVOICE_SELLER_* variables before any real invoicing.",
   aucuneFactureEmisePourL: "No invoices issued yet.",
   numero: "Number",
   client: "Customer",

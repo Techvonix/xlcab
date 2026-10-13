@@ -469,8 +469,13 @@ référence — les exigences de la Partie 8 priment.
   elle-même n'est jamais modifiée (le solde vit sur la pénalité). Vues : `invoice { number, totalCents, dueDate }`
   dans `/operators/me/cancellations` et `/admin/penalties` ; admin : `PenaltyPayment` dans « Bourse et lignes » ;
   appli chauffeur : ligne dans « Mes annulations » (`payFacturePenalite`). LineBookingsModule importe InvoicesModule
-  (`RescueService` : InvoicesService en dernier paramètre @Optional). L'IBAN de XLCAB ne figure pas sur la facture
-  (pas de variable prévue) : à ajouter avec les mentions du vendeur. Reste : essai réel avec les clés de test
+  (`RescueService` : InvoicesService en dernier paramètre @Optional). IBAN du vendeur (2026-10-13) :
+  `INVOICE_SELLER_IBAN` / `INVOICE_SELLER_BIC` (à renseigner par le porteur de projet dans `.env.local`),
+  `src/invoices/bank-details.ts` (contrôle modulo 97 : un IBAN faux n'est JAMAIS imprimé), figé dans
+  `Invoice.seller.bank` pour toute facture `due` (pénalités ET factures mensuelles d'entreprise), mention
+  `paymentInstruction` du PDF (IBAN, BIC, numéro de facture à rappeler) ; absent → AuditLog
+  `invoice.bank_details_missing` et `sellerComplete` faux (alerte de la page Factures de l'admin). Reste : essai
+  réel avec les clés de test
   (`STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_CONNECT_WEBHOOK_SECRET`,
   `--dart-define=STRIPE_PUBLISHABLE_KEY`, `LINE_PAYMENT_MODE=connect`).
 - Migrations : `init_xlcab` appliquée sur la base locale ; toute modification de

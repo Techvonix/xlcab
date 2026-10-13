@@ -541,8 +541,13 @@ describe('Réservations sur ligne et protocole d’annulation (intégration)', (
       expect(db.invoice.rows).toHaveLength(0);
 
       const issuedAt = new Date(start + 39 * DAY);
+      // IBAN d'exemple (documentation bancaire), renseigné par le porteur de projet en vrai.
+      process.env.INVOICE_SELLER_IBAN = 'FR76 3000 6000 0112 3456 7890 189';
       expect((await rescue.tick(issuedAt)).penaltiesInvoiced).toBe(1);
+      delete process.env.INVOICE_SELLER_IBAN;
       const invoice = db.invoice.rows[0];
+      // Compte à créditer figé avec la facture : le chauffeur sait où virer.
+      expect(invoice.seller.bank).toEqual({ iban: 'FR7630006000011234567890189', bic: null });
       expect(invoice).toMatchObject({ kind: 'invoice', customerUserId: DJAMEL, totalCents: 21500, vatCents: 0, paymentStatus: 'due' });
       expect(invoice.number).toMatch(/^FA-\d{4}-\d{6}$/);
       expect(invoice.dueDate.getTime()).toBe(issuedAt.getTime() + 30 * DAY);

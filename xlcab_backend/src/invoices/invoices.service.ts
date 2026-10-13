@@ -1,3 +1,4 @@
+import { bankDetailsFrom } from './bank-details';
 import { ForbiddenException, Injectable, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
@@ -304,7 +305,7 @@ export class InvoicesService {
   /** Mentions du vendeur toutes renseignées (sinon : alerte dans le dashboard admin). */
   sellerComplete(): boolean {
     return ['INVOICE_SELLER_LEGAL_FORM', 'INVOICE_SELLER_CAPITAL', 'INVOICE_SELLER_ADDRESS', 'INVOICE_SELLER_SIREN', 'INVOICE_SELLER_RCS', 'INVOICE_SELLER_VAT_NUMBER', 'INVOICE_SELLER_REVTC']
-      .every((k) => !!this.config.get<string>(k));
+      .every((k) => !!this.config.get<string>(k)) && bankDetailsFrom((k) => this.config.get<string>(k)) !== null;
   }
 
   // ── Mécanique interne ───────────────────────────────────────────────
@@ -327,6 +328,14 @@ export class InvoicesService {
     const subtotalCents = input.lines.reduce((s, l) => s + l.unitCents * l.quantity, 0);
     const vatCents = input.lines.reduce((s, l) => s + l.vatCents, 0);
     const seller = this.seller();
+    // Facture à régler par virement : compte à créditer, figé avec la facture.
+    if (input.kind === 'invoice' && input.paymentStatus === 'due') {
+      seller.bank = bankDetailsFrom((k) => this.config.get<string>(k));
+      if (!seller.bank) {
+        this.logger.warn('Facture à régler émise sans IBAN : INVOICE_SELLER_IBAN absent ou invalide');
+        await this.audit.log({ action: 'invoice.bank_details_missing', entity: 'Invoice', metadata: { customerUserId: input.customerUserId ?? null, corporateId: input.corporateId ?? null } });
+      }
+    }
     const year = new Date().getUTCFullYear();
 
     // Numéro attribué dans la même transaction que la facture : sans trou.

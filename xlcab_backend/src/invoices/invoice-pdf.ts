@@ -1,8 +1,11 @@
 import PDFDocument = require('pdfkit');
+import { BankDetails, formatIban } from './bank-details';
 
 export interface Party {
   name: string;
   lines: string[]; // adresse, identifiants (SIREN, TVA…), e-mail
+  /** Vendeur d'une facture à régler par virement : compte à créditer, figé avec la facture. */
+  bank?: BankDetails | null;
 }
 
 export interface InvoiceLine {
@@ -41,6 +44,20 @@ const sanitize = (s: string) =>
     .replace(/→/g, '->')
     .replace(/[  ]/g, ' ')
     .replace(/[^\x20-\x7E -ÿ€’‘“”–—…œŒ]/g, '?');
+
+/**
+ * Mention de règlement. Facture à régler : compte à créditer et numéro de
+ * facture à rappeler dans le libellé du virement, quand l'IBAN du vendeur
+ * est configuré.
+ */
+export function paymentInstruction(doc: Pick<InvoiceDocument, 'number' | 'kind' | 'paymentStatus' | 'dueDate' | 'seller'>): string {
+  if (doc.kind === 'credit_note') return 'Remboursement effectué sur le moyen de paiement utilisé.';
+  if (doc.paymentStatus === 'paid') return 'Facture acquittée : réglée par carte bancaire à la réservation.';
+  const due = `À régler avant le ${doc.dueDate ? date(doc.dueDate) : '—'} par virement`;
+  const bank = doc.seller.bank;
+  if (!bank) return `${due}.`;
+  return `${due} sur le compte IBAN ${formatIban(bank.iban)}${bank.bic ? ` (BIC ${bank.bic})` : ''}, en rappelant le numéro ${doc.number} dans le libellé.`;
+}
 
 /** 123456 → « 1 234,56 € » (espace normale : compatible WinAnsi). */
 export function euros(cents: number): string {
@@ -161,13 +178,7 @@ export function renderInvoicePdf(doc: InvoiceDocument): Promise<Buffer> {
     // Règlement et mentions légales.
     y += 12;
     pdf.font('Helvetica').fontSize(9);
-    const payment =
-      doc.kind === 'credit_note'
-        ? 'Remboursement effectué sur le moyen de paiement utilisé.'
-        : doc.paymentStatus === 'paid'
-          ? 'Facture acquittée : réglée par carte bancaire à la réservation.'
-          : `À régler avant le ${doc.dueDate ? date(doc.dueDate) : '—'} par virement.`;
-    pdf.text(t(payment), left, y, { width });
+    pdf.text(t(paymentInstruction(doc)), left, y, { width });
     pdf.moveDown(0.8);
     pdf.fontSize(8).fillColor('#444444');
     doc.mentions.forEach((m) => pdf.text(t(m), { width }).moveDown(0.3));

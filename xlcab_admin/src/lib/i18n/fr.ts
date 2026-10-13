@@ -148,7 +148,7 @@ export const fr = {
   prendreEnCharge: "Prendre en charge",
   compteRenduDeResolution: "Compte rendu de résolution",
   cloturerLIncident: "Clôturer l’incident",
-  mentionsLegalesDuVendeurIncompletes: "Mentions légales du vendeur incomplètes : les factures portent « [à compléter] » (forme juridique, capital, adresse, SIREN, RCS, TVA intracommunautaire, n° REVTC). Renseignez les variables INVOICE_SELLER_* du serveur avant toute facturation réelle.",
+  mentionsLegalesDuVendeurIncompletes: "Mentions légales du vendeur incomplètes : les factures portent « [à compléter] » (forme juridique, capital, adresse, SIREN, RCS, TVA intracommunautaire, n° REVTC) ou IBAN absent des factures à régler par virement. Renseignez les variables INVOICE_SELLER_* du serveur avant toute facturation réelle.",
   aucuneFactureEmisePourL: "Aucune facture émise pour l’instant.",
   numero: "Numéro",
   client: "Client",
