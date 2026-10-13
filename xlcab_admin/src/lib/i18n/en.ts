@@ -407,4 +407,9 @@ export const en: Record<MessageKey, string> = {
   rvRelanceVersee: "Transfer sent.",
   rvRelanceToujoursEnAttente: "The transfer did not go out: {status}.",
   rvPenaliteRecouvree: "Recovered from payouts: {collected} of {total}",
+  rvBonus: "Rescue bonuses",
+  rvBonusIntro: "Paid to the backup driver who saved a departure, as soon as the replaced driver’s penalty has been recovered up to the bonus amount.",
+  rvAucunBonus: "No rescue bonuses.",
+  rvBonusEnAttentePenalite: "Waiting for the penalty to be recovered",
+  rvRelancerLeBonus: "Retry the bonus transfer",
 };

@@ -455,6 +455,102 @@ describe('Reversement à l’opérateur en fin de trajet (intégration)', () => 
       expect(deductionsOf(tripId)).toHaveLength(1);
     });
 
+    describe('bonus de reprise du chauffeur de secours', () => {
+      /** Bonus de 160 € dû à Karim, qui a repris un départ abandonné par Djamel. */
+      function bonusFor(penaltyId: string, over: Record<string, unknown> = {}) {
+        const row = { id: id(600 + db.driverBonus.rows.length), driverId: KARIM, departureId: id(700), penaltyId, amountCents: 16000, status: 'pending', attempts: 0,
+          nextAttemptAt: null, lastError: null, stripeTransferId: null, stripeAccountId: null, paidAt: null, createdAt: new Date(), ...over };
+        db.driverBonus.rows.push(row);
+        return db.driverBonus.rows.find((b: any) => b.id === row.id);
+      }
+      const bonusTransfers = () => stripe.transfersCreated.filter((t) => t.params.metadata?.bonusId);
+
+      it('pas de bonus tant que la pénalité n’est pas recouvrée à hauteur du bonus', async () => {
+        const p = penalty();
+        const bonus = bonusFor(p.id);
+        await payouts.tick();
+        expect(bonus.status).toBe('pending');
+
+        // Premier reversement de Djamel : 45 € retenus, c'est moins que le bonus.
+        await paidBooking();
+        await runDeparture();
+        await payouts.tick();
+        expect(p.collectedCents).toBe(4500);
+        expect(bonusTransfers()).toHaveLength(0);
+        expect(bonus.status).toBe('pending');
+      });
+
+      it('pénalité recouvrée à hauteur du bonus : 160 € virés au secours, une seule fois', async () => {
+        const p = penalty();
+        const bonus = bonusFor(p.id);
+        await payouts.onTripCompleted(completedTrip()); // 162 € retenus sur le revenu de Djamel
+        expect(p.collectedCents).toBe(16200);
+
+        expect(await payouts.tick()).toMatchObject({ bonusesPaid: 1 });
+        expect(bonusTransfers()).toHaveLength(1);
+        const transfer = bonusTransfers()[0];
+        expect(transfer.params).toMatchObject({ amount: 16000, currency: 'eur', destination: 'acct_Karim', metadata: { bonusId: bonus.id } });
+        // Virement depuis le solde de la plateforme : pas rattaché à un encaissement.
+        expect(transfer.params.source_transaction).toBeUndefined();
+        expect(bonus).toMatchObject({ status: 'paid', stripeTransferId: transfer.id });
+        expect(notified(KARIM, 'bonus.paid')).toBe(1);
+
+        expect(await payouts.tick()).toMatchObject({ bonusesPaid: 0 });
+        expect(bonusTransfers()).toHaveLength(1);
+        // Le secours le voit dans ses reversements ; le chauffeur pénalisé ne voit pas ce bonus.
+        expect((await mine(KARIM)).body.bonuses).toMatchObject([{ amountCents: 16000, status: 'paid' }]);
+        expect((await mine(DJAMEL)).body.bonuses).toEqual([]);
+      });
+
+      it('pénalité contestée ou annulée : aucun bonus viré', async () => {
+        const contested = penalty({ status: 'contested', collectedCents: 26000 });
+        const cancelled = penalty({ status: 'cancelled', collectedCents: 26000 });
+        bonusFor(contested.id);
+        bonusFor(cancelled.id);
+        expect(await payouts.tick()).toMatchObject({ bonusesPaid: 0 });
+        expect(bonusTransfers()).toHaveLength(0);
+      });
+
+      it('secours sans compte de versement : le bonus attend, il est prévenu une fois, puis il est versé', async () => {
+        const p = penalty({ collectedCents: 26000, collectedAt: new Date() });
+        const bonus = bonusFor(p.id);
+        account(KARIM).payoutsEnabled = false;
+        await payouts.tick();
+        await payouts.tick(new Date(Date.now() + 2 * HOUR));
+        expect(bonus.status).toBe('blocked');
+        expect(notified(KARIM, 'payout.blocked')).toBe(1);
+
+        account(KARIM).payoutsEnabled = true;
+        expect(await payouts.tick(new Date(Date.now() + 4 * HOUR))).toMatchObject({ bonusesPaid: 1 });
+        expect(bonus.status).toBe('paid');
+      });
+
+      it('incident Stripe (solde insuffisant…) : repris plus tard ; l’équipe peut relancer', async () => {
+        const p = penalty({ collectedCents: 26000, collectedAt: new Date() });
+        const bonus = bonusFor(p.id);
+        stripe.failNextTransfer = true;
+        await payouts.tick();
+        expect(bonus).toMatchObject({ status: 'failed', attempts: 1, lastError: 'Stripe API indisponible' });
+        // Pas de nouvel essai avant le délai.
+        expect(await payouts.tick(new Date(bonus.nextAttemptAt.getTime() - MIN))).toMatchObject({ bonusesPaid: 0 });
+
+        const list = await http().get('/api/v1/admin/payouts/bonuses').set(admin);
+        expect(list.body[0]).toMatchObject({ id: bonus.id, status: 'failed', driverName: 'Karim Test', penaltyCollectedCents: 26000, penaltyCents: 26000 });
+        const retry = await http().post(`/api/v1/admin/payouts/bonuses/${bonus.id}/retry`).set(admin);
+        expect(retry.body).toEqual({ id: bonus.id, status: 'paid' });
+        expect((await http().post(`/api/v1/admin/payouts/bonuses/${bonus.id}/retry`).set(admin)).status).toBe(409);
+        expect(bonusTransfers()).toHaveLength(1);
+      });
+
+      it('l’équipe ne peut pas forcer un bonus dont la pénalité n’est pas recouvrée', async () => {
+        const bonus = bonusFor(penalty().id);
+        const res = await http().post(`/api/v1/admin/payouts/bonuses/${bonus.id}/retry`).set(admin);
+        expect(res.status).toBe(409);
+        expect(bonusTransfers()).toHaveLength(0);
+        expect((await http().get('/api/v1/admin/payouts/bonuses').set('Authorization', as(KARIM, 'driver'))).status).toBe(403);
+      });
+    });
+
     it('calcul des retenues interrompu (arrêt du serveur) : repris par le planificateur, sans double retenue', async () => {
       const p = penalty({ amountCents: 5000, collectedCents: 2000 });
       const tripId = completedTrip();

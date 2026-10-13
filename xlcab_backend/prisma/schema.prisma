@@ -743,14 +743,25 @@ model DriverPenalty {
 
 // Bonus de reprise versé au chauffeur de secours (financé par la pénalité).
 model DriverBonus {
-  id          String   @id @default(uuid())
-  driverId    String
-  departureId String
-  penaltyId   String?
-  amountCents Int
-  createdAt   DateTime @default(now())
+  id               String    @id @default(uuid())
+  driverId         String
+  departureId      String
+  penaltyId        String?
+  amountCents      Int
+  // Virement Stripe Connect, une fois la pénalité recouvrée à hauteur du bonus :
+  // pending : à virer ; paid : viré ; blocked : compte de versement pas prêt ;
+  // failed : incident Stripe (repris automatiquement).
+  status           String    @default("pending")
+  stripeTransferId String?
+  stripeAccountId  String?
+  attempts         Int       @default(0)
+  nextAttemptAt    DateTime?
+  lastError        String?
+  paidAt           DateTime?
+  createdAt        DateTime  @default(now())
 
   @@index([driverId])
+  @@index([status, nextAttemptAt])
 }
 
 // Avoir d'un passager (départ sans secours, part de la pénalité).

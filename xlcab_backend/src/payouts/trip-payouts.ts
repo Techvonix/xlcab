@@ -81,6 +81,20 @@ type PayoutRow = {
   paidAt: Date | null;
 };
 
+type BonusRow = {
+  id: string;
+  driverId: string;
+  departureId: string;
+  penaltyId: string | null;
+  amountCents: number;
+  status: string;
+  attempts: number;
+  nextAttemptAt: Date | null;
+  lastError: string | null;
+  createdAt: Date;
+  paidAt: Date | null;
+};
+
 /** Part de l'opérateur : prix hors taxes moins la commission XLCAB (comme l'écran « Revenus »). */
 export function operatorShareCents(trip: { totalPriceCents: number | null; vatCents: number | null; commissionCents: number | null }): number {
   return Math.max(0, (trip.totalPriceCents ?? 0) - (trip.vatCents ?? 0) - (trip.commissionCents ?? 0));
@@ -270,7 +284,7 @@ export class TripPayoutsService {
    * dont le reversement n'aurait pas été enregistré.
    */
   async tick(now = new Date()) {
-    const report = { paid: 0, blocked: 0, failed: 0, registered: 0 };
+    const report = { paid: 0, blocked: 0, failed: 0, registered: 0, bonusesPaid: 0 };
 
     const completed = await this.prisma.trip.findMany({
       where: { status: TripStatus.COMPLETED, source: { in: ['line', 'market'] }, completedAt: { gte: new Date(now.getTime() - SWEEP_DAYS * 24 * HOUR) } },
@@ -310,7 +324,125 @@ export class TripPayoutsService {
       const status = await this.attempt(payout, now);
       if (status !== 'pending') report[status as 'paid' | 'blocked' | 'failed']++;
     }
+    report.bonusesPaid = await this.payBonuses(now);
     return report;
+  }
+
+  // ── Bonus de reprise du chauffeur de secours ────────────────────────
+  //
+  // Le bonus (160 €) est financé par la pénalité du chauffeur défaillant :
+  // « pas de bonus sans pénalité encaissée ». Il est viré dès que la
+  // pénalité a été recouvrée à hauteur du bonus (le secours passe avant la
+  // part des avoirs passagers) — règle À VALIDER par le porteur de projet.
+  // Le virement vient du solde de la plateforme (pas d'encaissement lié).
+
+  /** Bonus dont la pénalité est suffisamment recouvrée : virés. Renvoie le nombre de bonus versés. */
+  async payBonuses(now = new Date()): Promise<number> {
+    if (!this.stripe) return 0;
+    const bonuses = (await this.prisma.driverBonus.findMany({
+      where: { status: { in: ['pending', 'blocked', 'failed'] }, penaltyId: { not: null } },
+      orderBy: { createdAt: 'asc' },
+      take: 100,
+    })) as BonusRow[];
+    let paid = 0;
+    for (const bonus of bonuses) {
+      if (bonus.nextAttemptAt && bonus.nextAttemptAt > now) continue;
+      try {
+        if (!(await this.bonusFunded(bonus))) continue;
+        if ((await this.attemptBonus(bonus, now)) === 'paid') paid++;
+      } catch (err) {
+        this.logger.error(`Bonus ${bonus.id} non traité : ${(err as Error).message}`);
+      }
+    }
+    return paid;
+  }
+
+  /** La pénalité qui finance ce bonus est due (appliquée) et recouvrée à hauteur du bonus. */
+  private async bonusFunded(bonus: BonusRow): Promise<boolean> {
+    const penalty = bonus.penaltyId ? await this.prisma.driverPenalty.findUnique({ where: { id: bonus.penaltyId } }) : null;
+    return !!penalty && penalty.status === 'applied' && penalty.collectedCents >= Math.min(bonus.amountCents, penalty.amountCents);
+  }
+
+  private async attemptBonus(bonus: BonusRow, now: Date): Promise<'paid' | 'blocked' | 'failed'> {
+    const accountId = await this.accounts.readyAccountId(bonus.driverId);
+    if (!accountId) {
+      await this.prisma.driverBonus.update({ where: { id: bonus.id }, data: { status: 'blocked', nextAttemptAt: new Date(now.getTime() + BLOCKED_RETRY_MS) } });
+      if (bonus.status !== 'blocked') {
+        await this.notifications.notify(
+          bonus.driverId, 'payout.blocked', 'Revenu en attente',
+          `${euros(bonus.amountCents)} € vous attendent : ouvrez ou complétez votre compte de versement pour les recevoir.`, { departureId: bonus.departureId },
+        );
+      }
+      return 'blocked';
+    }
+    try {
+      const transfer = await this.stripe!.transfers.create(
+        {
+          amount: bonus.amountCents,
+          currency: 'eur',
+          destination: accountId,
+          description: `Bonus de reprise XLCAB ${bonus.departureId}`,
+          metadata: { bonusId: bonus.id, departureId: bonus.departureId },
+        },
+        { idempotencyKey: `bonus-${bonus.id}-${accountId}` },
+      );
+      await this.prisma.driverBonus.update({
+        where: { id: bonus.id },
+        data: { status: 'paid', stripeTransferId: transfer.id, stripeAccountId: accountId, paidAt: now, nextAttemptAt: null, lastError: null, attempts: bonus.attempts + 1 },
+      });
+      await this.audit.log({ action: 'bonus.paid', entity: 'DriverBonus', entityId: bonus.id, metadata: { departureId: bonus.departureId, amountCents: bonus.amountCents } });
+      await this.notifications.notify(
+        bonus.driverId, 'bonus.paid', 'Bonus de reprise versé', `${euros(bonus.amountCents)} € ont été versés sur votre compte de versement.`, { departureId: bonus.departureId },
+      );
+      return 'paid';
+    } catch (err) {
+      const attempts = bonus.attempts + 1;
+      const delay = Math.min(FAILED_BASE_RETRY_MS * 2 ** (attempts - 1), FAILED_MAX_RETRY_MS);
+      await this.prisma.driverBonus.update({
+        where: { id: bonus.id },
+        data: {
+          status: 'failed', attempts, lastError: String((err as Error).message).slice(0, 300),
+          nextAttemptAt: attempts >= PAYOUT_MAX_ATTEMPTS ? null : new Date(now.getTime() + delay),
+        },
+      });
+      this.logger.error(`Bonus ${bonus.id} non viré (essai ${attempts}) : ${(err as Error).message}`);
+      if (attempts === PAYOUT_MAX_ATTEMPTS) {
+        await this.audit.log({ action: 'bonus.abandoned', entity: 'DriverBonus', entityId: bonus.id, metadata: { amountCents: bonus.amountCents } });
+      }
+      return 'failed';
+    }
+  }
+
+  /** Équipe XLCAB : bonus de reprise et où en est leur virement. */
+  async adminBonuses() {
+    const rows = (await this.prisma.driverBonus.findMany({ orderBy: { createdAt: 'desc' }, take: 100 })) as BonusRow[];
+    const users = await this.prisma.user.findMany({ where: { id: { in: rows.map((r) => r.driverId) } }, select: { id: true, firstName: true, lastName: true, email: true } });
+    const penalties = await this.prisma.driverPenalty.findMany({ where: { id: { in: rows.map((r) => r.penaltyId).filter((x): x is string => !!x) } } });
+    return rows.map((r) => {
+      const u = users.find((x) => x.id === r.driverId);
+      const p = penalties.find((x) => x.id === r.penaltyId);
+      return {
+        id: r.id, driverId: r.driverId, departureId: r.departureId, amountCents: r.amountCents, status: r.status, attempts: r.attempts, lastError: r.lastError,
+        createdAt: r.createdAt, paidAt: r.paidAt,
+        driverName: [u?.firstName, u?.lastName].filter(Boolean).join(' ') || null,
+        // Ce qui a déjà été recouvré sur la pénalité qui finance ce bonus.
+        penaltyCollectedCents: p?.collectedCents ?? 0,
+        penaltyCents: p?.amountCents ?? 0,
+        needsAttention: r.status === 'failed' && r.attempts >= PAYOUT_MAX_ATTEMPTS,
+      };
+    });
+  }
+
+  /** Équipe XLCAB : relance immédiate du virement d'un bonus (seulement s'il est financé). */
+  async adminRetryBonus(adminId: string, bonusId: string, ctx: { ipAddress?: string; userAgent?: string }, now = new Date()) {
+    const bonus = (await this.prisma.driverBonus.findUnique({ where: { id: bonusId } })) as BonusRow | null;
+    if (!bonus) throw new NotFoundException('Bonus introuvable');
+    if (bonus.status === 'paid') throw new ConflictException('Ce bonus est déjà versé');
+    if (!(await this.bonusFunded(bonus))) throw new ConflictException('La pénalité qui finance ce bonus n’est pas encore recouvrée');
+    if (!this.stripe) throw new ConflictException('Paiement momentanément indisponible');
+    const status = await this.attemptBonus(bonus, now);
+    await this.audit.log({ userId: adminId, action: 'bonus.retry', entity: 'DriverBonus', entityId: bonusId, metadata: { status }, ...ctx });
+    return { id: bonusId, status };
   }
 
   // ── Vues ────────────────────────────────────────────────────────────
@@ -323,7 +455,10 @@ export class TripPayoutsService {
       select: { id: true, originAddress: true, destinationAddress: true, scheduledAt: true },
     });
     const sum = (statuses: string[]) => rows.filter((r) => statuses.includes(r.status)).reduce((s, r) => s + r.amountCents, 0);
+    const bonuses = (await this.prisma.driverBonus.findMany({ where: { driverId }, orderBy: { createdAt: 'desc' }, take: 20 })) as BonusRow[];
     return {
+      // Bonus de reprise (départs sauvés) : versés quand la pénalité du chauffeur défaillant est recouvrée.
+      bonuses: bonuses.map((b) => ({ id: b.id, amountCents: b.amountCents, status: b.status === 'paid' ? 'paid' : b.status === 'blocked' ? 'blocked' : 'pending', createdAt: b.createdAt, paidAt: b.paidAt })),
       paidCents: sum(['paid']),
       pendingCents: sum(['draft', 'pending', 'blocked', 'failed']),
       // Pénalités d'annulation retenues sur ces reversements.
@@ -418,6 +553,17 @@ export class AdminPayoutsController {
   @Get()
   list(@Query() q: PayoutsQueryDto) {
     return this.payouts.adminList(q.status);
+  }
+
+  @Get('bonuses')
+  bonuses() {
+    return this.payouts.adminBonuses();
+  }
+
+  @Post('bonuses/:id/retry')
+  @HttpCode(HttpStatus.OK)
+  retryBonus(@Req() req: any, @Param('id', ParseUUIDPipe) id: string) {
+    return this.payouts.adminRetryBonus(req.user.sub, id, AuditService.context(req));
   }
 
   @Post(':id/retry')

@@ -1053,5 +1053,8 @@
   "mkcCarteAValider": "Card to confirm",
   "mkcValiderMaCarte": "Confirm my card",
   "mkcCarteAutorisee": "Card authorised. The operator has 2 hours to confirm: you will only be charged then.",
-  "mkcCarteNonValidee": "Card not confirmed: your choice has not been sent yet. You have 15 minutes to confirm it."
+  "mkcCarteNonValidee": "Card not confirmed: your choice has not been sent yet. You have 15 minutes to confirm it.",
+  "payBonus": "Rescue bonuses",
+  "payBonusAide": "For a departure you saved. The bonus is paid as soon as the replaced driver’s penalty has been recovered.",
+  "payBonusEnAttente": "Waiting for the penalty to be recovered"
 }

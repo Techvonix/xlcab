@@ -2151,5 +2151,8 @@
   "mkcCarteAValider": "Carte à valider",
   "mkcValiderMaCarte": "Valider ma carte",
   "mkcCarteAutorisee": "Carte autorisée. L’opérateur a 2 heures pour confirmer : vous ne serez débité qu’à ce moment-là.",
-  "mkcCarteNonValidee": "Carte non validée : votre choix n’est pas encore transmis. Vous avez 15 minutes pour la valider."
+  "mkcCarteNonValidee": "Carte non validée : votre choix n’est pas encore transmis. Vous avez 15 minutes pour la valider.",
+  "payBonus": "Bonus de reprise",
+  "payBonusAide": "Pour un départ que vous avez sauvé. Le bonus est versé dès que la pénalité du chauffeur remplacé a été recouvrée.",
+  "payBonusEnAttente": "En attente du recouvrement de la pénalité"
 }

@@ -534,6 +534,10 @@ export const MESSAGES_EN: Record<string, string> = {
   'Carte non autorisée : validez le paiement pour confirmer votre choix': 'Card not authorised: complete the payment to confirm your choice',
   'Votre carte n’a pas pu être débitée : choisissez de nouveau une proposition.': 'Your card could not be charged: please choose an offer again.',
   'Reversement introuvable': 'Payout not found',
+  'Bonus introuvable': 'Bonus not found',
+  'Ce bonus est déjà versé': 'This bonus has already been paid',
+  'La pénalité qui finance ce bonus n’est pas encore recouvrée': 'The penalty funding this bonus has not been recovered yet',
+  'Bonus de reprise versé': 'Rescue bonus paid',
   'Ce reversement est déjà traité': 'This payout has already been processed',
   'Revenu en attente': 'Earnings on hold',
   '{} € vous attendent : ouvrez ou complétez votre compte de versement pour les recevoir.':

@@ -1,0 +1,8 @@
+{
+  "payBonus": { "fr": "Bonus de reprise", "en": "Rescue bonuses" },
+  "payBonusAide": {
+    "fr": "Pour un départ que vous avez sauvé. Le bonus est versé dès que la pénalité du chauffeur remplacé a été recouvrée.",
+    "en": "For a departure you saved. The bonus is paid as soon as the replaced driver’s penalty has been recovered."
+  },
+  "payBonusEnAttente": { "fr": "En attente du recouvrement de la pénalité", "en": "Waiting for the penalty to be recovered" }
+}

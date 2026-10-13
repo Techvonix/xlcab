@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { api } from '@/lib/api';
 import { formatDateTime, formatEuros } from '@/lib/format';
-import type { AdminPayout, PayoutStatus } from '@/lib/types';
+import type { AdminBonus, AdminPayout, PayoutStatus } from '@/lib/types';
 import { t } from '@/lib/i18n';
 
 /** Libellé d'un statut (accesseur : la langue est fixée au chargement). */
@@ -123,6 +123,68 @@ export function PayoutsPage() {
           </li>
         ))}
       </ul>
+
+      <BonusesSection />
     </div>
+  );
+}
+
+/**
+ * Bonus de reprise (160 €) des chauffeurs de secours : virés quand la
+ * pénalité du chauffeur remplacé est recouvrée à hauteur du bonus.
+ */
+function BonusesSection() {
+  const queryClient = useQueryClient();
+  const [error, setError] = useState<{ id: string; message: string } | null>(null);
+  const { data, isPending, error: loadError } = useQuery({ queryKey: ['bonuses'], queryFn: () => api.bonuses() });
+  const retry = useMutation({
+    mutationFn: (id: string) => api.retryBonus(id),
+    onSuccess: () => {
+      setError(null);
+      queryClient.invalidateQueries({ queryKey: ['bonuses'] });
+    },
+    onError: (e, id) => setError({ id, message: e.message }),
+  });
+  const label = (b: AdminBonus) => {
+    if (b.status === 'paid') return t('rvStatutVerse');
+    if (b.status === 'blocked') return t('rvStatutBloque');
+    if (b.status === 'failed') return t('rvStatutEchec');
+    return b.penaltyCollectedCents >= Math.min(b.amountCents, b.penaltyCents) ? t('rvStatutEnCours') : t('rvBonusEnAttentePenalite');
+  };
+
+  return (
+    <section className="flex flex-col gap-3" aria-labelledby="bonus-titre">
+      <h2 id="bonus-titre" className="text-xl font-bold">{t('rvBonus')}</h2>
+      <p className="text-muted">{t('rvBonusIntro')}</p>
+      {isPending && <p role="status">{t('chargement')}</p>}
+      {loadError && <Alert>{loadError.message}</Alert>}
+      {data?.length === 0 && <p>{t('rvAucunBonus')}</p>}
+      <ul className="flex flex-col gap-3">
+        {data?.map((b) => (
+          <li key={b.id}>
+            <Card>
+              <div className="flex flex-wrap items-baseline justify-between gap-2">
+                <p className="font-bold">
+                  {b.driverName ?? '—'} · <span className="tabular">{formatEuros(b.amountCents)}</span>{' '}
+                  <span className="font-normal text-muted">· {label(b)}</span>
+                </p>
+                {b.needsAttention && <span className="rounded-full bg-surface px-3 py-1 text-sm font-semibold">{t('rvInterventionRequise')}</span>}
+              </div>
+              <p className="tabular text-muted">
+                {t('rvPenaliteRecouvree', { collected: formatEuros(b.penaltyCollectedCents), total: formatEuros(b.penaltyCents) })}
+              </p>
+              {b.paidAt && <p className="tabular text-muted">{t('rvVerseLe')} {formatDateTime(b.paidAt)}</p>}
+              {b.lastError && b.status === 'failed' && <p className="mt-2 text-sm text-muted">{t('rvDerniereErreur', { error: b.lastError })}</p>}
+              {error?.id === b.id && <Alert>{error.message}</Alert>}
+              {(b.status === 'failed' || b.status === 'blocked') && (
+                <Button variant="outline" size="sm" className="mt-3" disabled={retry.isPending} onClick={() => retry.mutate(b.id)}>
+                  {t('rvRelancerLeBonus')}<span className="sr-only"> ({b.driverName ?? b.id})</span>
+                </Button>
+              )}
+            </Card>
+          </li>
+        ))}
+      </ul>
+    </section>
   );
 }

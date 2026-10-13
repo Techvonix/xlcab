@@ -137,6 +137,26 @@ class _PayoutsScreenState extends ConsumerState<PayoutsScreen> with WidgetsBindi
           child: Text(l10n.payAucunReversement, textAlign: TextAlign.center, style: AppTypography.body.copyWith(color: onSurface)),
         ),
       for (final p in s.items) _PayoutTile(payout: p, locale: locale),
+      if (s.bonuses.isNotEmpty) ...[
+        SectionTitle(l10n.payBonus),
+        Text(l10n.payBonusAide, style: AppTypography.caption.copyWith(color: muted)),
+        const SizedBox(height: AppSpacing.sm),
+        for (final b in s.bonuses)
+          OpCard(
+            highlight: b.status == PayoutStatus.blocked,
+            child: Row(children: [
+              Expanded(
+                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Text(formatTripDate(b.createdAt, locale: locale), style: AppTypography.bodyBold.copyWith(color: onSurface)),
+                  const SizedBox(height: AppSpacing.xs),
+                  StatusPill(label: b.status == PayoutStatus.pending ? l10n.payBonusEnAttente : payoutStatusLabel(b.status)),
+                ]),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              Text(formatPrice(b.amountCents, locale: locale), style: AppTypography.bodyBold.copyWith(color: onSurface)),
+            ]),
+          ),
+      ],
     ];
   }
 }

@@ -406,6 +406,11 @@ export const fr = {
   rvRelanceVersee: "Virement effectué.",
   rvRelanceToujoursEnAttente: "Le virement n’est pas parti : {status}.",
   rvPenaliteRecouvree: "Recouvré sur les reversements : {collected} sur {total}",
+  rvBonus: "Bonus de reprise",
+  rvBonusIntro: "Versé au chauffeur de secours qui a sauvé un départ, dès que la pénalité du chauffeur remplacé est recouvrée à hauteur du bonus.",
+  rvAucunBonus: "Aucun bonus de reprise.",
+  rvBonusEnAttentePenalite: "En attente du recouvrement de la pénalité",
+  rvRelancerLeBonus: "Relancer le virement du bonus",
 };
 
 export type MessageKey = keyof typeof fr;

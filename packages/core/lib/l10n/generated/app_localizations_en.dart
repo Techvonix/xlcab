@@ -3731,4 +3731,14 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get mkcCarteNonValidee =>
       'Card not confirmed: your choice has not been sent yet. You have 15 minutes to confirm it.';
+
+  @override
+  String get payBonus => 'Rescue bonuses';
+
+  @override
+  String get payBonusAide =>
+      'For a departure you saved. The bonus is paid as soon as the replaced driver’s penalty has been recovered.';
+
+  @override
+  String get payBonusEnAttente => 'Waiting for the penalty to be recovered';
 }

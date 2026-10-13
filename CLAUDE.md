@@ -451,9 +451,17 @@ référence — les exigences de la Partie 8 priment.
   par défaut ceux qui ne sont pas partis, « Intervention requise » après 10 échecs, relance manuelle, détail de la
   retenue ; part recouvrée affichée sur les pénalités appliquées de « Bourse et lignes ». Tests :
   `src/features/payouts.test.tsx` (mock d'API séparé) ; page NON vue dans le navigateur (connexion admin + 2FA à
-  refaire après le seed). Restent : bonus du secours par virement, facture de pénalité à 30 j, puis essai réel
-  avec les clés de test (`STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_CONNECT_WEBHOOK_SECRET`,
-  `--dart-define=STRIPE_PUBLISHABLE_KEY`, `LINE_PAYMENT_MODE=connect`).
+  refaire après le seed). Bonus de reprise fait (2026-10-13, migration `driver_bonus_payout`) : `DriverBonus` a un
+  statut de virement (pending | paid | blocked | failed) ; `TripPayoutsService.payBonuses` (dans `tick`) vire les
+  160 € au secours dès que la pénalité liée est `applied` ET recouvrée À HAUTEUR DU BONUS (le secours passe avant
+  les avoirs passagers — règle À VALIDER) ; virement depuis le solde de la plateforme (pas de `source_transaction`),
+  clé `bonus-{id}-{compte}`, mêmes reprises que les reversements. `mine()` renvoie `bonuses`, admin
+  `GET /admin/payouts/bonuses`, `POST /admin/payouts/bonuses/:id/retry` (409 si la pénalité n'est pas recouvrée).
+  Affiché dans l'écran chauffeur (`RescueBonus`, clés `payBonus*`) et la page admin (`BonusesSection`, `rvBonus*`).
+  L'APK chauffeur installé sur le téléphone date d'AVANT l'affichage des bonus : recompiler avant une démo.
+  Restent : facture de pénalité à 30 j, puis essai réel avec les clés de test (`STRIPE_SECRET_KEY`,
+  `STRIPE_WEBHOOK_SECRET`, `STRIPE_CONNECT_WEBHOOK_SECRET`, `--dart-define=STRIPE_PUBLISHABLE_KEY`,
+  `LINE_PAYMENT_MODE=connect`).
 - Migrations : `init_xlcab` appliquée sur la base locale ; toute modification de
   `prisma/schema.prisma` demande désormais `npx prisma migrate dev --name <nom>`. Référentiel :
   `npx prisma db seed` (config FR uniquement).

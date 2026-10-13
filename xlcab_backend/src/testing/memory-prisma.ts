@@ -222,7 +222,10 @@ export function memoryPrisma() {
       collectedCents: 0, collectedAt: null,
       status: 'pending', contestReason: null, decidedBy: null, decisionReason: null, decidedAt: null, createdAt: new Date(),
     })),
-    driverBonus: new Table(() => ({ penaltyId: null, createdAt: new Date() })),
+    driverBonus: new Table(() => ({
+      penaltyId: null, status: 'pending', stripeTransferId: null, stripeAccountId: null, attempts: 0, nextAttemptAt: null, lastError: null, paidAt: null,
+      createdAt: new Date(),
+    })),
     passengerCredit: new Table(() => ({ tripId: null, usedAt: null, createdAt: new Date() })),
     transportRequest: new Table(() => ({
       partnerRef: null, flexMin: 0, returnAt: null, luggage: 0, accessible: false, recurring: false, frequency: null, budgetCents: null,

@@ -3754,4 +3754,14 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get mkcCarteNonValidee =>
       'Carte non validée : votre choix n’est pas encore transmis. Vous avez 15 minutes pour la valider.';
+
+  @override
+  String get payBonus => 'Bonus de reprise';
+
+  @override
+  String get payBonusAide =>
+      'Pour un départ que vous avez sauvé. Le bonus est versé dès que la pénalité du chauffeur remplacé a été recouvrée.';
+
+  @override
+  String get payBonusEnAttente => 'En attente du recouvrement de la pénalité';
 }

@@ -297,6 +297,24 @@ export interface AdminPenalty {
 
 export type PayoutStatus = 'draft' | 'pending' | 'paid' | 'blocked' | 'failed' | 'withheld' | 'void';
 
+/** GET /admin/payouts/bonuses : bonus de reprise d'un chauffeur de secours. */
+export interface AdminBonus {
+  id: string;
+  driverId: string;
+  driverName: string | null;
+  departureId: string;
+  amountCents: number;
+  status: 'pending' | 'paid' | 'blocked' | 'failed';
+  attempts: number;
+  lastError: string | null;
+  createdAt: string;
+  paidAt: string | null;
+  /** Recouvré sur la pénalité qui finance ce bonus. */
+  penaltyCollectedCents: number;
+  penaltyCents: number;
+  needsAttention: boolean;
+}
+
 /** GET /admin/payouts : reversement dû à un opérateur pour une course terminée. */
 export interface AdminPayout {
   id: string;

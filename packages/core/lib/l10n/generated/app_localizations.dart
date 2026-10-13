@@ -6422,6 +6422,24 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Carte non validée : votre choix n’est pas encore transmis. Vous avez 15 minutes pour la valider.'**
   String get mkcCarteNonValidee;
+
+  /// No description provided for @payBonus.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bonus de reprise'**
+  String get payBonus;
+
+  /// No description provided for @payBonusAide.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pour un départ que vous avez sauvé. Le bonus est versé dès que la pénalité du chauffeur remplacé a été recouvrée.'**
+  String get payBonusAide;
+
+  /// No description provided for @payBonusEnAttente.
+  ///
+  /// In fr, this message translates to:
+  /// **'En attente du recouvrement de la pénalité'**
+  String get payBonusEnAttente;
 }
 
 class _AppLocalizationsDelegate

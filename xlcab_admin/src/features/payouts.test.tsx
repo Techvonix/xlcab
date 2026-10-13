@@ -8,7 +8,7 @@ import { renderWithProviders } from '@/test/fixtures';
 
 vi.mock('@/lib/api', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@/lib/api')>();
-  return { ...actual, api: { payouts: vi.fn(), retryPayout: vi.fn() } };
+  return { ...actual, api: { payouts: vi.fn(), retryPayout: vi.fn(), bonuses: vi.fn(), retryBonus: vi.fn() } };
 });
 
 const { api, ApiError } = await import('@/lib/api');
@@ -23,6 +23,7 @@ const payout = (over: Record<string, unknown> = {}) => ({
 
 beforeEach(() => {
   vi.clearAllMocks();
+  m.bonuses.mockResolvedValue([]);
 });
 
 describe('Reversements', () => {
@@ -83,6 +84,29 @@ describe('Reversements', () => {
     expect(await screen.findByText('98,00 € sur un revenu de 162,00 €')).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /Relancer le virement/ })).not.toBeInTheDocument();
     expect(screen.queryByText(/Dernière erreur/)).not.toBeInTheDocument();
+  });
+
+  it('bonus de reprise : en attente du recouvrement, puis relance d’un virement en échec', async () => {
+    m.payouts.mockResolvedValue([]);
+    const bonus = {
+      id: 'b1', driverId: 'k1', driverName: 'Karim Benali', departureId: 'dep1', amountCents: 16000, status: 'pending', attempts: 0, lastError: null,
+      createdAt: '2026-10-12T05:30:00.000Z', paidAt: null, penaltyCollectedCents: 4500, penaltyCents: 26000, needsAttention: false,
+    };
+    m.bonuses.mockResolvedValue([bonus, { ...bonus, id: 'b2', driverName: 'Samir Kaci', status: 'failed', attempts: 2, lastError: 'Solde insuffisant', penaltyCollectedCents: 26000 }]);
+    m.retryBonus.mockResolvedValue({ id: 'b2', status: 'paid' });
+    const { container } = renderWithProviders(<PayoutsPage />);
+
+    const waiting = (await screen.findByText(/Karim Benali ·/)).closest('li')!;
+    expect(within(waiting).getByText(/En attente du recouvrement de la pénalité/)).toBeInTheDocument();
+    expect(within(waiting).getByText('Recouvré sur les reversements : 45,00 € sur 260,00 €')).toBeInTheDocument();
+    // Pas de relance tant que la pénalité n'est pas recouvrée.
+    expect(within(waiting).queryByRole('button')).not.toBeInTheDocument();
+    expect(await axe(container)).toHaveNoViolations();
+
+    const failed = screen.getByText(/Samir Kaci ·/).closest('li')!;
+    expect(within(failed).getByText('Dernière erreur : Solde insuffisant')).toBeInTheDocument();
+    await userEvent.click(within(failed).getByRole('button', { name: /Relancer le virement du bonus/ }));
+    await waitFor(() => expect(m.retryBonus).toHaveBeenCalledWith('b2'));
   });
 
   it('statut sans résultat : message distinct', async () => {
