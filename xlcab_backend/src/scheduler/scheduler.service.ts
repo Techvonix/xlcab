@@ -9,6 +9,7 @@ import { ComplianceReport, ComplianceService } from '../compliance/compliance.se
 import { LinesService } from '../operators/lines.service';
 import { RescueService } from '../line-bookings/rescue.service';
 import { MarketService } from '../market/market.service';
+import { TripPayoutsService } from '../payouts/trip-payouts';
 
 export const SCHEDULER_TICK_MS = 60_000;
 // Verrou d'un tour : si l'API tourne un jour sur plusieurs instances, une
@@ -30,6 +31,8 @@ export interface TickReport {
   rescue: Awaited<ReturnType<RescueService['tick']>> | null;
   /** Bourse : propositions et demandes expirées. */
   market: Awaited<ReturnType<MarketService['tick']>> | null;
+  /** Reversements aux opérateurs repris à ce tour (virés, en attente de compte, en échec). */
+  payouts: Awaited<ReturnType<TripPayoutsService['tick']>> | null;
 }
 
 /**
@@ -43,7 +46,8 @@ export interface TickReport {
  *   comptes inactifs 3 ans), une fois par jour ;
  * - départs des lignes régulières sur 30 jours glissants, une fois par jour ;
  * - protocole d'annulation des lignes (secours, contrôles T−75/60/45 min) ;
- * - bourse : propositions et demandes arrivées à échéance.
+ * - bourse : propositions et demandes arrivées à échéance ;
+ * - reversements aux opérateurs à reprendre (compte de versement ouvert depuis, incident Stripe).
  *
  * Simple setInterval (pas de dépendance supplémentaire) : suffisant pour
  * une instance. Désactivable avec SCHEDULER_ENABLED=false.
@@ -64,6 +68,7 @@ export class SchedulerService implements OnApplicationBootstrap, OnModuleDestroy
     @Optional() private lines?: LinesService,
     @Optional() private rescue?: RescueService,
     @Optional() private market?: MarketService,
+    @Optional() private payouts?: TripPayoutsService,
   ) {}
 
   onApplicationBootstrap() {
@@ -149,6 +154,16 @@ export class SchedulerService implements OnApplicationBootstrap, OnModuleDestroy
       }
     }
 
+    // Reversements aux opérateurs : reprises.
+    let payouts: TickReport['payouts'] = null;
+    if (this.payouts) {
+      try {
+        payouts = await this.payouts.tick(now);
+      } catch (err) {
+        this.logger.error(`Reversements aux opérateurs en échec : ${(err as Error).message}`);
+      }
+    }
+
     // Lignes régulières : départs générés sur 30 jours glissants, une fois par jour.
     let linesSynced: number | null = null;
     if (this.lines && (await this.redis.set(`lines:daily:${today}`, '1', 'EX', 2 * 24 * 3600, 'NX')) === 'OK') {
@@ -161,7 +176,7 @@ export class SchedulerService implements OnApplicationBootstrap, OnModuleDestroy
     }
 
     return {
-      expiredBookings, dispatchStarted: dispatch.started, dispatchRetried: dispatch.retried, strandedParcels, monthlyInvoices, compliance, linesSynced, rescue, market,
+      expiredBookings, dispatchStarted: dispatch.started, dispatchRetried: dispatch.retried, strandedParcels, monthlyInvoices, compliance, linesSynced, rescue, market, payouts,
     };
   }
 }

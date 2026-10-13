@@ -7,10 +7,11 @@ import { ComplianceModule } from '../compliance/compliance.module';
 import { OperatorsModule } from '../operators/operators.module';
 import { LineBookingsModule } from '../line-bookings/line-bookings.module';
 import { MarketModule } from '../market/market.module';
+import { PayoutsModule } from '../payouts/payouts.module';
 import { SchedulerService } from './scheduler.service';
 
 @Module({
-  imports: [MatchingModule, PaymentsModule, ParcelsModule, InvoicesModule, ComplianceModule, OperatorsModule, LineBookingsModule, MarketModule],
+  imports: [MatchingModule, PaymentsModule, ParcelsModule, InvoicesModule, ComplianceModule, OperatorsModule, LineBookingsModule, MarketModule, PayoutsModule],
   providers: [SchedulerService],
 })
 export class SchedulerModule {}

@@ -547,6 +547,30 @@ model PayoutAccount {
   updatedAt        DateTime @updatedAt
 }
 
+// Reversement dû à l'opérateur pour une course terminée (lignes et bourse
+// payées en ligne) : un par course, viré sur son compte de versement.
+model Payout {
+  id               String    @id @default(uuid())
+  tripId           String    @unique
+  driverId         String // celui qui a assuré la course (titulaire ou secours)
+  paymentId        String? // encaissement du passager dont provient le virement
+  amountCents      Int // prix HT − commission XLCAB
+  currency         String    @default("EUR")
+  // pending : à virer ; paid : viré ; blocked : compte de versement pas prêt ;
+  // failed : incident Stripe (repris automatiquement) ; void : rien à verser.
+  status           String    @default("pending")
+  stripeTransferId String?
+  stripeAccountId  String?
+  attempts         Int       @default(0)
+  nextAttemptAt    DateTime?
+  lastError        String?
+  createdAt        DateTime  @default(now())
+  paidAt           DateTime?
+
+  @@index([driverId, createdAt])
+  @@index([status, nextAttemptAt])
+}
+
 // Ligne régulière : trajet type + calendrier. Le trajet (origine,
 // destination) ne se modifie pas : on ferme la ligne et on en crée une
 // autre, les départs déjà réservés gardent ainsi leur historique.

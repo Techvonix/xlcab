@@ -16,6 +16,7 @@ import { PaymentsService } from '../payments/payments.service';
 import { ParcelsService } from '../parcels/parcels.service';
 import { InvoicesService } from '../invoices/invoices.service';
 import { LinesService } from '../operators/lines.service';
+import { TripPayoutsService } from '../payouts/trip-payouts';
 import { cancellationFee } from './cancellation';
 
 export interface RequestUser {
@@ -67,6 +68,7 @@ export class TripsService {
     private parcels: ParcelsService,
     private invoices: InvoicesService,
     private lines: LinesService,
+    private payouts: TripPayoutsService,
   ) {}
 
   // ── GET /trips/:id ──────────────────────────────────────────────────
@@ -225,6 +227,8 @@ export class TripsService {
     await this.audit.log({ userId: user.sub, action: 'trip.complete', entity: 'Trip', entityId: tripId, ...ctx });
     // Facture du particulier (déjà payée) ; les entreprises sont facturées au mois.
     await this.invoices.issueForTrip(tripId);
+    // Ligne ou bourse payée en ligne : part de l'opérateur virée sur son compte de versement.
+    await this.payouts.onTripCompleted(tripId, now);
     return { tripId, status: TripStatus.COMPLETED, completedAt: now };
   }
 

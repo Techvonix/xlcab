@@ -72,7 +72,7 @@ export class FakeStripe {
       if (i.status === 'succeeded') return i; // même clé d'idempotence
       if (i.status !== 'requires_capture') throw new Error(`PaymentIntent in status ${i.status} cannot be captured`);
       this.captured.push({ id, options });
-      Object.assign(i, { status: 'succeeded', amount_received: i.amount, amount_capturable: 0 });
+      Object.assign(i, { status: 'succeeded', amount_received: i.amount, amount_capturable: 0, latest_charge: `ch_${id}` });
       return i;
     },
   };
@@ -105,6 +105,26 @@ export class FakeStripe {
 
   setupIntents = {
     create: async (params: any) => ({ id: `seti_${++this.seq}`, client_secret: `seti_secret_${params.customer}` }),
+  };
+
+  // ── Stripe Connect : reversements aux opérateurs ──
+  transfersCreated: { params: any; options: any; id: string }[] = [];
+  /** Erreur à lever sur le prochain virement (incident Stripe). */
+  failNextTransfer = false;
+
+  transfers = {
+    create: async (params: any, options: any) => {
+      if (this.failNextTransfer) {
+        this.failNextTransfer = false;
+        throw new Error('Stripe API indisponible');
+      }
+      // Même clé d'idempotence = même virement, comme chez Stripe.
+      const same = this.transfersCreated.find((t) => options?.idempotencyKey && t.options?.idempotencyKey === options.idempotencyKey);
+      if (same) return { id: same.id, amount: same.params.amount };
+      const id = `tr_${++this.seq}`;
+      this.transfersCreated.push({ params, options, id });
+      return { id, amount: params.amount };
+    },
   };
 
   // ── Stripe Connect : comptes de versement des opérateurs ──
@@ -182,6 +202,7 @@ export class FakeStripe {
     const i = this.intents.get(intentId)!;
     i.status = 'succeeded';
     i.amount_received = i.amount;
+    i.latest_charge = `ch_${intentId}`;
     return i;
   }
 }

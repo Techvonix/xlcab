@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { MatchingModule } from '../matching/matching.module';
 import { OperatorsModule } from '../operators/operators.module';
 import { PaymentsModule } from '../payments/payments.module';
-import { PayoutsModule } from '../payouts/payout-accounts';
+import { PayoutsModule } from '../payouts/payouts.module';
 import { TwoFactorModule } from '../two-factor/two-factor.module';
 import { AdminMarketController, MarketController } from './market.controller';
 import { MarketService } from './market.service';

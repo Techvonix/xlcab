@@ -19,7 +19,7 @@ import { DriverModeModule } from './driver-mode/driver-mode.module';
 import { UsersModule } from './users/users.module';
 import { TripSharingModule } from './trip-sharing/trip-sharing';
 import { ImpactModule } from './impact/impact';
-import { PayoutsModule } from './payouts/payout-accounts';
+import { PayoutsModule } from './payouts/payouts.module';
 import { ParcelsModule } from './parcels/parcels.module';
 import { InvoicesModule } from './invoices/invoices.module';
 import { ComplianceModule } from './compliance/compliance.module';

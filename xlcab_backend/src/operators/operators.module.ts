@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { LinesSearchController, OperatorsController } from './operators.controller';
 import { LinesService } from './lines.service';
-import { PayoutsModule } from '../payouts/payout-accounts';
+import { PayoutsModule } from '../payouts/payouts.module';
 
 // Bourse de transport, étape 1 : profils opérateurs et lignes régulières.
 // LinesService est exporté pour le planificateur (départs à 30 jours) et la

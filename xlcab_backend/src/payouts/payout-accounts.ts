@@ -11,7 +11,6 @@ import {
   Inject,
   Injectable,
   Logger,
-  Module,
   Post,
   Query,
   Req,
@@ -21,11 +20,11 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import Stripe = require('stripe');
-import { AuditModule, AuditService } from '../audit/audit.service';
+import { AuditService } from '../audit/audit.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { Roles, RolesGuard } from '../auth/guards/roles.guard';
-import { NotificationsModule, NotificationsService } from '../notifications/notifications.service';
-import { STRIPE_CLIENT, stripeProvider } from '../payments/stripe.provider';
+import { NotificationsService } from '../notifications/notifications.service';
+import { STRIPE_CLIENT } from '../payments/stripe.provider';
 import { PrismaService } from '../prisma/prisma.service';
 import { RedisService } from '../redis/redis.service';
 import { linePaymentMode } from './payment-mode';
@@ -367,13 +366,3 @@ export class PayoutReturnController {
       .send(renderPayoutReturnPage(kind, chosen));
   }
 }
-
-// Module autonome (Prisma et Redis sont globaux) : importé par les lignes et
-// la bourse, qui vérifient le compte de versement avant toute mise en vente.
-@Module({
-  imports: [NotificationsModule, AuditModule],
-  controllers: [PayoutAccountController, StripeConnectWebhookController, PayoutReturnController],
-  providers: [PayoutAccountsService, stripeProvider],
-  exports: [PayoutAccountsService],
-})
-export class PayoutsModule {}

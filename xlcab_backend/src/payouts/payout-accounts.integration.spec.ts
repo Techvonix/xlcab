@@ -15,7 +15,7 @@ import { RedisService } from '../redis/redis.service';
 import { FakeRedis } from '../testing/fake-redis';
 import { FakeStripe } from '../testing/fake-stripe';
 import { memoryPrisma } from '../testing/memory-prisma';
-import { PayoutsModule } from './payout-accounts';
+import { PayoutsModule } from './payouts.module';
 
 // Stripe Connect, étape 1 (vrai HTTP, base et Stripe simulés) : ouverture du
 // compte de versement d'un opérateur, suivi de sa validation par Stripe, et

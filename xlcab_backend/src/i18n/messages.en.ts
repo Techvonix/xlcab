@@ -533,6 +533,13 @@ export const MESSAGES_EN: Record<string, string> = {
   'Le paiement du client n’est plus autorisé': 'The customer’s payment is no longer authorised',
   'Carte non autorisée : validez le paiement pour confirmer votre choix': 'Card not authorised: complete the payment to confirm your choice',
   'Votre carte n’a pas pu être débitée : choisissez de nouveau une proposition.': 'Your card could not be charged: please choose an offer again.',
+  'Reversement introuvable': 'Payout not found',
+  'Ce reversement est déjà traité': 'This payout has already been processed',
+  'Revenu en attente': 'Earnings on hold',
+  '{} € vous attendent : ouvrez ou complétez votre compte de versement pour les recevoir.':
+    '€{} is waiting for you: open or complete your payout account to receive it.',
+  'Revenu versé': 'Earnings paid out',
+  '{} € ont été versés sur votre compte de versement.': '€{} has been paid to your payout account.',
   'Réservation annulée': 'Booking cancelled',
   'Ce départ n’est plus disponible : vous êtes remboursé intégralement.': 'This departure is no longer available: you are refunded in full.',
 };
