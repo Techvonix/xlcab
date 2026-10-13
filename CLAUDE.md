@@ -490,6 +490,10 @@ référence — les exigences de la Partie 8 priment.
   échouait. Clé désormais `uuid.pdf` ; `assertStorageKey` appliqué aussi à `MemoryDocumentStorage` pour que les
   tests voient ce genre d'écart. Ne jamais lancer une appli sur le téléphone (`monkey`) sans regarder d'abord ce
   qui est au premier plan : le porteur de projet peut être en train de s'en servir.
+- Vidéos chauffeur retournées le 2026-10-13 (65 s chacune, mode Avion) : la prise `d1` passe maintenant par
+  Revenus → « Compte de versement et reversements » (tuile en 360 730, mêmes coordonnées en anglais) avec le
+  bonus de reprise de démo, puis Profil. Volet de notifications resté ouvert après le mode Avion : le refermer par
+  `adb shell cmd statusbar collapse` (jamais la touche Retour).
 - Migrations : `init_xlcab` appliquée sur la base locale ; toute modification de
   `prisma/schema.prisma` demande désormais `npx prisma migrate dev --name <nom>`. Référentiel :
   `npx prisma db seed` (config FR uniquement).
