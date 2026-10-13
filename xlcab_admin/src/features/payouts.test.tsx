@@ -1,0 +1,94 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { screen, waitFor, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { axe } from 'jest-axe';
+import { renderWithProviders } from '@/test/fixtures';
+
+// Reversements aux opérateurs (Stripe Connect) dans le dashboard. Serveur simulé.
+
+vi.mock('@/lib/api', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/lib/api')>();
+  return { ...actual, api: { payouts: vi.fn(), retryPayout: vi.fn() } };
+});
+
+const { api, ApiError } = await import('@/lib/api');
+const { PayoutsPage } = await import('./payouts/PayoutsPage');
+const m = api as unknown as Record<string, ReturnType<typeof vi.fn>>;
+
+const payout = (over: Record<string, unknown> = {}) => ({
+  id: 'po1', tripId: 'trip-1', driverId: 'd1', driverName: 'Djamel Haddad', driverEmail: 'djamel@x.fr', amountCents: 4500, grossCents: 4500, withheldCents: 0,
+  status: 'failed', attempts: 10, lastError: 'Stripe API indisponible', nextAttemptAt: null, createdAt: '2026-10-12T05:30:00.000Z', paidAt: null, needsAttention: true,
+  ...over,
+});
+
+beforeEach(() => {
+  vi.clearAllMocks();
+});
+
+describe('Reversements', () => {
+  it('rien à traiter : message clair', async () => {
+    m.payouts.mockResolvedValue([]);
+    const { container } = renderWithProviders(<PayoutsPage />);
+    expect(await screen.findByText('Tous les reversements sont partis.')).toBeInTheDocument();
+    expect(m.payouts).toHaveBeenCalledWith(undefined);
+    expect(await axe(container)).toHaveNoViolations();
+  });
+
+  it('échec après dix essais : signalé en clair, relance manuelle, résultat annoncé', async () => {
+    m.payouts.mockResolvedValue([payout()]);
+    m.retryPayout.mockResolvedValue({ id: 'po1', status: 'paid' });
+    const { container } = renderWithProviders(<PayoutsPage />);
+
+    const card = (await screen.findByText('Intervention requise')).closest('li')!;
+    expect(within(card).getByText(/Djamel Haddad ·/)).toBeInTheDocument();
+    expect(within(card).getByText(/Échec du virement/)).toBeInTheDocument();
+    expect(within(card).getByText('Dernière erreur : Stripe API indisponible')).toBeInTheDocument();
+    expect(within(card).getByText('45,00 €')).toBeInTheDocument();
+    expect(await axe(container)).toHaveNoViolations();
+
+    await userEvent.click(within(card).getByRole('button', { name: /Relancer le virement/ }));
+    await waitFor(() => expect(m.retryPayout).toHaveBeenCalledWith('po1'));
+    expect(await screen.findByText('Virement effectué.')).toBeInTheDocument();
+  });
+
+  it('relance sans effet (compte de versement toujours absent) : l’état est expliqué', async () => {
+    m.payouts.mockResolvedValue([payout({ status: 'blocked', needsAttention: false, attempts: 0, lastError: null })]);
+    m.retryPayout.mockResolvedValue({ id: 'po1', status: 'blocked' });
+    renderWithProviders(<PayoutsPage />);
+
+    expect(await screen.findByText(/n’a pas de compte de versement validé/)).toBeInTheDocument();
+    expect(screen.queryByText('Intervention requise')).not.toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: /Relancer le virement/ }));
+    expect(await screen.findByText('Le virement n’est pas parti : En attente du compte de versement.')).toBeInTheDocument();
+  });
+
+  it('refus du serveur à la relance : affiché sur le reversement concerné', async () => {
+    m.payouts.mockResolvedValue([payout()]);
+    m.retryPayout.mockRejectedValue(new ApiError('Ce reversement est déjà traité', 409));
+    renderWithProviders(<PayoutsPage />);
+    await userEvent.click(await screen.findByRole('button', { name: /Relancer le virement/ }));
+    expect(await screen.findByText('Ce reversement est déjà traité')).toBeInTheDocument();
+  });
+
+  it('filtre « Versé » : détail de la retenue, aucune relance proposée', async () => {
+    m.payouts.mockResolvedValue([]);
+    renderWithProviders(<PayoutsPage />);
+    await screen.findByText('Tous les reversements sont partis.');
+
+    m.payouts.mockResolvedValue([
+      payout({ status: 'paid', needsAttention: false, lastError: null, amountCents: 6400, grossCents: 16200, withheldCents: 9800, paidAt: '2026-10-12T06:00:00.000Z' }),
+    ]);
+    await userEvent.selectOptions(screen.getByLabelText('Statut'), 'paid');
+    await waitFor(() => expect(m.payouts).toHaveBeenLastCalledWith('paid'));
+    expect(await screen.findByText('98,00 € sur un revenu de 162,00 €')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Relancer le virement/ })).not.toBeInTheDocument();
+    expect(screen.queryByText(/Dernière erreur/)).not.toBeInTheDocument();
+  });
+
+  it('statut sans résultat : message distinct', async () => {
+    m.payouts.mockResolvedValue([]);
+    renderWithProviders(<PayoutsPage />);
+    await userEvent.selectOptions(await screen.findByLabelText('Statut'), 'failed');
+    expect(await screen.findByText('Aucun reversement pour ce statut.')).toBeInTheDocument();
+  });
+});

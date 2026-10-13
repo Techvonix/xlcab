@@ -261,6 +261,9 @@ function PenaltiesSection() {
                 <span className="font-normal text-muted">· {PENALTY[p.status]}</span>
               </p>
               <p className="text-muted">{t('boContestableJusquAu', { date: formatDateTime(p.contestUntil) })}</p>
+              {p.status === 'applied' && (
+                <p className="tabular text-muted">{t('rvPenaliteRecouvree', { collected: formatEuros(p.collectedCents ?? 0), total: formatEuros(p.amountCents) })}</p>
+              )}
               {p.contestReason && <blockquote className="mt-2 border-l-4 border-line pl-3 italic">{p.contestReason}</blockquote>}
               {(p.status === 'contested' || p.status === 'pending') && (
                 <Decision

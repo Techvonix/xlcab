@@ -445,9 +445,15 @@ référence — les exigences de la Partie 8 priment.
   `RequestDetailScreen._accept` → feuille → `authorizeOffer` ; feuille fermée = offre « Carte à valider » avec
   bouton « Valider ma carte » (même empreinte, 15 min). Sans `payment` (mode `deferred`), parcours inchangés.
   Clés ARB `mkcPaiementAbandonne`, `mkcCarte*`, `mkcValiderMaCarte`. Tests :
-  `apps/passenger/test/screens/market_payments_test.dart`. Restent : admin (page des reversements), bonus du
-  secours par virement, puis essai réel avec les clés de test (`STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`,
-  `STRIPE_CONNECT_WEBHOOK_SECRET`, `--dart-define=STRIPE_PUBLISHABLE_KEY`, `LINE_PAYMENT_MODE=connect`).
+  `apps/passenger/test/screens/market_payments_test.dart` ; réservation d'une ligne revérifiée sur le téléphone en
+  mode `deferred`. Admin fait (2026-10-13) : page « Reversements » (`xlcab_admin`,
+  `features/payouts/PayoutsPage.tsx`, route `/reversements`, `api.payouts` / `api.retryPayout`, clés i18n `rv*`) :
+  par défaut ceux qui ne sont pas partis, « Intervention requise » après 10 échecs, relance manuelle, détail de la
+  retenue ; part recouvrée affichée sur les pénalités appliquées de « Bourse et lignes ». Tests :
+  `src/features/payouts.test.tsx` (mock d'API séparé) ; page NON vue dans le navigateur (connexion admin + 2FA à
+  refaire après le seed). Restent : bonus du secours par virement, facture de pénalité à 30 j, puis essai réel
+  avec les clés de test (`STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_CONNECT_WEBHOOK_SECRET`,
+  `--dart-define=STRIPE_PUBLISHABLE_KEY`, `LINE_PAYMENT_MODE=connect`).
 - Migrations : `init_xlcab` appliquée sur la base locale ; toute modification de
   `prisma/schema.prisma` demande désormais `npx prisma migrate dev --name <nom>`. Référentiel :
   `npx prisma db seed` (config FR uniquement).

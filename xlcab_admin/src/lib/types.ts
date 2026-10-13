@@ -290,7 +290,32 @@ export interface AdminPenalty {
   status: 'pending' | 'contested' | 'applied' | 'cancelled';
   contestUntil: string;
   contestReason: string | null;
+  /** Part déjà retenue sur les reversements du chauffeur. */
+  collectedCents?: number;
   createdAt: string;
+}
+
+export type PayoutStatus = 'draft' | 'pending' | 'paid' | 'blocked' | 'failed' | 'withheld' | 'void';
+
+/** GET /admin/payouts : reversement dû à un opérateur pour une course terminée. */
+export interface AdminPayout {
+  id: string;
+  tripId: string;
+  driverId: string;
+  driverName: string | null;
+  driverEmail: string | null;
+  /** Viré : revenu − retenue. */
+  amountCents: number;
+  grossCents: number;
+  withheldCents: number;
+  status: PayoutStatus;
+  attempts: number;
+  lastError: string | null;
+  nextAttemptAt: string | null;
+  createdAt: string;
+  paidAt: string | null;
+  /** Dix essais échoués : plus de reprise automatique. */
+  needsAttention: boolean;
 }
 
 /** GET /admin/market/requests : demande de transport publiée sur la bourse. */
