@@ -144,16 +144,15 @@ class _PayoutsScreenState extends ConsumerState<PayoutsScreen> with WidgetsBindi
         for (final b in s.bonuses)
           OpCard(
             highlight: b.status == PayoutStatus.blocked,
-            child: Row(children: [
-              Expanded(
-                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Text(formatTripDate(b.createdAt, locale: locale), style: AppTypography.bodyBold.copyWith(color: onSurface)),
-                  const SizedBox(height: AppSpacing.xs),
-                  StatusPill(label: b.status == PayoutStatus.pending ? l10n.payBonusEnAttente : payoutStatusLabel(b.status)),
-                ]),
-              ),
-              const SizedBox(width: AppSpacing.sm),
-              Text(formatPrice(b.amountCents, locale: locale), style: AppTypography.bodyBold.copyWith(color: onSurface)),
+            // Pastille sous la ligne date / montant, sur toute la largeur : son libellé est long.
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Row(children: [
+                Expanded(child: Text(formatTripDate(b.createdAt, locale: locale), style: AppTypography.bodyBold.copyWith(color: onSurface))),
+                const SizedBox(width: AppSpacing.sm),
+                Text(formatPrice(b.amountCents, locale: locale), style: AppTypography.bodyBold.copyWith(color: onSurface)),
+              ]),
+              const SizedBox(height: AppSpacing.xs),
+              StatusPill(label: b.status == PayoutStatus.pending ? l10n.payBonusEnAttente : payoutStatusLabel(b.status)),
             ]),
           ),
       ],

@@ -64,7 +64,8 @@ class StatusPill extends StatelessWidget {
       decoration: BoxDecoration(color: scheme.secondaryContainer, borderRadius: BorderRadius.circular(999)),
       child: Row(mainAxisSize: MainAxisSize.min, children: [
         if (icon != null) ...[ExcludeSemantics(child: Icon(icon, size: 14, color: scheme.onSecondaryContainer)), const SizedBox(width: 4)],
-        Text(label, style: AppTypography.caption.copyWith(color: scheme.onSecondaryContainer, fontWeight: FontWeight.w600)),
+        // Flexible : un libellé long (ou un texte agrandi) passe à la ligne au lieu de déborder.
+        Flexible(child: Text(label, style: AppTypography.caption.copyWith(color: scheme.onSecondaryContainer, fontWeight: FontWeight.w600))),
       ]),
     );
   }
