@@ -494,6 +494,13 @@ référence — les exigences de la Partie 8 priment.
   Revenus → « Compte de versement et reversements » (tuile en 360 730, mêmes coordonnées en anglais) avec le
   bonus de reprise de démo, puis Profil. Volet de notifications resté ouvert après le mode Avion : le refermer par
   `adb shell cmd statusbar collapse` (jamais la touche Retour).
+- Tests automatiques (2026-10-13, `.github/workflows/tests.yml`, PAS ENCORE ENVOYÉ : aucun dépôt distant, `gh`
+  absent) : GitHub Actions sur push `main` / PR / lancement manuel — Flutter 3.47.5 (analyse + tests de
+  `packages/core`, `packages/ui`, `apps/passenger`, `apps/driver`, journal en artefact), serveur (Node 22, `npm ci`,
+  `prisma generate`, tests, build), portails admin et entreprise. Aucun secret requis. Avant tout envoi : dépôt
+  PRIVÉ créé par le porteur de projet, accord explicite pour le `git push`. Historique vérifié le 2026-10-13 : aucun
+  secret (seulement des valeurs d'exemple) ; CLAUDE.md cite l'adresse Gmail du compte Google Cloud. Les tests
+  Flutter n'ayant jamais tourné, s'attendre à des échecs au premier passage.
 - Migrations : `init_xlcab` appliquée sur la base locale ; toute modification de
   `prisma/schema.prisma` demande désormais `npx prisma migrate dev --name <nom>`. Référentiel :
   `npx prisma db seed` (config FR uniquement).

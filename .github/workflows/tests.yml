@@ -1,0 +1,132 @@
+# Tests automatiques XLCAB : lancés à chaque envoi du code sur GitHub.
+#
+# Raison d'être : les tests des applications Flutter ne peuvent pas tourner sur le
+# poste de développement (Smart App Control de Windows bloque flutter_tester.exe).
+# Ici ils tournent sur une machine Linux fournie par GitHub.
+#
+# Aucun secret n'est nécessaire : tous les tests utilisent des doubles (base, Redis,
+# Stripe, Google simulés). Ne JAMAIS ajouter de clé réelle dans ce fichier.
+
+name: Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  # Bouton « Run workflow » dans l'onglet Actions de GitHub.
+  workflow_dispatch:
+
+# Un nouvel envoi annule les tests encore en cours de l'envoi précédent.
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  flutter:
+    name: Flutter · ${{ matrix.package }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      # Un paquet en échec n'empêche pas de voir le résultat des autres.
+      fail-fast: false
+      matrix:
+        package: [packages/core, packages/ui, apps/passenger, apps/driver]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          # Même version que le poste de développement (voir CLAUDE.md).
+          flutter-version: '3.47.5'
+          channel: stable
+          cache: true
+
+      # Espace de travail Dart : une seule résolution, depuis la racine.
+      - name: Dépendances
+        run: flutter pub get
+
+      - name: Analyse
+        working-directory: ${{ matrix.package }}
+        run: flutter analyze .
+
+      - name: Tests
+        working-directory: ${{ matrix.package }}
+        # packages/ui n'a pas (encore) de dossier de tests : rien à lancer.
+        run: |
+          if [ -d test ]; then
+            set -o pipefail
+            flutter test --reporter expanded 2>&1 | tee "$RUNNER_TEMP/tests.log"
+          else
+            echo "Pas de tests dans ce paquet." | tee "$RUNNER_TEMP/tests.log"
+          fi
+
+      # Journal complet téléchargeable, même (surtout) quand des tests échouent.
+      - name: Journal des tests
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: journal-flutter-${{ strategy.job-index }}
+          path: ${{ runner.temp }}/tests.log
+          if-no-files-found: ignore
+          retention-days: 14
+
+  backend:
+    name: Serveur (NestJS)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: xlcab_backend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: xlcab_backend/package-lock.json
+
+      - name: Dépendances
+        run: npm ci
+
+      # Client Prisma généré depuis le schéma : aucune base n'est nécessaire.
+      - name: Client Prisma
+        run: npx prisma generate
+
+      - name: Tests
+        run: npm test
+
+      - name: Compilation
+        run: npm run build
+
+  portails:
+    name: Portail · ${{ matrix.app }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        app: [xlcab_admin, xlcab_corporate]
+    defaults:
+      run:
+        working-directory: ${{ matrix.app }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: ${{ matrix.app }}/package-lock.json
+
+      - name: Dépendances
+        run: npm ci
+
+      - name: Tests
+        run: npm test
+
+      - name: Compilation
+        run: npm run build
