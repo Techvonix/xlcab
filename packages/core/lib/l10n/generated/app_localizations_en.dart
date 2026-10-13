@@ -3542,4 +3542,47 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get etqColisSoigne => 'Parcel handled well';
+
+  @override
+  String impKgEvites(String kg) {
+    return '$kg kg of CO₂ avoided';
+  }
+
+  @override
+  String get impSousTitre => 'by sharing your shuttle trips';
+
+  @override
+  String impTrajets(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count completed trips',
+      one: '1 completed trip',
+      zero: 'No completed trip',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String impDistance(int km) {
+    return '$km km by shuttle';
+  }
+
+  @override
+  String get impMethodeTitre => 'How it is calculated';
+
+  @override
+  String impMethode(String car, String shuttle) {
+    return 'This is an estimate. We compare your trip with the same trip driven alone in a petrol or diesel car ($car kg of CO₂e per km, source: ADEME). The shuttle ($shuttle kg per km) is shared between the travellers on board. Alone on board, nothing is counted.';
+  }
+
+  @override
+  String get impAucun =>
+      'Your figures will appear here after your first completed trip.';
+
+  @override
+  String get impIndisponible => 'Your impact is unavailable for now.';
+
+  @override
+  String get impChargement => 'Calculating your impact';
 }

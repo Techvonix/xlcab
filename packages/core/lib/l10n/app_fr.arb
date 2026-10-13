@@ -2047,5 +2047,45 @@
   "etqPonctuel": "Ponctualité",
   "etqVehiculePropre": "Véhicule propre",
   "etqAccueil": "Accueil agréable",
-  "etqColisSoigne": "Colis bien traité"
+  "etqColisSoigne": "Colis bien traité",
+  "impKgEvites": "{kg} kg de CO₂ évités",
+  "@impKgEvites": {
+    "placeholders": {
+      "kg": {
+        "type": "String"
+      }
+    }
+  },
+  "impSousTitre": "en partageant vos trajets en navette",
+  "impTrajets": "{count, plural, =0{Aucun trajet terminé} =1{1 trajet terminé} other{{count} trajets terminés}}",
+  "@impTrajets": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "impDistance": "{km} km en navette",
+  "@impDistance": {
+    "placeholders": {
+      "km": {
+        "type": "int"
+      }
+    }
+  },
+  "impMethodeTitre": "Comment c’est calculé",
+  "impMethode": "C’est une estimation. Nous comparons votre trajet au même trajet fait seul en voiture thermique ({car} kg de CO₂e par km, source ADEME). La navette ({shuttle} kg par km) est partagée entre les voyageurs à bord. Seul à bord, rien n’est compté.",
+  "@impMethode": {
+    "placeholders": {
+      "car": {
+        "type": "String"
+      },
+      "shuttle": {
+        "type": "String"
+      }
+    }
+  },
+  "impAucun": "Votre bilan apparaîtra ici après votre premier trajet terminé.",
+  "impIndisponible": "Bilan indisponible pour le moment.",
+  "impChargement": "Calcul de votre bilan"
 }

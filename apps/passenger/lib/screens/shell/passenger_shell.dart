@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:xlcab_core/l10n/l10n.dart';
 
+import '../impact/impact_screen.dart';
 import '../parcels/parcels_screen.dart';
 import '../profile/trip_history_screen.dart';
 
@@ -21,9 +22,10 @@ class PassengerShell extends ConsumerWidget {
         selectedIndex: shell.currentIndex,
         // Un second appui sur l'onglet courant le ramène à son premier écran.
         onDestinationSelected: (index) {
-          // Les onglets restent en mémoire : Trajets et Colis se rechargent quand on y revient.
+          // Les onglets restent en mémoire : Trajets, Colis et Impact se rechargent quand on y revient.
           if (index == 1) ref.read(tripsRefreshProvider.notifier).state++;
           if (index == 2) ref.invalidate(myParcelsProvider);
+          if (index == 3) ref.invalidate(impactProvider);
           shell.goBranch(index, initialLocation: index == shell.currentIndex);
         },
         destinations: [

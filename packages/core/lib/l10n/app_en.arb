@@ -1004,5 +1004,14 @@
   "etqPonctuel": "On time",
   "etqVehiculePropre": "Clean vehicle",
   "etqAccueil": "Friendly welcome",
-  "etqColisSoigne": "Parcel handled well"
+  "etqColisSoigne": "Parcel handled well",
+  "impKgEvites": "{kg} kg of CO₂ avoided",
+  "impSousTitre": "by sharing your shuttle trips",
+  "impTrajets": "{count, plural, =0{No completed trip} =1{1 completed trip} other{{count} completed trips}}",
+  "impDistance": "{km} km by shuttle",
+  "impMethodeTitre": "How it is calculated",
+  "impMethode": "This is an estimate. We compare your trip with the same trip driven alone in a petrol or diesel car ({car} kg of CO₂e per km, source: ADEME). The shuttle ({shuttle} kg per km) is shared between the travellers on board. Alone on board, nothing is counted.",
+  "impAucun": "Your figures will appear here after your first completed trip.",
+  "impIndisponible": "Your impact is unavailable for now.",
+  "impChargement": "Calculating your impact"
 }

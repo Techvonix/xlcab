@@ -6128,6 +6128,60 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Colis bien traité'**
   String get etqColisSoigne;
+
+  /// No description provided for @impKgEvites.
+  ///
+  /// In fr, this message translates to:
+  /// **'{kg} kg de CO₂ évités'**
+  String impKgEvites(String kg);
+
+  /// No description provided for @impSousTitre.
+  ///
+  /// In fr, this message translates to:
+  /// **'en partageant vos trajets en navette'**
+  String get impSousTitre;
+
+  /// No description provided for @impTrajets.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =0{Aucun trajet terminé} =1{1 trajet terminé} other{{count} trajets terminés}}'**
+  String impTrajets(int count);
+
+  /// No description provided for @impDistance.
+  ///
+  /// In fr, this message translates to:
+  /// **'{km} km en navette'**
+  String impDistance(int km);
+
+  /// No description provided for @impMethodeTitre.
+  ///
+  /// In fr, this message translates to:
+  /// **'Comment c’est calculé'**
+  String get impMethodeTitre;
+
+  /// No description provided for @impMethode.
+  ///
+  /// In fr, this message translates to:
+  /// **'C’est une estimation. Nous comparons votre trajet au même trajet fait seul en voiture thermique ({car} kg de CO₂e par km, source ADEME). La navette ({shuttle} kg par km) est partagée entre les voyageurs à bord. Seul à bord, rien n’est compté.'**
+  String impMethode(String car, String shuttle);
+
+  /// No description provided for @impAucun.
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre bilan apparaîtra ici après votre premier trajet terminé.'**
+  String get impAucun;
+
+  /// No description provided for @impIndisponible.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bilan indisponible pour le moment.'**
+  String get impIndisponible;
+
+  /// No description provided for @impChargement.
+  ///
+  /// In fr, this message translates to:
+  /// **'Calcul de votre bilan'**
+  String get impChargement;
 }
 
 class _AppLocalizationsDelegate

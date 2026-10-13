@@ -3565,4 +3565,47 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get etqColisSoigne => 'Colis bien traité';
+
+  @override
+  String impKgEvites(String kg) {
+    return '$kg kg de CO₂ évités';
+  }
+
+  @override
+  String get impSousTitre => 'en partageant vos trajets en navette';
+
+  @override
+  String impTrajets(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count trajets terminés',
+      one: '1 trajet terminé',
+      zero: 'Aucun trajet terminé',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String impDistance(int km) {
+    return '$km km en navette';
+  }
+
+  @override
+  String get impMethodeTitre => 'Comment c’est calculé';
+
+  @override
+  String impMethode(String car, String shuttle) {
+    return 'C’est une estimation. Nous comparons votre trajet au même trajet fait seul en voiture thermique ($car kg de CO₂e par km, source ADEME). La navette ($shuttle kg par km) est partagée entre les voyageurs à bord. Seul à bord, rien n’est compté.';
+  }
+
+  @override
+  String get impAucun =>
+      'Votre bilan apparaîtra ici après votre premier trajet terminé.';
+
+  @override
+  String get impIndisponible => 'Bilan indisponible pour le moment.';
+
+  @override
+  String get impChargement => 'Calcul de votre bilan';
 }
