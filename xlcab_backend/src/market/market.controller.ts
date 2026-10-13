@@ -67,6 +67,14 @@ export class MarketController {
     return this.market.acceptOffer(req.user.sub, id);
   }
 
+  /** Paiement en ligne : l'app appelle ceci après la feuille de paiement (empreinte de carte validée). */
+  @Post('offers/:id/authorize')
+  @Roles(...CLIENTS)
+  @HttpCode(HttpStatus.OK)
+  authorize(@Req() req: any, @Param('id', ParseUUIDPipe) id: string) {
+    return this.market.authorizeOffer(req.user.sub, id);
+  }
+
   // ── Côté opérateur ──
 
   @Get('feed')

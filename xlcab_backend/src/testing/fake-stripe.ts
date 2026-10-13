@@ -43,6 +43,8 @@ export class FakeStripe {
         amount_received: 0,
         currency: params.currency,
         status: 'requires_payment_method',
+        capture_method: params.capture_method ?? 'automatic',
+        amount_capturable: 0,
         metadata: params.metadata,
         payment_method_types: ['card'],
       };
@@ -57,7 +59,20 @@ export class FakeStripe {
     cancel: async (id: string) => {
       this.canceled.push(id);
       const i = this.intents.get(id);
-      if (i) i.status = 'canceled';
+      if (i) Object.assign(i, { status: 'canceled', amount_capturable: 0 });
+      return i;
+    },
+    capture: async (id: string, _params: any, options: any) => {
+      const i = this.intents.get(id);
+      if (!i) throw new Error('No such payment_intent');
+      if (this.failNextCapture) {
+        this.failNextCapture = false;
+        throw new Error('This PaymentIntent could not be captured');
+      }
+      if (i.status === 'succeeded') return i; // même clé d'idempotence
+      if (i.status !== 'requires_capture') throw new Error(`PaymentIntent in status ${i.status} cannot be captured`);
+      this.captured.push({ id, options });
+      Object.assign(i, { status: 'succeeded', amount_received: i.amount, amount_capturable: 0 });
       return i;
     },
   };
@@ -150,6 +165,17 @@ export class FakeStripe {
       return JSON.parse(raw.toString());
     },
   };
+
+  captured: { id: string; options: any }[] = [];
+  /** Erreur à lever sur le prochain débit d'une empreinte (carte refusée, autorisation expirée). */
+  failNextCapture = false;
+
+  /** Simule une empreinte de carte validée dans la feuille de paiement : rien n'est débité. */
+  authorize(intentId: string) {
+    const i = this.intents.get(intentId)!;
+    Object.assign(i, { status: 'requires_capture', amount_capturable: i.amount });
+    return i;
+  }
 
   /** Simule un paiement réussi côté Stripe (feuille de paiement validée). */
   succeed(intentId: string) {

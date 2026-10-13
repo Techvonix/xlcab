@@ -43,6 +43,8 @@ model User {
 
 model Trip {
   id                   String    @id @default(uuid())
+  // Retour d'un aller-retour de la bourse : payé avec l'aller (un seul paiement).
+  paidWithTripId       String?
   type                 String // passenger|parcel|mixed
   status               String    @default("pending")
   passengerId          String?
@@ -240,15 +242,19 @@ model Payment {
   id                    String   @id @default(uuid())
   tripId                String?
   userId                String?
+  // Bourse : empreinte de carte prise au choix d'une proposition, avant que
+  // les courses existent ; tripId = l'aller une fois l'opérateur confirmé.
+  offerId               String?
   stripePaymentIntentId String?  @unique
   amountCents           Int
   currency              String   @default("EUR")
-  status                String // requires_payment|succeeded|failed|canceled
+  status                String // requires_payment|authorized|succeeded|failed|canceled
   method                String?
   refundedCents         Int      @default(0)
   createdAt             DateTime @default(now())
 
   @@index([tripId])
+  @@index([offerId])
 }
 
 // ── Module 10 (Dashboard admin) ───────────────────────────────────────

@@ -237,7 +237,7 @@ export function memoryPrisma() {
     })),
   };
   db.trip = new Table(
-    () => ({ status: 'pending', vatCents: 0, createdAt: new Date(), source: 'instant', lineDepartureId: null, commissionCents: null }),
+    () => ({ status: 'pending', vatCents: 0, createdAt: new Date(), source: 'instant', lineDepartureId: null, commissionCents: null, paidWithTripId: null }),
     {
       priceLines: (trip) => tripPriceLine.rows.filter((l) => l.tripId === trip.id),
       passengerBooking: (trip) => db.passengerBooking.rows.find((b: Row) => b.tripId === trip.id) ?? null,

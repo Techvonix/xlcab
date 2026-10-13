@@ -34,6 +34,16 @@ const DEFAULT_UNPAID_EXPIRY_MIN = 30;
 /** Groupe Stripe qui relie le paiement d'une course à son reversement (Connect). */
 export const transferGroupOf = (tripId: string) => `trip_${tripId}`;
 
+/** Feuille de paiement d'une empreinte de carte (bourse) : rien n'est débité à ce stade. */
+export interface AuthorizationSheetParams {
+  offerId: string;
+  paymentIntentClientSecret: string;
+  customerId: string;
+  ephemeralKeySecret: string;
+  amountCents: number;
+  currency: string;
+}
+
 export interface PaymentSheetParams {
   tripId: string;
   paymentIntentClientSecret: string;
@@ -164,6 +174,136 @@ export class PaymentsService {
 
     const trip = await this.prisma.trip.findUnique({ where: { id: tripId }, select: { status: true } });
     return { tripId, paymentStatus: intent.status, tripStatus: trip?.status ?? null };
+  }
+
+  // ── Empreinte de carte (bourse de transport) ────────────────────────
+  //
+  // Décision du 2026-10-13 : quand le client choisit une proposition, sa
+  // carte est AUTORISÉE pour le montant sans être débitée. Le débit a lieu
+  // quand l'opérateur confirme ; sinon l'autorisation est levée, sans aucun
+  // mouvement d'argent. (Une autorisation tient 7 jours : l'opérateur a 2 h.)
+
+  /** Feuille de paiement de l'empreinte, rappelable (même demande tant qu'elle est en cours). */
+  async authorizationSheet(userId: string, offerId: string, amountCents: number): Promise<AuthorizationSheetParams> {
+    const stripe = this.client();
+    if (!Number.isInteger(amountCents) || amountCents <= 0) throw new ConflictException('Montant de la course invalide');
+    const customerId = await this.customerId(userId);
+    const existing = await this.prisma.payment.findFirst({ where: { offerId, userId, status: 'requires_payment' }, select: { stripePaymentIntentId: true } });
+
+    let intent: Stripe.PaymentIntent;
+    if (existing?.stripePaymentIntentId) {
+      intent = await stripe.paymentIntents.retrieve(existing.stripePaymentIntentId);
+    } else {
+      // Une proposition peut être choisie, abandonnée puis choisie de nouveau :
+      // chaque tentative a sa propre clé d'idempotence.
+      const attempt = await this.prisma.payment.count({ where: { offerId } });
+      intent = await stripe.paymentIntents.create(
+        {
+          amount: amountCents,
+          currency: 'eur',
+          customer: customerId,
+          automatic_payment_methods: { enabled: true },
+          // Empreinte : débit déclenché par le serveur, à la confirmation de l'opérateur.
+          capture_method: 'manual',
+          description: `Proposition XLCAB ${offerId}`,
+          metadata: { offerId, userId },
+        },
+        { idempotencyKey: `offer-payment-${offerId}-${attempt}` },
+      );
+      await this.prisma.payment.create({
+        data: { offerId, userId, stripePaymentIntentId: intent.id, amountCents, currency: 'EUR', status: 'requires_payment' },
+      });
+    }
+    const ephemeralKey = await stripe.ephemeralKeys.create(
+      { customer: customerId },
+      { apiVersion: this.config.get<string>('STRIPE_MOBILE_API_VERSION') ?? DEFAULT_MOBILE_API_VERSION },
+    );
+    return {
+      offerId,
+      paymentIntentClientSecret: intent.client_secret!,
+      customerId,
+      ephemeralKeySecret: ephemeralKey.secret!,
+      amountCents,
+      currency: 'EUR',
+    };
+  }
+
+  /** Vrai si la carte du client est autorisée pour le montant exact de la proposition (relu chez Stripe). */
+  async authorizationReady(offerId: string): Promise<boolean> {
+    const payment = await this.prisma.payment.findFirst({ where: { offerId }, orderBy: { createdAt: 'desc' } });
+    if (!payment?.stripePaymentIntentId) return false;
+    if (payment.status === 'authorized') return true;
+    if (payment.status !== 'requires_payment' || !this.stripe) return false;
+    const intent = await this.stripe.paymentIntents.retrieve(payment.stripePaymentIntentId);
+    if (intent.status !== 'requires_capture' || intent.amount_capturable !== payment.amountCents) return false;
+    await this.prisma.payment.update({ where: { id: payment.id }, data: { status: 'authorized', method: intent.payment_method_types?.[0] ?? null } });
+    return true;
+  }
+
+  /**
+   * Débite l'empreinte (l'opérateur vient de confirmer). Refus de la banque
+   * ou autorisation levée entre-temps : 409, rien n'est débité.
+   */
+  async captureAuthorization(offerId: string): Promise<void> {
+    const stripe = this.client();
+    const payment = await this.prisma.payment.findFirst({ where: { offerId }, orderBy: { createdAt: 'desc' } });
+    if (!payment?.stripePaymentIntentId || payment.status !== 'authorized') {
+      throw new ConflictException('Le paiement du client n’est plus autorisé');
+    }
+    let intent: Stripe.PaymentIntent;
+    try {
+      intent = await stripe.paymentIntents.capture(payment.stripePaymentIntentId, {}, { idempotencyKey: `offer-capture-${payment.id}` });
+    } catch (err) {
+      this.logger.error(`Débit de l'empreinte impossible (proposition ${offerId}) : ${(err as Error).message}`);
+      await this.audit.log({ action: 'payment.capture_failed', entity: 'Payment', entityId: payment.id, metadata: { offerId } });
+      throw new ConflictException('Le paiement du client n’est plus autorisé');
+    }
+    if (intent.status !== 'succeeded' || intent.amount_received !== payment.amountCents) {
+      await this.audit.log({ action: 'payment.amount_mismatch', entity: 'Payment', entityId: payment.id, metadata: { received: intent.amount_received, expected: payment.amountCents } });
+      throw new ConflictException('Le paiement du client n’est plus autorisé');
+    }
+    await this.prisma.payment.update({ where: { id: payment.id }, data: { status: 'succeeded' } });
+  }
+
+  /** Rattache le paiement d'une proposition à la course créée (l'aller ; le retour y renvoie par paidWithTripId). */
+  async attachOfferPayment(offerId: string, tripId: string): Promise<void> {
+    await this.prisma.payment.updateMany({ where: { offerId, status: 'succeeded' }, data: { tripId } });
+  }
+
+  /**
+   * Lève l'empreinte d'une proposition qui n'aboutit pas (refus, délai,
+   * demande annulée). Ne lève jamais d'erreur : un incident Stripe est
+   * tracé, l'autorisation tombe de toute façon d'elle-même sous 7 jours.
+   */
+  async releaseAuthorization(offerId: string): Promise<void> {
+    try {
+      const pending = await this.prisma.payment.findMany({ where: { offerId, status: { in: ['requires_payment', 'authorized'] } } });
+      for (const payment of pending) {
+        if (payment.stripePaymentIntentId && this.stripe) await this.stripe.paymentIntents.cancel(payment.stripePaymentIntentId);
+        await this.prisma.payment.update({ where: { id: payment.id }, data: { status: 'canceled' } });
+      }
+    } catch (err) {
+      this.logger.error(`Levée de l'empreinte échouée (proposition ${offerId}) : ${(err as Error).message}`);
+      await this.audit.log({ action: 'payment.release_failed', entity: 'TransportOffer', entityId: offerId });
+    }
+  }
+
+  /** Empreinte débitée mais course non créée (incident) : remboursement intégral, tracé. */
+  async refundCapturedOffer(offerId: string): Promise<void> {
+    try {
+      const payment = await this.prisma.payment.findFirst({ where: { offerId, status: 'succeeded' }, orderBy: { createdAt: 'desc' } });
+      if (!payment?.stripePaymentIntentId || !this.stripe) return;
+      const amount = payment.amountCents - payment.refundedCents;
+      if (amount <= 0) return;
+      await this.stripe.refunds.create(
+        { payment_intent: payment.stripePaymentIntentId, amount, metadata: { offerId, reason: 'booking_not_created' } },
+        { idempotencyKey: `offer-refund-${payment.id}` },
+      );
+      await this.prisma.payment.update({ where: { id: payment.id }, data: { refundedCents: payment.amountCents } });
+    } catch (err) {
+      this.logger.error(`Remboursement de la proposition ${offerId} échoué : ${(err as Error).message}`);
+      await this.audit.log({ action: 'payment.refund_failed', entity: 'TransportOffer', entityId: offerId });
+    }
   }
 
   // ── Webhook Stripe ──────────────────────────────────────────────────
@@ -442,7 +582,7 @@ export class PaymentsService {
     // ici (base ou Stripe) ne doit jamais la faire passer pour un échec.
     let paymentId: string | undefined;
     try {
-      const payment = await this.prisma.payment.findFirst({ where: { tripId }, orderBy: { createdAt: 'desc' } });
+      const { payment, shareCents } = await this.paymentOf(tripId);
       if (!payment?.stripePaymentIntentId || !this.stripe) return { refundedCents: 0 };
       paymentId = payment.id;
 
@@ -454,7 +594,9 @@ export class PaymentsService {
       }
       if (payment.status !== 'succeeded') return { refundedCents: 0 };
 
-      const amount = payment.amountCents - payment.refundedCents - feeCents;
+      // Aller-retour payé en une fois : on ne rembourse que la part de CETTE course.
+      const remaining = payment.amountCents - payment.refundedCents;
+      const amount = shareCents === null ? remaining - feeCents : Math.min(shareCents - feeCents, remaining);
       if (amount <= 0) return { refundedCents: 0 };
       await this.stripe.refunds.create(
         { payment_intent: payment.stripePaymentIntentId, amount, reason: 'requested_by_customer', metadata: { tripId, feeCents: String(feeCents) } },
@@ -467,6 +609,23 @@ export class PaymentsService {
       await this.audit.log({ action: 'payment.refund_failed', entity: 'Payment', entityId: paymentId, metadata: { tripId, feeCents } });
       return { refundedCents: 0, failed: true };
     }
+  }
+
+  /**
+   * Paiement d'une course. Pour un aller-retour de la bourse, un seul
+   * paiement couvre les deux courses : `shareCents` est alors la part de
+   * celle-ci (son prix), null quand le paiement ne couvre qu'elle.
+   */
+  private async paymentOf(tripId: string) {
+    const own = await this.prisma.payment.findFirst({ where: { tripId }, orderBy: { createdAt: 'desc' } });
+    const trip = await this.prisma.trip.findUnique({ where: { id: tripId }, select: { totalPriceCents: true, paidWithTripId: true } });
+    if (own) {
+      const shared = own.offerId ? await this.prisma.trip.count({ where: { paidWithTripId: tripId } }) : 0;
+      return { payment: own, shareCents: shared > 0 ? trip?.totalPriceCents ?? 0 : null };
+    }
+    if (!trip?.paidWithTripId) return { payment: null, shareCents: null };
+    const carrier = await this.prisma.payment.findFirst({ where: { tripId: trip.paidWithTripId }, orderBy: { createdAt: 'desc' } });
+    return { payment: carrier, shareCents: trip.totalPriceCents ?? 0 };
   }
 
   /** Remboursement manuel par l'équipe XLCAB (geste commercial, litige). */

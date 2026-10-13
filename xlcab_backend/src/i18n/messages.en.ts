@@ -530,6 +530,9 @@ export const MESSAGES_EN: Record<string, string> = {
   'Compte de versement à compléter': 'Payout account needs attention',
   'Stripe a besoin d’informations supplémentaires pour continuer à vous verser vos revenus.':
     'Stripe needs more information to keep paying out your earnings.',
+  'Le paiement du client n’est plus autorisé': 'The customer’s payment is no longer authorised',
+  'Carte non autorisée : validez le paiement pour confirmer votre choix': 'Card not authorised: complete the payment to confirm your choice',
+  'Votre carte n’a pas pu être débitée : choisissez de nouveau une proposition.': 'Your card could not be charged: please choose an offer again.',
   'Réservation annulée': 'Booking cancelled',
   'Ce départ n’est plus disponible : vous êtes remboursé intégralement.': 'This departure is no longer available: you are refunded in full.',
 };

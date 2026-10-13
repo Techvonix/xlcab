@@ -15,6 +15,7 @@ import { localDateOf, localTimeOf } from '../common/local-time';
 import { driverCommissionPercent } from '../driver-mode/driver-mode.service';
 import { linePaymentMode } from '../payouts/payment-mode';
 import { PayoutAccountsService } from '../payouts/payout-accounts';
+import { PaymentsService } from '../payments/payments.service';
 import { TripStatus } from '../matching/matching.constants';
 import { MatchingService } from '../matching/matching.service';
 import { NotificationsService } from '../notifications/notifications.service';
@@ -30,6 +31,8 @@ export const REQUEST_MIN_LEAD_MIN = 120;
 export const REQUEST_CLOSE_BEFORE_MIN = 60;
 /** Délai laissé à l'opérateur pour reconfirmer une proposition choisie. */
 export const CONFIRM_WINDOW_MIN = 120;
+/** Paiement en ligne : délai laissé au client pour valider son empreinte de carte après son choix. */
+export const AUTHORIZE_WINDOW_MIN = 15;
 export const OFFER_DEFAULT_VALID_HOURS = 24;
 export const MAX_OPEN_REQUESTS = 10;
 export const REQUESTS_MAX_PER_HOUR = 20;
@@ -37,6 +40,10 @@ export const REQUESTS_MAX_PER_HOUR = 20;
 export const NOTIFY_MAX = 30;
 
 const OPEN = ['published', 'offers_received'];
+// Proposition choisie par le client : « authorizing » = empreinte de carte en
+// cours (l'opérateur n'est pas encore prévenu), « accepted » = à reconfirmer.
+const CHOSEN = ['authorizing', 'accepted'];
+const LIVE = ['pending', ...CHOSEN];
 const PAGE_SIZE = 25;
 const MIN = 60_000;
 
@@ -45,6 +52,9 @@ const MIN = 60_000;
 const PHONE = /(\+?\d[\s.\-()]?){9,}/;
 const EMAIL = /[^\s@]+@[^\s@]+\.[a-z]{2,}/i;
 const APPS = /\b(whats ?app|telegram|signal|snap(chat)?|insta(gram)?|messenger)\b/i;
+
+/** Statut montré à l'opérateur : l'empreinte de carte en cours ne le regarde pas encore. */
+const operatorStatus = (status: string) => (status === 'authorizing' ? 'pending' : status);
 
 /** Adresse sans numéro ni rue (« 75017 Paris ») tant que rien n'est confirmé. */
 export function coarseAddress(address: string): string {
@@ -74,6 +84,7 @@ export class MarketService {
     private notifications: NotificationsService,
     private audit: AuditService,
     private payouts: PayoutAccountsService,
+    private payments: PaymentsService,
   ) {}
 
   // ── Demandes (client) ───────────────────────────────────────────────
@@ -161,9 +172,10 @@ export class MarketService {
         : 'Cette demande ne peut plus être annulée');
     }
     await this.prisma.transportRequest.update({ where: { id: requestId }, data: { status: 'cancelled' } });
-    const offers = await this.prisma.transportOffer.findMany({ where: { requestId, status: { in: ['pending', 'accepted'] } } });
-    await this.prisma.transportOffer.updateMany({ where: { requestId, status: { in: ['pending', 'accepted'] } }, data: { status: 'rejected' } });
+    const offers = await this.prisma.transportOffer.findMany({ where: { requestId, status: { in: LIVE } } });
+    await this.prisma.transportOffer.updateMany({ where: { requestId, status: { in: LIVE } }, data: { status: 'rejected' } });
     for (const o of offers) {
+      if (CHOSEN.includes(o.status)) await this.payments.releaseAuthorization(o.id);
       await this.notifications.notify(o.operatorId, 'market.request.cancelled', 'Demande annulée', 'Le client a annulé sa demande de transport.', { requestId });
     }
     await this.audit.log({ userId, action: 'market.request.cancel', entity: 'TransportRequest', entityId: requestId });
@@ -195,6 +207,12 @@ export class MarketService {
     const offer = await this.prisma.transportOffer.findUnique({ where: { id: offerId } });
     const request = offer && (await this.prisma.transportRequest.findUnique({ where: { id: offer.requestId } }));
     if (!offer || !request || request.requesterId !== userId) throw new NotFoundException('Proposition introuvable');
+    const online = linePaymentMode() === 'connect';
+    if (online) this.assertMarketOpen();
+    // Reprise : feuille de paiement fermée par erreur, le client la rouvre.
+    if (online && offer.status === 'authorizing' && request.acceptedOfferId === offer.id && offer.confirmDeadline && offer.confirmDeadline > now) {
+      return this.authorizing(userId, offer, offer.confirmDeadline);
+    }
     if (offer.status !== 'pending' || offer.validUntil <= now) throw new ConflictException('Proposition expirée ou déjà traitée');
     if (!OPEN.includes(request.status) || request.acceptedOfferId) throw new ConflictException('Une proposition est déjà en cours de confirmation');
 
@@ -204,11 +222,75 @@ export class MarketService {
       data: { status: 'accepted', acceptedOfferId: offer.id },
     });
     if (claimed.count === 0) throw new ConflictException('Une proposition est déjà en cours de confirmation');
+    if (online) {
+      // Empreinte de carte d'abord : l'opérateur n'est prévenu qu'une fois la carte autorisée.
+      const authorizeBy = new Date(Math.min(now.getTime() + AUTHORIZE_WINDOW_MIN * MIN, request.expiresAt.getTime()));
+      const held = await this.prisma.transportOffer.update({ where: { id: offer.id }, data: { status: 'authorizing', confirmDeadline: authorizeBy } });
+      try {
+        return await this.authorizing(userId, held, authorizeBy);
+      } catch (err) {
+        // Stripe en panne : le choix est défait, le client peut réessayer.
+        await this.dropAuthorization(held, now);
+        throw err;
+      }
+    }
     await this.prisma.transportOffer.update({ where: { id: offer.id }, data: { status: 'accepted', confirmDeadline: deadline, respondedAt: now } });
     await this.notifications.notify(offer.operatorId, 'market.offer.accepted', 'Proposition retenue',
       'Le client a choisi votre proposition : confirmez votre disponibilité pour valider la réservation.', { offerId: offer.id });
     await this.audit.log({ userId, action: 'market.offer.accept', entity: 'TransportOffer', entityId: offer.id });
     return { offerId: offer.id, status: 'accepted', confirmDeadline: deadline };
+  }
+
+  /**
+   * Paiement en ligne : l'empreinte de carte est validée (feuille de
+   * paiement terminée). Le choix devient ferme côté client et l'opérateur
+   * est invité à reconfirmer. Sans effet si c'est déjà fait.
+   */
+  async authorizeOffer(userId: string, offerId: string, now = new Date()) {
+    const offer = await this.prisma.transportOffer.findUnique({ where: { id: offerId } });
+    const request = offer && (await this.prisma.transportRequest.findUnique({ where: { id: offer.requestId } }));
+    if (!offer || !request || request.requesterId !== userId) throw new NotFoundException('Proposition introuvable');
+    if (offer.status === 'accepted') return { offerId, status: 'accepted', confirmDeadline: offer.confirmDeadline };
+    if (offer.status !== 'authorizing' || request.acceptedOfferId !== offer.id) throw new ConflictException('Proposition expirée ou déjà traitée');
+    if (!(await this.payments.authorizationReady(offer.id))) {
+      throw new ConflictException('Carte non autorisée : validez le paiement pour confirmer votre choix');
+    }
+    const confirmDeadline = await this.markAuthorized(offer, request, now);
+    await this.audit.log({ userId, action: 'market.offer.accept', entity: 'TransportOffer', entityId: offer.id, metadata: { payment: 'authorized' } });
+    return { offerId, status: 'accepted', confirmDeadline };
+  }
+
+  private async authorizing(userId: string, offer: TransportOffer, authorizeBy: Date) {
+    const payment = await this.payments.authorizationSheet(userId, offer.id, offer.priceCents);
+    return { offerId: offer.id, status: 'authorizing', authorizeDeadline: authorizeBy, payment };
+  }
+
+  /** Carte autorisée : la proposition passe à « à reconfirmer » et l'opérateur est prévenu (une seule fois). */
+  private async markAuthorized(offer: TransportOffer, request: TransportRequest, now: Date) {
+    const deadline = new Date(Math.min(now.getTime() + CONFIRM_WINDOW_MIN * MIN, request.expiresAt.getTime()));
+    const { count } = await this.prisma.transportOffer.updateMany({
+      where: { id: offer.id, status: 'authorizing' },
+      data: { status: 'accepted', confirmDeadline: deadline, respondedAt: now },
+    });
+    if (count > 0) {
+      await this.notifications.notify(offer.operatorId, 'market.offer.accepted', 'Proposition retenue',
+        'Le client a choisi votre proposition : confirmez votre disponibilité pour valider la réservation.', { offerId: offer.id });
+    }
+    return deadline;
+  }
+
+  /** Empreinte abandonnée : elle est levée, la proposition redevient disponible et la demande se rouvre. */
+  private async dropAuthorization(offer: TransportOffer, now: Date) {
+    await this.payments.releaseAuthorization(offer.id);
+    await this.prisma.transportOffer.updateMany({
+      where: { id: offer.id, status: 'authorizing' },
+      data: { status: offer.validUntil > now ? 'pending' : 'expired', confirmDeadline: null },
+    });
+    await this.prisma.transportRequest.updateMany({
+      where: { id: offer.requestId, status: 'accepted', acceptedOfferId: offer.id },
+      data: { status: 'offers_received', acceptedOfferId: null },
+    });
+    await this.refreshStatus(offer.requestId);
   }
 
   // ── Côté opérateur ──────────────────────────────────────────────────
@@ -243,7 +325,7 @@ export class MarketService {
           budgetCents: r.budgetCents,
           needs: r.needs,
           expiresAt: r.expiresAt,
-          myOffer: offer ? { id: offer.id, priceCents: offer.priceCents, status: offer.status } : null,
+          myOffer: offer ? { id: offer.id, priceCents: offer.priceCents, status: operatorStatus(offer.status) } : null,
         };
       });
   }
@@ -297,7 +379,8 @@ export class MarketService {
 
   async myOffers(operatorId: string) {
     const offers = await this.prisma.transportOffer.findMany({ where: { operatorId }, orderBy: { createdAt: 'desc' }, take: 100 });
-    return Promise.all(offers.map((o) => this.offerView(o)));
+    const views = await Promise.all(offers.map((o) => this.offerView(o)));
+    return views.map((v) => ({ ...v, status: operatorStatus(v.status), confirmDeadline: v.status === 'authorizing' ? null : v.confirmDeadline }));
   }
 
   /**
@@ -321,11 +404,25 @@ export class MarketService {
       throw new ConflictException('Vous avez déjà une course sur ce créneau');
     }
 
+    // Paiement en ligne : la carte du client est débitée MAINTENANT. Refus de la
+    // banque : rien n'est réservé, le client est invité à choisir de nouveau.
+    const online = linePaymentMode() === 'connect';
+    if (online) {
+      try {
+        await this.payments.captureAuthorization(offer.id);
+      } catch (err) {
+        await this.prisma.transportOffer.update({ where: { id: offer.id }, data: { status: 'expired', respondedAt: now } });
+        await this.releaseAcceptance(offer, 'Votre carte n’a pas pu être débitée : choisissez de nouveau une proposition.');
+        throw err;
+      }
+    }
+
     const legs = offer.includesReturn && request.returnAt ? 2 : 1;
     const shares = [Math.ceil(offer.priceCents / legs), Math.floor(offer.priceCents / legs)].slice(0, legs);
     const config = await this.prisma.jurisdictionConfig.findUnique({ where: { code: vehicle.jurisdiction } });
     const rate = Number(config?.vatPassengerRate ?? 0);
     const tripIds: string[] = [];
+    try {
     await this.prisma.$transaction(async (tx) => {
       for (let leg = 0; leg < legs; leg++) {
         const back = leg === 1;
@@ -353,6 +450,8 @@ export class MarketService {
             vatCents: total - base,
             commissionCents: Math.round((base * driverCommissionPercent()) / 100),
             jurisdiction: vehicle.jurisdiction,
+            // Aller-retour : un seul paiement, porté par l'aller.
+            paidWithTripId: back && online ? tripIds[0] : null,
             priceLines: { create: [{ regime: 'passenger', baseCents: base, ratePercent: rate, vatCents: total - base }] },
           },
           select: { id: true },
@@ -363,6 +462,12 @@ export class MarketService {
         tripIds.push(trip.id);
       }
     });
+    } catch (err) {
+      // Carte débitée mais courses non créées : remboursement intégral immédiat.
+      if (online) await this.payments.refundCapturedOffer(offer.id);
+      throw err;
+    }
+    if (online) await this.payments.attachOfferPayment(offer.id, tripIds[0]);
 
     await this.prisma.transportOffer.update({ where: { id: offer.id }, data: { status: 'confirmed', respondedAt: now } });
     await this.prisma.transportOffer.updateMany({ where: { requestId: request.id, status: 'pending' }, data: { status: 'rejected' } });
@@ -397,7 +502,7 @@ export class MarketService {
 
   async postMessage(userId: string, offerId: string, body: string) {
     const { offer, request } = await this.offerParty(userId, offerId);
-    if (!['pending', 'accepted', 'confirmed'].includes(offer.status)) throw new ConflictException('Échange clos pour cette proposition');
+    if (![...LIVE, 'confirmed'].includes(offer.status)) throw new ConflictException('Échange clos pour cette proposition');
     if (offer.status !== 'confirmed' && (PHONE.test(body) || EMAIL.test(body) || APPS.test(body))) {
       throw new BadRequestException('Pas de coordonnées avant la confirmation : échangez par la messagerie XLCAB');
     }
@@ -417,6 +522,20 @@ export class MarketService {
       await this.prisma.transportOffer.updateMany({ where: { id: { in: stale.map((o) => o.id) } }, data: { status: 'expired' } });
       for (const requestId of new Set(stale.map((o) => o.requestId))) await this.refreshStatus(requestId);
     }
+    // Paiement en ligne : empreintes de carte en cours. Validée chez Stripe sans que
+    // l'app l'ait signalé (app fermée) : prise en compte ; délai dépassé : levée.
+    const authorizing = await this.prisma.transportOffer.findMany({ where: { status: 'authorizing' } });
+    for (const o of authorizing) {
+      const request = await this.prisma.transportRequest.findUnique({ where: { id: o.requestId } });
+      let ready = false;
+      try {
+        ready = !!request && (await this.payments.authorizationReady(o.id));
+      } catch {
+        continue; // Stripe injoignable : on réessaie à la minute suivante
+      }
+      if (ready && request) await this.markAuthorized(o, request, now);
+      else if (!o.confirmDeadline || o.confirmDeadline <= now) await this.dropAuthorization(o, now);
+    }
     // Choix du client non reconfirmé à temps par l'opérateur.
     const unconfirmed = await this.prisma.transportOffer.findMany({ where: { status: 'accepted', confirmDeadline: { lte: now } } });
     for (const o of unconfirmed) {
@@ -427,7 +546,9 @@ export class MarketService {
     const due = await this.prisma.transportRequest.findMany({ where: { status: { in: [...OPEN, 'accepted', 'draft'] }, expiresAt: { lte: now } } });
     for (const r of due) {
       await this.prisma.transportRequest.update({ where: { id: r.id }, data: { status: 'expired' } });
-      await this.prisma.transportOffer.updateMany({ where: { requestId: r.id, status: { in: ['pending', 'accepted'] } }, data: { status: 'expired' } });
+      const chosen = await this.prisma.transportOffer.findMany({ where: { requestId: r.id, status: { in: CHOSEN } }, select: { id: true } });
+      for (const o of chosen) await this.payments.releaseAuthorization(o.id);
+      await this.prisma.transportOffer.updateMany({ where: { requestId: r.id, status: { in: LIVE } }, data: { status: 'expired' } });
       if (r.status !== 'draft') {
         await this.notifications.notify(r.requesterId, 'market.request.expired', 'Demande expirée',
           'Aucune réservation n’a pu être confirmée à temps pour votre demande.', { requestId: r.id });
@@ -471,9 +592,9 @@ export class MarketService {
 
   /** Pas de vente réelle en production tant que Stripe Connect n'est pas branché (comme les lignes). */
   private assertMarketOpen() {
-    if (linePaymentMode() !== 'deferred' || process.env.NODE_ENV === 'production') {
-      throw new ServiceUnavailableException('Bourse de transport bientôt disponible');
-    }
+    const online = linePaymentMode() === 'connect';
+    if (!online && process.env.NODE_ENV === 'production') throw new ServiceUnavailableException('Bourse de transport bientôt disponible');
+    if (online && !this.payments.available()) throw new ServiceUnavailableException('Paiement momentanément indisponible');
   }
 
   private checkDates(departureAt: Date, returnAt: Date | null, now: Date) {
@@ -544,6 +665,7 @@ export class MarketService {
 
   /** Le choix du client tombe (refus ou délai dépassé) : la demande se rouvre. */
   private async releaseAcceptance(offer: TransportOffer, message: string) {
+    await this.payments.releaseAuthorization(offer.id);
     const reopened = await this.prisma.transportRequest.updateMany({
       where: { id: offer.requestId, status: 'accepted', acceptedOfferId: offer.id },
       data: { status: 'offers_received', acceptedOfferId: null },
@@ -581,7 +703,7 @@ export class MarketService {
     const trip = r.tripId ? await this.prisma.trip.findUnique({ where: { id: r.tripId }, select: { status: true } }) : null;
     const progress =
       trip?.status === TripStatus.STARTED ? 'in_progress' : trip?.status === TripStatus.COMPLETED ? 'completed' : trip?.status === TripStatus.CANCELLED ? 'cancelled' : null;
-    const offers = await this.prisma.transportOffer.count({ where: { requestId: r.id, status: { in: ['pending', 'accepted'] } } });
+    const offers = await this.prisma.transportOffer.count({ where: { requestId: r.id, status: { in: LIVE } } });
     return {
       id: r.id,
       status: progress ?? r.status,
