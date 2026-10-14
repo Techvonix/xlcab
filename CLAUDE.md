@@ -517,6 +517,10 @@ référence — les exigences de la Partie 8 priment.
   `formatPrice(...)` (espace insécable avant « € ») ; formulaire en liste paresseuse plus haut que l'écran de test
   → `pump(..., height:)` ; chemins de fichiers relatifs au dossier de l'appli (`../../packages/...`). `showToast`
   REMPLACE le message affiché (`removeCurrentSnackBar`) au lieu de le mettre en file.
+- Clarification du modèle (2026-10-14, `CLARIFICATION_MODELE.md`, demandée AVANT de nouvelles vidéos explicatives) :
+  régimes de transport (pro seulement au lancement, covoiturage = second produit, avis juridique), seuil de départ
+  garanti, départ ponctuel, points de rencontre / arrêts, colis sur les lignes, dashcam ; décisions D1-D13 EN ATTENTE
+  du porteur de projet. Ne rien construire ni tourner avant ses décisions.
 - Migrations : `init_xlcab` appliquée sur la base locale ; toute modification de
   `prisma/schema.prisma` demande désormais `npx prisma migrate dev --name <nom>`. Référentiel :
   `npx prisma db seed` (config FR uniquement).
