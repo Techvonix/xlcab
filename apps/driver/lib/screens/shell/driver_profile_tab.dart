@@ -11,6 +11,7 @@ import 'package:xlcab_core/services/api_service.dart';
 import 'package:xlcab_ui/theme/app_spacing.dart';
 import 'package:xlcab_ui/theme/app_typography.dart';
 import 'package:xlcab_ui/widgets/display_preferences.dart';
+import 'package:xlcab_ui/widgets/data_export.dart';
 import 'package:xlcab_ui/widgets/legal_links.dart';
 
 /// Identité du compte connecté.
@@ -71,6 +72,7 @@ class DriverProfileTab extends ConsumerWidget {
           section(l10n.informationsLegales),
           tile(Icons.privacy_tip_outlined, l10n.politiqueDeConfidentialite, () => open(privacyPolicyFor(lang))),
           tile(Icons.description_outlined, l10n.conditionsGeneralesCguCgv, () => open(termsFor(lang))),
+          const DataExportTile(),
           ListTile(
             contentPadding: EdgeInsets.zero,
             leading: const Icon(Icons.mail_outline),

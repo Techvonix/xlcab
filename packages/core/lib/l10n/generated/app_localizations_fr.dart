@@ -3769,4 +3769,23 @@ class AppLocalizationsFr extends AppLocalizations {
   String payFacturePenalite(String number, String amount, String date) {
     return 'Facture $number : $amount restent à régler avant le $date';
   }
+
+  @override
+  String get expTitre => 'Télécharger mes données';
+
+  @override
+  String get expSousTitre => 'Profil, trajets, paiements, préférences';
+
+  @override
+  String get expExplication =>
+      'Votre navigateur va télécharger un fichier avec toutes les données de votre compte : profil, trajets, paiements, préférences, contacts de confiance. Le lien est valable 5 minutes et ne sert qu’une fois. Cinq téléchargements par jour au plus.';
+
+  @override
+  String get expTelecharger => 'Télécharger';
+
+  @override
+  String get expOuvert => 'Le téléchargement a démarré dans votre navigateur.';
+
+  @override
+  String get expPreparation => 'Préparation du téléchargement';
 }

@@ -297,6 +297,12 @@ class FakeAccountService extends AccountService {
   Future<void> deleteAccount(String password) => _act('delete:$password');
 
   @override
+  Future<Uri> exportLink() async {
+    await _act('exportLink');
+    return Uri.parse('http://localhost:3000/api/v1/users/export/file?token=jeton-test');
+  }
+
+  @override
   Future<List<SavedCard>> cards() async => savedCards;
 
   @override

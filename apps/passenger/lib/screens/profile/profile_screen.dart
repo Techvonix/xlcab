@@ -9,6 +9,7 @@ import '../../widgets/driver_app_info.dart';
 import 'package:xlcab_core/services/account_service.dart';
 import 'package:xlcab_core/services/api_service.dart';
 import 'package:xlcab_ui/widgets/display_preferences.dart';
+import 'package:xlcab_ui/widgets/data_export.dart';
 import 'package:xlcab_ui/widgets/legal_links.dart';
 import 'package:xlcab_ui/theme/app_colors.dart';
 
@@ -89,6 +90,7 @@ class ProfileScreen extends ConsumerWidget {
           section(l10n.informationsLegales),
           tile(Icons.privacy_tip_outlined, l10n.politiqueDeConfidentialite, () => _open(context, ref, privacyPolicyFor(Localizations.localeOf(context).languageCode))),
           tile(Icons.description_outlined, l10n.conditionsGeneralesCguCgv, () => _open(context, ref, termsFor(Localizations.localeOf(context).languageCode))),
+          const DataExportTile(),
           ListTile(
             contentPadding: EdgeInsets.zero,
             leading: const Icon(Icons.mail_outline),

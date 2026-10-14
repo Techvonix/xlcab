@@ -2168,5 +2168,11 @@
         "type": "String"
       }
     }
-  }
+  },
+  "expTitre": "Télécharger mes données",
+  "expSousTitre": "Profil, trajets, paiements, préférences",
+  "expExplication": "Votre navigateur va télécharger un fichier avec toutes les données de votre compte : profil, trajets, paiements, préférences, contacts de confiance. Le lien est valable 5 minutes et ne sert qu’une fois. Cinq téléchargements par jour au plus.",
+  "expTelecharger": "Télécharger",
+  "expOuvert": "Le téléchargement a démarré dans votre navigateur.",
+  "expPreparation": "Préparation du téléchargement"
 }

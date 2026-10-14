@@ -28,6 +28,15 @@ class AccountService {
   Future<void> deleteAccount(String password) =>
       _guard(() => _dio.delete<void>('/api/v1/users/me', data: {'password': password}));
 
+  /// Droit d'accès : lien de téléchargement de l'export (5 minutes, usage unique), à ouvrir dans le navigateur.
+  Future<Uri> exportLink() => _guard(() async {
+        final res = await _dio.post<Map<String, dynamic>>('/api/v1/users/me/export/link');
+        final url = Uri.tryParse(res.data?['url'] is String ? res.data!['url'] as String : '');
+        // Jamais autre chose qu'une adresse web, quoi que réponde le serveur.
+        if (url == null || !const {'https', 'http'}.contains(url.scheme) || url.host.isEmpty) throw const FormatException('lien');
+        return url;
+      });
+
   Future<List<SavedCard>> cards() => _guard(() async {
         final res = await _dio.get<List<dynamic>>('/api/v1/payments/methods');
         return (res.data ?? const []).map(SavedCard.fromJson).whereType<SavedCard>().toList();

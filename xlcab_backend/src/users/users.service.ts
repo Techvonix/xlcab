@@ -28,7 +28,9 @@ export interface AuditCtx {
 
 /** Même durée que l'access token (Module 2) : la blacklist couvre sa vie restante. */
 const ACCESS_TOKEN_TTL_SECONDS = 15 * 60;
-const EXPORTS_PER_DAY = 5;
+export const EXPORTS_PER_DAY = 5;
+/** Compteur d'exports du jour (partagé avec le lien de téléchargement de l'app). */
+export const exportRateKey = (userId: string) => `users:export:rate:${userId}`;
 
 // Courses qui empêchent la suppression : une réservation à venir ou en
 // cours doit d'abord être annulée (remboursement selon les CGV) ou terminée.
@@ -94,7 +96,7 @@ export class UsersService {
    * en JSON. Jamais de secret (mot de passe, clés Stripe, QR, jetons).
    */
   async export(user: RequestUser, ctx: AuditCtx) {
-    const key = `users:export:rate:${user.sub}`;
+    const key = exportRateKey(user.sub);
     const count = await this.redis.incr(key);
     if (count === 1) await this.redis.expire(key, 24 * 3600);
     if (count > EXPORTS_PER_DAY) {

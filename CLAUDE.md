@@ -72,8 +72,14 @@ référence — les exigences de la Partie 8 priment.
   — URLs à confirmer par XLCAB —, version `APP_VERSION`, suppression du compte),
   `trip_history_screen.dart` (paginé, détail = écran 8), `payment_methods_screen.dart` (cartes Stripe,
   ajout via `PaymentSheetPresenter.presentSetup`). Thème mémorisé dans Hive (boîte `prefs`,
-  `PreferencesStore`, écrit par `app.dart`). Photo de profil, adresses favorites et export dans
-  l'app non faits.
+  `PreferencesStore`, écrit par `app.dart`). Photo de profil non faite. Export RGPD dans les DEUX applis
+  (2026-10-14) : `src/users/export-link.ts` — `POST /users/me/export/link` (quota du jour vérifié AVANT, pour
+  que le 429 s'affiche dans l'app) renvoie un lien `GET /users/export/file?token=` de 5 min, À USAGE UNIQUE
+  (nonce dans Redis `users:export:link:{nonce}`), jeton `{userId}.{expiration}.{nonce}.{HMAC}` (clé dérivée de
+  JWT_SECRET, rien en base), fichier `xlcab-mes-donnees-AAAA-MM-JJ.json` en pièce jointe, no-store ; compte
+  supprimé = 401. App : `AccountService.exportLink()`, tuile partagée `xlcab_ui/widgets/data_export.dart`
+  (`DataExportTile` : explication, puis navigateur via `legalLinkOpenerProvider`) dans le Compte passager et le
+  Profil chauffeur. Clés ARB `exp*`.
 - Module Colis (`src/parcels/`, décisions du porteur de projet) : chaque colis a sa propre course
   (`Trip.type = 'parcel'`, expéditeur = `passengerId`, prépaiement Stripe) + `ParcelBooking`
   (QR d'enlèvement, `deliveryCode` à 4 chiffres connu du seul expéditeur, photo de remise obligatoire,

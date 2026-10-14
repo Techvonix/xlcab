@@ -122,6 +122,80 @@ describe('Users (intégration)', () => {
       for (let i = 0; i < 5; i++) await http().get('/api/v1/users/me/export').set('Authorization', as('p1'));
       expect((await http().get('/api/v1/users/me/export').set('Authorization', as('p1'))).status).toBe(429);
     });
+
+    describe('depuis l’application : lien de téléchargement', () => {
+      const link = async (auth = as('p1')) => http().post('/api/v1/users/me/export/link').set('Authorization', auth);
+      /** Chemin et requête du lien renvoyé (l'adresse de base dépend du serveur de test). */
+      const pathOf = (url: string) => {
+        const u = new URL(url);
+        return `${u.pathname}${u.search}`;
+      };
+
+      it('lien de 5 minutes, puis fichier JSON téléchargeable sans en-tête d’authentification', async () => {
+        const res = await link();
+        expect(res.status).toBe(200);
+        expect(res.body.url).toMatch(/\/api\/v1\/users\/export\/file\?token=/);
+        const ttl = new Date(res.body.expiresAt).getTime() - Date.now();
+        expect(ttl).toBeGreaterThan(4 * 60_000);
+        expect(ttl).toBeLessThanOrEqual(5 * 60_000);
+
+        const file = await http().get(pathOf(res.body.url));
+        expect(file.status).toBe(200);
+        expect(file.headers['content-type']).toMatch(/application\/json/);
+        expect(file.headers['content-disposition']).toMatch(/^attachment; filename="xlcab-mes-donnees-\d{4}-\d{2}-\d{2}\.json"$/);
+        expect(file.headers['cache-control']).toBe('no-store');
+        const data = JSON.parse(file.text);
+        expect(data.profile).toMatchObject({ id: 'p1' });
+        expect(file.text).not.toContain('passwordHash');
+        expect(db.auditLog.rows.some((l: any) => l.action === 'user.export' && l.userId === 'p1')).toBe(true);
+      });
+
+      it('le lien ne sert qu’une fois (il reste dans l’historique du navigateur)', async () => {
+        const { body } = await link();
+        expect((await http().get(pathOf(body.url))).status).toBe(200);
+        const again = await http().get(pathOf(body.url));
+        expect(again.status).toBe(401);
+        expect(again.text).not.toContain('"profile"');
+      });
+
+      it('lien expiré, falsifié ou absent : refusé, rien n’est exporté', async () => {
+        const { body } = await link();
+        const token = new URL(body.url).searchParams.get('token')!;
+        const [uid, expires, nonce, sig] = token.split('.');
+        const get = (t: string) => http().get(`/api/v1/users/export/file?token=${encodeURIComponent(t)}`);
+        // Échéance repoussée à la main : la signature ne correspond plus.
+        expect((await get(`${uid}.${Number(expires) + 3_600_000}.${nonce}.${sig}`)).status).toBe(401);
+        // Lien d'un autre compte fabriqué avec la signature du mien.
+        expect((await get(`p2.${expires}.${nonce}.${sig}`)).status).toBe(401);
+        expect((await get('nimporte-quoi')).status).toBe(401);
+        expect((await http().get('/api/v1/users/export/file')).status).toBe(401);
+        expect(db.auditLog.rows.filter((l: any) => l.action === 'user.export')).toHaveLength(0);
+        // Le vrai lien, lui, fonctionne toujours (les refus ne l'ont pas consommé).
+        expect((await get(token)).status).toBe(200);
+      });
+
+      it('lien périmé au bout de 5 minutes', async () => {
+        const { body } = await link();
+        const realNow = Date.now;
+        Date.now = () => realNow() + 6 * 60_000;
+        try {
+          expect((await http().get(pathOf(body.url))).status).toBe(401);
+        } finally {
+          Date.now = realNow;
+        }
+      });
+
+      it('quota du jour atteint : refusé dès la demande de lien (message affiché dans l’app)', async () => {
+        for (let i = 0; i < 5; i++) await http().get('/api/v1/users/me/export').set('Authorization', as('p1'));
+        const res = await link();
+        expect(res.status).toBe(429);
+        expect(res.body.message).toBe('Trop d’exports aujourd’hui — réessayez demain');
+      });
+
+      it('demande de lien réservée au titulaire du compte connecté', async () => {
+        expect((await http().post('/api/v1/users/me/export/link')).status).toBe(401);
+      });
+    });
   });
 
   describe('suppression (droit à l’effacement)', () => {

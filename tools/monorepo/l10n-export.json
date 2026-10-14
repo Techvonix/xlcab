@@ -1,0 +1,11 @@
+{
+  "expTitre": { "fr": "Télécharger mes données", "en": "Download my data" },
+  "expSousTitre": { "fr": "Profil, trajets, paiements, préférences", "en": "Profile, trips, payments, preferences" },
+  "expExplication": {
+    "fr": "Votre navigateur va télécharger un fichier avec toutes les données de votre compte : profil, trajets, paiements, préférences, contacts de confiance. Le lien est valable 5 minutes et ne sert qu’une fois. Cinq téléchargements par jour au plus.",
+    "en": "Your browser will download a file with all your account data: profile, trips, payments, preferences, trusted contacts. The link is valid for 5 minutes and works only once. Five downloads per day at most."
+  },
+  "expTelecharger": { "fr": "Télécharger", "en": "Download" },
+  "expOuvert": { "fr": "Le téléchargement a démarré dans votre navigateur.", "en": "The download has started in your browser." },
+  "expPreparation": { "fr": "Préparation du téléchargement", "en": "Preparing the download" }
+}

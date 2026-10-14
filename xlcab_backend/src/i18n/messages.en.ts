@@ -534,6 +534,7 @@ export const MESSAGES_EN: Record<string, string> = {
   'Carte non autorisée : validez le paiement pour confirmer votre choix': 'Card not authorised: complete the payment to confirm your choice',
   'Votre carte n’a pas pu être débitée : choisissez de nouveau une proposition.': 'Your card could not be charged: please choose an offer again.',
   'Reversement introuvable': 'Payout not found',
+  'Lien expiré ou déjà utilisé : relancez le téléchargement depuis l’application': 'Link expired or already used: start the download again from the app',
   'Montant en centimes': 'Amount in cents',
   'Référence du paiement : 3 caractères minimum': 'Payment reference: at least 3 characters',
   'Référence du paiement limitée à 120 caractères': 'Payment reference limited to 120 characters',

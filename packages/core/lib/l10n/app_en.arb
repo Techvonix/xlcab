@@ -1057,5 +1057,11 @@
   "payBonus": "Rescue bonuses",
   "payBonusAide": "For a departure you saved. The bonus is paid as soon as the replaced driver’s penalty has been recovered.",
   "payBonusEnAttente": "Waiting for the penalty to be recovered",
-  "payFacturePenalite": "Invoice {number}: {amount} still to pay by {date}"
+  "payFacturePenalite": "Invoice {number}: {amount} still to pay by {date}",
+  "expTitre": "Download my data",
+  "expSousTitre": "Profile, trips, payments, preferences",
+  "expExplication": "Your browser will download a file with all your account data: profile, trips, payments, preferences, trusted contacts. The link is valid for 5 minutes and works only once. Five downloads per day at most.",
+  "expTelecharger": "Download",
+  "expOuvert": "The download has started in your browser.",
+  "expPreparation": "Preparing the download"
 }

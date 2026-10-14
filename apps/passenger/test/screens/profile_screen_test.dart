@@ -178,6 +178,37 @@ void main() {
     });
   });
 
+  group('télécharger mes données (RGPD)', () {
+    testWidgets('explication, puis lien ouvert dans le navigateur', (tester) async {
+      await pump(tester);
+      await tap(tester, find.text('Télécharger mes données'));
+      expect(find.textContaining('valable 5 minutes'), findsOneWidget);
+      expect(account.calls, isEmpty); // rien n'est demandé avant la confirmation
+
+      await tap(tester, find.widgetWithText(FilledButton, 'Télécharger'));
+      expect(account.calls, ['exportLink']);
+      expect(opened.single.toString(), 'http://localhost:3000/api/v1/users/export/file?token=jeton-test');
+      expect(find.text('Le téléchargement a démarré dans votre navigateur.'), findsOneWidget);
+    });
+
+    testWidgets('« Annuler » ne demande rien au serveur', (tester) async {
+      await pump(tester);
+      await tap(tester, find.text('Télécharger mes données'));
+      await tap(tester, find.text('Annuler'));
+      expect(account.calls, isEmpty);
+      expect(opened, isEmpty);
+    });
+
+    testWidgets('quota du jour atteint : message du serveur, rien n’est ouvert', (tester) async {
+      account.nextError = const ApiException('Trop d’exports aujourd’hui — réessayez demain');
+      await pump(tester);
+      await tap(tester, find.text('Télécharger mes données'));
+      await tap(tester, find.widgetWithText(FilledButton, 'Télécharger'));
+      expect(find.text('Trop d’exports aujourd’hui — réessayez demain'), findsOneWidget);
+      expect(opened, isEmpty);
+    });
+  });
+
   group('suppression du compte', () {
     Future<void> openDialog(WidgetTester tester) async {
       await pump(tester);

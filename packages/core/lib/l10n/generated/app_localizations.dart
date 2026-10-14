@@ -6446,6 +6446,42 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Facture {number} : {amount} restent à régler avant le {date}'**
   String payFacturePenalite(String number, String amount, String date);
+
+  /// No description provided for @expTitre.
+  ///
+  /// In fr, this message translates to:
+  /// **'Télécharger mes données'**
+  String get expTitre;
+
+  /// No description provided for @expSousTitre.
+  ///
+  /// In fr, this message translates to:
+  /// **'Profil, trajets, paiements, préférences'**
+  String get expSousTitre;
+
+  /// No description provided for @expExplication.
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre navigateur va télécharger un fichier avec toutes les données de votre compte : profil, trajets, paiements, préférences, contacts de confiance. Le lien est valable 5 minutes et ne sert qu’une fois. Cinq téléchargements par jour au plus.'**
+  String get expExplication;
+
+  /// No description provided for @expTelecharger.
+  ///
+  /// In fr, this message translates to:
+  /// **'Télécharger'**
+  String get expTelecharger;
+
+  /// No description provided for @expOuvert.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le téléchargement a démarré dans votre navigateur.'**
+  String get expOuvert;
+
+  /// No description provided for @expPreparation.
+  ///
+  /// In fr, this message translates to:
+  /// **'Préparation du téléchargement'**
+  String get expPreparation;
 }
 
 class _AppLocalizationsDelegate
