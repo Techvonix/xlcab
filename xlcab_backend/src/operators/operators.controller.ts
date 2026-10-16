@@ -95,6 +95,13 @@ export class OperatorsController {
   updateDeparture(@Req() req: any, @Param('id', ParseUUIDPipe) id: string, @Body() dto: UpdateDepartureDto) {
     return this.lines.setDepartureClosed(req.user.sub, id, dto.closed);
   }
+
+  /** « Je pars quand même » : départ garanti sans attendre le seuil. */
+  @Post('departures/:id/guarantee')
+  @HttpCode(HttpStatus.OK)
+  guarantee(@Req() req: any, @Param('id', ParseUUIDPipe) id: string) {
+    return this.lines.guarantee(req.user.sub, id);
+  }
 }
 
 /** Recherche de départs de lignes régulières : tout compte connecté. */

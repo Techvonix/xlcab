@@ -543,6 +543,8 @@ export class PaymentsService {
     if (driverId) {
       await this.notifications.notify(driverId, 'line.new_booking', 'Nouvelle réservation', 'Un passager a réservé sur votre ligne.', { departureId });
     }
+    // Seuil de départ : ce paiement l'a peut-être atteint (« Départ confirmé »).
+    await this.lines?.guaranteeIfReached(departureId, now);
   }
 
   /** Rend à la vente les places (et sièges numérotés) d'une réservation de ligne abandonnée. */

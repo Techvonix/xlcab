@@ -169,6 +169,8 @@ export class LineBookingsService {
       await this.audit.log({
         userId, action: 'line.book', entity: 'Trip', entityId: trip.id, metadata: { departureId: departure.id, seats: dto.seats, totalCents: total },
       });
+      // Seuil de départ : cette réservation l'a peut-être atteint (« Départ confirmé »).
+      await this.lines.guaranteeIfReached(departure.id, now);
       return {
         tripId: trip.id,
         status: TripStatus.ACCEPTED,
@@ -177,6 +179,7 @@ export class LineBookingsService {
         seatNumbers: trip.seatNumbers,
         totalPriceCents: total,
         paymentMode: 'deferred',
+        guarantee: await this.lines.guaranteeById(departure.id),
       };
     } catch (err) {
       // Course non créée : les places retenues sont rendues.
@@ -217,6 +220,7 @@ export class LineBookingsService {
       totalPriceCents: total,
       paymentMode: 'connect',
       payment,
+      guarantee: await this.lines.guaranteeById(departure.id),
     };
   }
 
@@ -307,6 +311,7 @@ export class LineBookingsService {
         started: active.some((t) => t.status === TripStatus.STARTED),
         ready: d.driverReadyAt !== null,
         rescued: d.rescueStatus === 'rescued',
+        guarantee: await this.lines.guaranteeOf(d, line),
       });
     }
     return result;
@@ -337,6 +342,7 @@ export class LineBookingsService {
       destination: outbound ? line.destinationAddress : line.originAddress,
       ready: departure.driverReadyAt !== null,
       seatsBooked: trips.reduce((n, t) => n + (t.passengerBooking?.seats ?? 0), 0),
+      guarantee: await this.lines.guaranteeOf(departure, line),
       passengers: trips.map((t) => {
         const u = users.find((x) => x.id === t.passengerId);
         return {

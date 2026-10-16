@@ -564,4 +564,24 @@ export const MESSAGES_EN: Record<string, string> = {
     '€{} was withheld from your earnings for a cancellation penalty. It is now settled.',
   'Réservation annulée': 'Booking cancelled',
   'Ce départ n’est plus disponible : vous êtes remboursé intégralement.': 'This departure is no longer available: you are refunded in full.',
+
+  // Seuil de départ garanti (2026-10-14)
+  'Seuil de départ : entre 1 et le nombre de places': 'Departure threshold: between 1 and the number of seats',
+  'Le seuil de départ ne s’applique qu’à la vente à la place': 'The departure threshold only applies to per-seat sales',
+  'Départ annulé faute de passagers : il ne peut pas être rouvert': 'Departure cancelled for lack of passengers: it cannot be reopened',
+  'Confirmez d’abord ce départ pour le mettre en vente': 'Confirm this departure first to put it on sale',
+  'Départ confirmé': 'Departure confirmed',
+  'Votre départ de {} aura lieu : le chauffeur est engagé.': 'Your {} departure will run: the driver is committed.',
+  'Top départ': 'Go for departure',
+  'Seuil atteint : {} passagers pour votre départ de {}. Votre départ est confirmé.':
+    'Threshold reached: {} passengers for your {} departure. Your departure is confirmed.',
+  'Départ non confirmé': 'Departure not confirmed',
+  'Départ non confirmé : nombre minimum de passagers non atteint': 'Departure not confirmed: minimum number of passengers not reached',
+  'Départ retiré par le chauffeur avant d’être confirmé': 'Departure withdrawn by the driver before being confirmed',
+  'Le départ de {} n’a pas réuni assez de passagers : votre réservation est annulée et intégralement remboursée. D’autres départs vous attendent dans « Trouver une place ».':
+    'The {} departure did not gather enough passengers: your booking is cancelled and fully refunded. Other departures are waiting for you in “Find a seat”.',
+  'Le chauffeur a retiré le départ de {} avant qu’il soit confirmé : votre réservation est annulée et intégralement remboursée.':
+    'The driver withdrew the {} departure before it was confirmed: your booking is cancelled and fully refunded.',
+  'Seuil non atteint pour votre départ de {} : il est annulé et les passagers sont remboursés. Aucune pénalité.':
+    'Threshold not reached for your {} departure: it is cancelled and passengers are refunded. No penalty.',
 };

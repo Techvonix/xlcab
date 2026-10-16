@@ -8,6 +8,7 @@ import { InvoicesService } from '../invoices/invoices.service';
 import { ComplianceReport, ComplianceService } from '../compliance/compliance.service';
 import { LinesService } from '../operators/lines.service';
 import { RescueService } from '../line-bookings/rescue.service';
+import { DepartureThresholdService } from '../line-bookings/departure-threshold';
 import { MarketService } from '../market/market.service';
 import { TripPayoutsService } from '../payouts/trip-payouts';
 
@@ -33,6 +34,8 @@ export interface TickReport {
   market: Awaited<ReturnType<MarketService['tick']>> | null;
   /** Reversements aux opérateurs repris à ce tour (virés, en attente de compte, en échec). */
   payouts: Awaited<ReturnType<TripPayoutsService['tick']>> | null;
+  /** Seuil de départ garanti : départs non confirmés à l'échéance, annulés et remboursés. */
+  thresholds: Awaited<ReturnType<DepartureThresholdService['tick']>> | null;
 }
 
 /**
@@ -69,6 +72,7 @@ export class SchedulerService implements OnApplicationBootstrap, OnModuleDestroy
     @Optional() private rescue?: RescueService,
     @Optional() private market?: MarketService,
     @Optional() private payouts?: TripPayoutsService,
+    @Optional() private thresholds?: DepartureThresholdService,
   ) {}
 
   onApplicationBootstrap() {
@@ -144,6 +148,16 @@ export class SchedulerService implements OnApplicationBootstrap, OnModuleDestroy
       }
     }
 
+    // Seuil de départ garanti : départs de ligne non confirmés à l'échéance.
+    let thresholds: TickReport['thresholds'] = null;
+    if (this.thresholds) {
+      try {
+        thresholds = await this.thresholds.tick(now);
+      } catch (err) {
+        this.logger.error(`Seuils de départ des lignes en échec : ${(err as Error).message}`);
+      }
+    }
+
     // Bourse : propositions et demandes arrivées à échéance.
     let market: TickReport['market'] = null;
     if (this.market) {
@@ -176,7 +190,7 @@ export class SchedulerService implements OnApplicationBootstrap, OnModuleDestroy
     }
 
     return {
-      expiredBookings, dispatchStarted: dispatch.started, dispatchRetried: dispatch.retried, strandedParcels, monthlyInvoices, compliance, linesSynced, rescue, market, payouts,
+      expiredBookings, dispatchStarted: dispatch.started, dispatchRetried: dispatch.retried, strandedParcels, monthlyInvoices, compliance, linesSynced, rescue, market, payouts, thresholds,
     };
   }
 }

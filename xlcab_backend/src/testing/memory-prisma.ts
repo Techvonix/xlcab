@@ -208,12 +208,13 @@ export function memoryPrisma() {
     })),
     recurringLine: new Table(() => ({
       pickupRadiusKm: 5, returnTime: null, timezone: 'Europe/Paris', jurisdiction: 'FR', endDate: null, durationMin: null,
-      conditions: null, status: 'active', closedAt: null, createdAt: new Date(), updatedAt: new Date(),
+      conditions: null, minPassengers: null, status: 'active', closedAt: null, createdAt: new Date(), updatedAt: new Date(),
     })),
     lineException: new Table(() => ({ seats: null, reason: null })),
     lineDeparture: new Table(() => ({
       direction: 'outbound', seatsBooked: 0, status: 'to_confirm', confirmedAt: null, createdAt: new Date(),
       driverId: null, vehicleId: null, driverReadyAt: null, rescueStatus: 'none', rescueStage: null,
+      minPassengers: null, guaranteedAt: null, thresholdMissedAt: null,
     })),
     lineBackup: new Table(() => ({ status: 'invited', vehicleId: null, respondedAt: null, createdAt: new Date() })),
     rescueOffer: new Table(() => ({ status: 'pending', vehicleId: null, respondedAt: null, createdAt: new Date() })),
@@ -264,7 +265,7 @@ export function memoryPrisma() {
   );
   db.$transaction = async (fn: (tx: Row) => Promise<unknown>) => fn(db);
   db.jurisdictionConfig.rows.push({
-    code: 'FR', minTripKm: 60, vatPassengerRate: 0, vatParcelRate: 20, currency: 'EUR', requiresVtcCard: true,
+    code: 'FR', minTripKm: 60, vatPassengerRate: 0, vatParcelRate: 20, currency: 'EUR', requiresVtcCard: true, lineThresholdDeadlineHours: 24,
   });
   return db;
 }

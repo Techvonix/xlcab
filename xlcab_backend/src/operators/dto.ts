@@ -137,6 +137,16 @@ export class UpdateLineDto {
   @Max(1_000_000, { message: 'Prix invalide' })
   priceCents?: number;
 
+  /**
+   * Seuil de départ garanti : « je pars d'office dès N passagers » (vente à la
+   * place seulement). null = sans seuil.
+   */
+  @IsOptional()
+  @IsInt()
+  @Min(1, { message: 'Seuil de départ : entre 1 et le nombre de places' })
+  @Max(60, { message: 'Seuil de départ : entre 1 et le nombre de places' })
+  minPassengers?: number | null;
+
   @IsOptional()
   @IsInt()
   @Min(5, { message: 'Durée invalide' })
@@ -224,6 +234,16 @@ export class CreateLineDto {
   @Min(100, { message: 'Prix invalide' })
   @Max(1_000_000, { message: 'Prix invalide' })
   priceCents!: number;
+
+  /**
+   * Seuil de départ garanti : « je pars d'office dès N passagers » (vente à la
+   * place seulement). Absent = départ garanti dès sa confirmation.
+   */
+  @IsOptional()
+  @IsInt()
+  @Min(1, { message: 'Seuil de départ : entre 1 et le nombre de places' })
+  @Max(60, { message: 'Seuil de départ : entre 1 et le nombre de places' })
+  minPassengers?: number;
 
   @IsOptional()
   @IsInt()

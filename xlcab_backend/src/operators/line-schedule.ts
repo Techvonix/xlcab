@@ -28,6 +28,7 @@ export interface LineSchedule {
   seats: number;
   priceCents: number;
   pricingMode: string;
+  minPassengers: number | null;
 }
 
 export interface PlannedDeparture {
@@ -37,6 +38,7 @@ export interface PlannedDeparture {
   seatsTotal: number;
   priceCents: number;
   pricingMode: string;
+  minPassengers: number | null;
 }
 
 /** Clé unique d'un départ dans une ligne (même contrainte qu'en base). */
@@ -61,7 +63,9 @@ export function plannedDepartures(
     if (exception === null) continue; // jour fermé
     const seatsTotal = exception === undefined ? line.seats : Math.min(line.seats, exception);
     if (seatsTotal <= 0) continue;
-    const base = { localDate: day, seatsTotal, priceCents: line.priceCents, pricingMode: line.pricingMode };
+    // Seuil plafonné à la capacité du jour (jour à capacité réduite).
+    const minPassengers = line.minPassengers === null ? null : Math.min(line.minPassengers, seatsTotal);
+    const base = { localDate: day, seatsTotal, priceCents: line.priceCents, pricingMode: line.pricingMode, minPassengers };
     out.push({ ...base, direction: 'outbound', departureAt: zonedToUtc(day, line.departureTime, line.timezone) });
     if (line.returnTime) {
       out.push({ ...base, direction: 'return', departureAt: zonedToUtc(day, line.returnTime, line.timezone) });
@@ -81,6 +85,12 @@ export function bookable(d: { seatsTotal: number; seatsBooked: number; pricingMo
 /** Prix TTC d'une demande : par place, ou le véhicule entier. */
 export const priceFor = (d: { priceCents: number; pricingMode: string }, seats: number) =>
   d.pricingMode === 'per_seat' ? d.priceCents * seats : d.priceCents;
+
+/** Heures avant le départ où un seuil non atteint annule le départ (défaut ; réglable par pays). */
+export const DEFAULT_THRESHOLD_DEADLINE_HOURS = 24;
+
+/** Échéance du seuil d'un départ. */
+export const thresholdDeadline = (departureAt: Date, hours: number) => new Date(departureAt.getTime() - hours * 3600_000);
 
 /**
  * Version des conditions générales opérateur (protocole d'annulation,

@@ -328,6 +328,10 @@ model JurisdictionConfig {
   requiresVtcCard                   Boolean @default(false)
   minTripKm                         Int     @default(0)
   financialGuaranteePerVehicleCents Int?
+  // Seuil de départ garanti (CLARIFICATION_MODELE.md, D3) : un départ de ligne
+  // qui n'a pas atteint son seuil ce nombre d'heures avant l'heure de départ
+  // est annulé sans frais et remboursé. Réglable par pays.
+  lineThresholdDeadlineHours        Int     @default(24)
   currency                          String  @default("EUR")
   leadDpa                           String?
   legalTexts                        Json?
@@ -612,6 +616,9 @@ model RecurringLine {
   pricingMode        String // per_vehicle|per_seat
   priceCents         Int // TTC : par place ou pour le véhicule
   durationMin        Int?
+  // Seuil de départ garanti : « je pars d'office dès N passagers » (vente à la
+  // place seulement ; null = départ garanti dès sa confirmation).
+  minPassengers      Int?
   conditions         String?
   status             String    @default("active") // active|paused|closed
   createdAt          DateTime  @default(now())
@@ -649,6 +656,15 @@ model LineDeparture {
   status      String    @default("to_confirm") // to_confirm|open|closed
   confirmedAt DateTime?
   createdAt   DateTime  @default(now())
+
+  // Seuil de départ garanti (copié de la ligne, figé dès la 1re réservation).
+  // guaranteedAt : seuil atteint ou départ confirmé par le chauffeur (« top
+  // départ ») ; à partir de là l'engagement est ferme (secours, pénalités).
+  // thresholdMissedAt : seuil non atteint à l'échéance, ou désistement avant
+  // le seuil : réservations annulées sans frais et remboursées.
+  minPassengers     Int?
+  guaranteedAt      DateTime?
+  thresholdMissedAt DateTime?
 
   // Chauffeur et véhicule qui assurent ce départ (null = titulaire de la
   // ligne) ; changent quand un secours reprend le départ.

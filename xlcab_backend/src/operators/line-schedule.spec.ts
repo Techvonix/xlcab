@@ -1,5 +1,5 @@
 import { addDays, isoWeekday, localDateOf, localTimeOf, zonedToUtc } from '../common/local-time';
-import { LineSchedule, bookable, plannedDepartures, priceFor } from './line-schedule';
+import { LineSchedule, bookable, plannedDepartures, priceFor, thresholdDeadline } from './line-schedule';
 
 // Calendrier des lignes régulières : heures locales (changement d'heure),
 // jours d'exploitation, exceptions, retour, capacité vendable.
@@ -16,6 +16,7 @@ const beauvais: LineSchedule = {
   seats: 8,
   priceCents: 2500,
   pricingMode: 'per_seat',
+  minPassengers: null,
 };
 
 describe('heure locale', () => {
@@ -68,6 +69,17 @@ describe('départs prévus', () => {
       ['2026-10-21', 3],
       ['2026-10-22', 8],
     ]);
+  });
+
+  it('seuil de départ copié sur chaque départ, plafonné à la capacité du jour', () => {
+    const exceptions = new Map<string, number | null>([['2026-10-20', 3]]);
+    const deps = plannedDepartures({ ...beauvais, minPassengers: 5 }, exceptions, '2026-10-19', '2026-10-20');
+    expect(deps.map((d) => [d.localDate, d.seatsTotal, d.minPassengers])).toEqual([
+      ['2026-10-19', 8, 5],
+      ['2026-10-20', 3, 3],
+    ]);
+    expect(plannedDepartures(beauvais, new Map(), '2026-10-19', '2026-10-19')[0].minPassengers).toBeNull();
+    expect(thresholdDeadline(new Date('2026-10-20T03:00:00Z'), 24)).toEqual(new Date('2026-10-19T03:00:00Z'));
   });
 
   it('ligne avec retour : un départ par sens et par jour', () => {

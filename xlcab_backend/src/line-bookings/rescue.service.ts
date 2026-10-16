@@ -10,6 +10,7 @@ import { NotificationsService } from '../notifications/notifications.service';
 import { PaymentsService } from '../payments/payments.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { RedisService } from '../redis/redis.service';
+import { DepartureThresholdService } from './departure-threshold';
 import { InviteBackupDto } from './dto';
 import { assignedDriver } from './line-bookings.service';
 import {
@@ -74,6 +75,7 @@ export class RescueService {
     private audit: AuditService,
     // Optionnel : certains tests construisent ce service sans facturation.
     @Optional() private invoices?: InvoicesService,
+    @Optional() private threshold?: DepartureThresholdService,
   ) {}
 
   // ── Chauffeurs de réserve ───────────────────────────────────────────
@@ -184,6 +186,12 @@ export class RescueService {
     const started = await this.prisma.trip.count({ where: { lineDepartureId: departureId, status: TripStatus.STARTED } });
     if (started > 0) throw new ConflictException('Course en cours : terminez-la ou contactez le support');
 
+    // Départ à seuil pas encore garanti : le chauffeur ne s'était pas engagé.
+    // Réservations annulées sans frais et remboursées, sans secours ni pénalité.
+    if (departure.minPassengers !== null && departure.minPassengers !== undefined && !departure.guaranteedAt && this.threshold) {
+      const cancelled = await this.threshold.release(departure, line, 'driver_withdrew', now);
+      return { departureId, rescue: false, released: true, cancelledBookings: cancelled ?? 0 };
+    }
     if ((await this.passengerSeats(departureId)) === 0) {
       // Personne à transporter : le départ est simplement fermé à la vente.
       await this.prisma.lineDeparture.update({ where: { id: departureId }, data: { status: 'closed' } });

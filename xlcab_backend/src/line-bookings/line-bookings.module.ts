@@ -9,6 +9,7 @@ import { AdminLineProtocolController } from './admin-line-protocol.controller';
 import { LineBookingsController, LineOperationsController } from './line-bookings.controller';
 import { LineBookingsService } from './line-bookings.service';
 import { RescueService } from './rescue.service';
+import { DepartureThresholdService } from './departure-threshold';
 
 // Bourse, étape 2 : réservations sur les lignes régulières et protocole
 // d'annulation chauffeur. RescueService est exporté pour le planificateur
@@ -21,7 +22,7 @@ import { RescueService } from './rescue.service';
   // InvoicesModule : facture du solde d'une pénalité non recouvrée.
   imports: [OperatorsModule, TripsModule, MatchingModule, PaymentsModule, TwoFactorModule, InvoicesModule],
   controllers: [LineBookingsController, LineOperationsController, AdminLineProtocolController],
-  providers: [LineBookingsService, RescueService],
-  exports: [LineBookingsService, RescueService],
+  providers: [LineBookingsService, RescueService, DepartureThresholdService],
+  exports: [LineBookingsService, RescueService, DepartureThresholdService],
 })
 export class LineBookingsModule {}

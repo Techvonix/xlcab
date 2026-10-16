@@ -1,7 +1,8 @@
-import { BadRequestException, ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, ForbiddenException, Injectable, NotFoundException, Optional } from '@nestjs/common';
 import { LineDeparture, RecurringLine } from '@prisma/client';
 import { AuditService } from '../audit/audit.service';
 import { TIMEZONES, addDays, localDateOf, localTimeOf, minutesOf } from '../common/local-time';
+import { NotificationsService } from '../notifications/notifications.service';
 import { haversineKm } from '../parcels/parcels.constants';
 import { PayoutAccountsService } from '../payouts/payout-accounts';
 import { PrismaService } from '../prisma/prisma.service';
@@ -15,6 +16,7 @@ import {
   UpdateLineDto,
 } from './dto';
 import {
+  DEFAULT_THRESHOLD_DEADLINE_HOURS,
   LINE_BOOKING_LEAD_MIN,
   LINE_HORIZON_DAYS,
   MAX_LINES_PER_OPERATOR,
@@ -24,10 +26,25 @@ import {
   operatorTermsVersion,
   plannedDepartures,
   priceFor,
+  thresholdDeadline,
 } from './line-schedule';
 
 type Line = RecurringLine;
 type Departure = LineDeparture;
+
+/** Courses qui comptent pour le seuil : payées (ou confirmées sans paiement en ligne). */
+const SEATED = ['accepted', 'started'];
+const THRESHOLD_CACHE_MS = 60_000;
+
+/** État du seuil de départ garanti d'un départ, tel que l'affichent les applis. */
+export interface DepartureGuarantee {
+  minPassengers: number | null;
+  guaranteed: boolean;
+  guaranteedAt: Date | null;
+  missed: boolean;
+  /** Échéance : sans seuil atteint à cette heure, départ annulé et remboursé. */
+  deadline: Date | null;
+}
 
 /** Écart par défaut autour de l'heure demandée dans la recherche. */
 const DEFAULT_FLEX_MIN = 180;
@@ -56,10 +73,14 @@ const round1 = (km: number) => Math.round(km * 10) / 10;
  */
 @Injectable()
 export class LinesService {
+  private thresholdHoursCache = new Map<string, { hours: number; at: number }>();
+
   constructor(
     private prisma: PrismaService,
     private audit: AuditService,
     private payouts: PayoutAccountsService,
+    // Optionnel : le script de démo construit ce service sans notifications.
+    @Optional() private notifications?: NotificationsService,
   ) {}
 
   // ── Profil opérateur ────────────────────────────────────────────────
@@ -144,6 +165,7 @@ export class LinesService {
     const today = localDateOf(now, timezone);
     if (dto.startDate < today) throw new BadRequestException('La date de début ne peut pas être passée');
     checkSchedule({ ...dto, returnTime: dto.returnTime ?? null, endDate: dto.endDate ?? null });
+    checkThreshold(dto.pricingMode, dto.seats, dto.minPassengers ?? null);
 
     const open = await this.prisma.recurringLine.count({ where: { operatorId: userId, status: { in: ['active', 'paused'] } } });
     if (open >= MAX_LINES_PER_OPERATOR) {
@@ -173,6 +195,7 @@ export class LinesService {
         pricingMode: dto.pricingMode,
         priceCents: dto.priceCents,
         durationMin: dto.durationMin ?? null,
+        minPassengers: dto.minPassengers ?? null,
         conditions: dto.conditions || null,
         status: 'active',
       },
@@ -190,6 +213,10 @@ export class LinesService {
     if (dto.pricingMode) await this.checkPricing(userId, dto.pricingMode);
     if (dto.vehicleId || dto.seats) await this.ownedVehicle(userId, next.vehicleId, next.seats);
     checkSchedule(next);
+    // Passage au prix « par véhicule » : le seuil n'a plus de sens, il est retiré.
+    if (next.pricingMode === 'per_vehicle' && dto.minPassengers === undefined) next.minPassengers = null;
+    checkThreshold(next.pricingMode, next.seats, next.minPassengers ?? null);
+    if (next.minPassengers !== line.minPassengers) dto.minPassengers = next.minPassengers ?? null;
     if (next.endDate && next.endDate < localDateOf(now, line.timezone)) {
       throw new BadRequestException('La date de fin ne peut pas être passée');
     }
@@ -263,7 +290,13 @@ export class LinesService {
       orderBy: { departureAt: 'asc' },
       take: 200,
     });
-    return rows.map(departureView);
+    const lines = await this.prisma.recurringLine.findMany({ where: { id: { in: [...new Set(rows.map((d: Departure) => d.lineId))] } } });
+    const out = [];
+    for (const d of rows) {
+      const line = lines.find((l: Line) => l.id === d.lineId);
+      out.push({ ...departureView(d), thresholdDeadline: line ? (await this.guaranteeOf(d, line)).deadline : null });
+    }
+    return out;
   }
 
   /** Confirmation groupée : « j'assure ces départs jusqu'au … ». */
@@ -271,10 +304,15 @@ export class LinesService {
     // Paiement en ligne activé : pas de mise en vente sans compte de versement validé.
     await this.payouts.assertReady(userId);
     const lineIds = dto.lineId ? [(await this.ownedLine(userId, dto.lineId)).id] : await this.lineIdsOf(userId);
-    const { count } = await this.prisma.lineDeparture.updateMany({
-      where: { lineId: { in: lineIds }, status: 'to_confirm', localDate: { lte: dto.until }, departureAt: { gt: now } },
-      data: { status: 'open', confirmedAt: now },
+    const where = { lineId: { in: lineIds }, status: 'to_confirm', localDate: { lte: dto.until }, departureAt: { gt: now } };
+    // Sans seuil, confirmer vaut engagement ferme ; avec un seuil, l'engagement
+    // devient ferme quand le seuil est atteint (guaranteeIfReached).
+    const firm = await this.prisma.lineDeparture.updateMany({
+      where: { ...where, minPassengers: null },
+      data: { status: 'open', confirmedAt: now, guaranteedAt: now },
     });
+    const conditional = await this.prisma.lineDeparture.updateMany({ where, data: { status: 'open', confirmedAt: now } });
+    const count = firm.count + conditional.count;
     if (count > 0) {
       await this.audit.log({ userId, action: 'line.departures.confirm', metadata: { until: dto.until, count, lineId: dto.lineId ?? null } });
     }
@@ -288,11 +326,16 @@ export class LinesService {
     if (!departure || !line) throw new NotFoundException('Départ introuvable');
     if (new Date(departure.departureAt) <= now) throw new ConflictException('Ce départ est déjà passé');
     if (!closed && line.status === 'closed') throw new ConflictException('Ligne fermée : créez-en une nouvelle');
+    if (!closed && departure.thresholdMissedAt) {
+      throw new ConflictException('Départ annulé faute de passagers : il ne peut pas être rouvert');
+    }
     if (!closed) await this.payouts.assertReady(userId);
     const updated = await this.prisma.lineDeparture.update({
       where: { id: departureId },
-      // Rouvrir un départ vaut confirmation de la capacité.
-      data: closed ? { status: 'closed' } : { status: 'open', confirmedAt: now },
+      // Rouvrir un départ vaut confirmation de la capacité (et engagement ferme s'il n'a pas de seuil).
+      data: closed
+        ? { status: 'closed' }
+        : { status: 'open', confirmedAt: now, ...(departure.minPassengers === null && !departure.guaranteedAt ? { guaranteedAt: now } : {}) },
     });
     await this.audit.log({ userId, action: closed ? 'line.departure.close' : 'line.departure.open', entity: 'LineDeparture', entityId: departureId });
     return departureView(updated);
@@ -313,6 +356,8 @@ export class LinesService {
       throw new ConflictException('Ce départ n’est plus disponible');
     }
     if (!bookable(d, seats)) throw new ConflictException('Plus assez de places sur ce départ');
+    // Seuil non atteint à l'échéance : le départ va être annulé, il ne se vend plus.
+    if (!(await this.sellable(d, line, now))) throw new ConflictException('Ce départ n’est plus disponible');
     const { count } =
       d.pricingMode === 'per_vehicle'
         ? await this.prisma.lineDeparture.updateMany({
@@ -336,6 +381,113 @@ export class LinesService {
       where: { id: departureId },
       data: { seatsBooked: d.pricingMode === 'per_vehicle' ? 0 : Math.max(0, d.seatsBooked - seats) },
     });
+  }
+
+  // ── Seuil de départ garanti (CLARIFICATION_MODELE.md, section 4.5) ───
+
+  /** Heures avant le départ où le seuil doit être atteint, selon le pays de la ligne. */
+  async thresholdHours(jurisdiction: string): Promise<number> {
+    const cached = this.thresholdHoursCache.get(jurisdiction);
+    if (cached && Date.now() - cached.at < THRESHOLD_CACHE_MS) return cached.hours;
+    const config = await this.prisma.jurisdictionConfig.findUnique({ where: { code: jurisdiction } });
+    const hours = config?.lineThresholdDeadlineHours ?? DEFAULT_THRESHOLD_DEADLINE_HOURS;
+    this.thresholdHoursCache.set(jurisdiction, { hours, at: Date.now() });
+    return hours;
+  }
+
+  async guaranteeOf(d: Departure, line: Line): Promise<DepartureGuarantee> {
+    const min = d.minPassengers ?? null;
+    return {
+      minPassengers: min,
+      guaranteed: d.guaranteedAt !== null && d.guaranteedAt !== undefined,
+      guaranteedAt: d.guaranteedAt ?? null,
+      missed: Boolean(d.thresholdMissedAt),
+      deadline: min !== null && !d.guaranteedAt ? thresholdDeadline(new Date(d.departureAt), await this.thresholdHours(line.jurisdiction)) : null,
+    };
+  }
+
+  /** État du seuil d'un départ par son id (récapitulatif passager, liste du chauffeur). */
+  async guaranteeById(departureId: string): Promise<DepartureGuarantee | null> {
+    const d = await this.prisma.lineDeparture.findUnique({ where: { id: departureId } });
+    const line = d && (await this.prisma.recurringLine.findUnique({ where: { id: d.lineId } }));
+    return d && line ? this.guaranteeOf(d, line) : null;
+  }
+
+  /** Un départ à seuil non atteint ne se vend plus après son échéance. */
+  private async sellable(d: Departure, line: Line, now: Date): Promise<boolean> {
+    if (d.minPassengers === null || d.minPassengers === undefined || d.guaranteedAt) return true;
+    return now < thresholdDeadline(new Date(d.departureAt), await this.thresholdHours(line.jurisdiction));
+  }
+
+  /** Places des réservations confirmées (payées) du départ. */
+  async seatedPassengers(departureId: string): Promise<number> {
+    const trips = await this.prisma.trip.findMany({
+      where: { lineDepartureId: departureId, status: { in: SEATED } },
+      include: { passengerBooking: true },
+    });
+    return trips.reduce((n, t) => n + (t.passengerBooking?.seats ?? 0), 0);
+  }
+
+  /**
+   * Après chaque réservation confirmée : seuil atteint → départ garanti, et
+   * « Départ confirmé » (le top départ) au chauffeur et aux passagers.
+   * Écriture conditionnelle : un seul message même si deux paiements
+   * arrivent ensemble. Ne lève jamais (la réservation est déjà faite).
+   */
+  async guaranteeIfReached(departureId: string, now = new Date()): Promise<boolean> {
+    try {
+      const d = await this.prisma.lineDeparture.findUnique({ where: { id: departureId } });
+      if (!d || d.guaranteedAt || d.thresholdMissedAt || d.minPassengers === null || d.minPassengers === undefined) return false;
+      const seated = await this.seatedPassengers(departureId);
+      if (seated < d.minPassengers) return false;
+      return await this.markGuaranteed(d, now, 'threshold');
+    } catch {
+      return false;
+    }
+  }
+
+  /** « Je pars quand même » : le chauffeur garantit son départ sans attendre le seuil. */
+  async guarantee(userId: string, departureId: string, now = new Date()) {
+    const d = await this.prisma.lineDeparture.findUnique({ where: { id: departureId } });
+    const line = d && (await this.prisma.recurringLine.findUnique({ where: { id: d.lineId } }));
+    // Le chauffeur qui assure le départ (titulaire, ou secours affecté).
+    if (!d || !line || (d.driverId ?? line.operatorId) !== userId) throw new NotFoundException('Départ introuvable');
+    if (d.thresholdMissedAt) throw new ConflictException('Départ annulé faute de passagers : il ne peut pas être rouvert');
+    if (new Date(d.departureAt) <= now) throw new ConflictException('Ce départ est déjà passé');
+    if (d.status !== 'open') throw new ConflictException('Confirmez d’abord ce départ pour le mettre en vente');
+    if (!d.guaranteedAt) await this.markGuaranteed(d, now, 'driver');
+    const updated = await this.prisma.lineDeparture.findUnique({ where: { id: departureId } });
+    return { ...departureView(updated!), guarantee: await this.guaranteeOf(updated!, line) };
+  }
+
+  private async markGuaranteed(d: Departure, now: Date, by: 'threshold' | 'driver'): Promise<boolean> {
+    const { count } = await this.prisma.lineDeparture.updateMany({
+      where: { id: d.id, guaranteedAt: null, thresholdMissedAt: null },
+      data: { guaranteedAt: now },
+    });
+    if (count === 0) return false;
+    const line = await this.prisma.recurringLine.findUnique({ where: { id: d.lineId } });
+    const trips = await this.prisma.trip.findMany({
+      where: { lineDepartureId: d.id, status: { in: SEATED } },
+      select: { id: true, passengerId: true },
+    });
+    const seated = await this.seatedPassengers(d.id);
+    const time = line ? localTimeOf(new Date(d.departureAt), line.timezone) : '';
+    for (const t of trips) {
+      if (!t.passengerId) continue;
+      await this.notifications?.notify(t.passengerId, 'line.guaranteed', 'Départ confirmé',
+        `Votre départ de ${time} aura lieu : le chauffeur est engagé.`, { tripId: t.id, departureId: d.id });
+    }
+    const driverId = line ? d.driverId ?? line.operatorId : null;
+    if (driverId && by === 'threshold') {
+      await this.notifications?.notify(driverId, 'line.guaranteed.driver', 'Top départ',
+        `Seuil atteint : ${seated} passagers pour votre départ de ${time}. Votre départ est confirmé.`, { departureId: d.id });
+    }
+    await this.audit.log({
+      userId: by === 'driver' ? driverId ?? undefined : undefined,
+      action: 'line.departure.guaranteed', entity: 'LineDeparture', entityId: d.id, metadata: { by, seated, minPassengers: d.minPassengers },
+    });
+    return true;
   }
 
   // ── Recherche ───────────────────────────────────────────────────────
@@ -382,6 +534,7 @@ export class LinesService {
       if (d.pricingMode === 'per_seat' && !operator.perSeatAllowed) continue;
       if (!bookable(d, q.seats)) continue;
       if ((q.luggage ?? 0) > line.luggage) continue;
+      if (!(await this.sellable(d, line, now))) continue;
 
       const outbound = d.direction === 'outbound';
       const start = outbound ? { lat: line.originLat, lng: line.originLng } : { lat: line.destinationLat, lng: line.destinationLng };
@@ -426,6 +579,11 @@ export class LinesService {
           languages: driver.languages,
         },
         vehicle: { brand: vehicle.brand, model: vehicle.model, capacity: vehicle.capacity },
+        // Seuil de départ garanti : « confirmé » ou « encore N passagers », et l'échéance.
+        guarantee: {
+          ...(await this.guaranteeOf(d, line)),
+          missingPassengers: d.minPassengers !== null && !d.guaranteedAt ? Math.max(0, d.minPassengers - d.seatsBooked) : 0,
+        },
         reasons,
         rank: { diffMin: Math.abs(diffMin), pickupKm, price: priceFor(d, q.seats) },
       });
@@ -483,12 +641,20 @@ export class LinesService {
         // Nouvel horaire : la capacité doit être reconfirmée.
         await this.prisma.lineDeparture.update({
           where: { id: d.id },
-          data: { departureAt: p.departureAt, seatsTotal: p.seatsTotal, priceCents: p.priceCents, pricingMode: p.pricingMode, status: 'to_confirm', confirmedAt: null },
+          data: {
+            departureAt: p.departureAt, seatsTotal: p.seatsTotal, priceCents: p.priceCents, pricingMode: p.pricingMode,
+            minPassengers: p.minPassengers, status: 'to_confirm', confirmedAt: null, guaranteedAt: null,
+          },
         });
-      } else if (p.seatsTotal !== d.seatsTotal || p.priceCents !== d.priceCents || p.pricingMode !== d.pricingMode) {
+      } else if (
+        p.seatsTotal !== d.seatsTotal || p.priceCents !== d.priceCents || p.pricingMode !== d.pricingMode
+        || p.minPassengers !== (d.minPassengers ?? null)
+      ) {
+        // Seuil retiré d'un départ déjà confirmé : engagement ferme ; seuil ajouté : à atteindre.
+        const guaranteedAt = p.minPassengers !== null ? null : d.status === 'open' ? d.guaranteedAt ?? now : d.guaranteedAt;
         await this.prisma.lineDeparture.update({
           where: { id: d.id },
-          data: { seatsTotal: p.seatsTotal, priceCents: p.priceCents, pricingMode: p.pricingMode },
+          data: { seatsTotal: p.seatsTotal, priceCents: p.priceCents, pricingMode: p.pricingMode, minPassengers: p.minPassengers, guaranteedAt },
         });
       }
     }
@@ -564,6 +730,13 @@ export class LinesService {
   }
 }
 
+/** Seuil de départ : vente à la place seulement, entre 1 et le nombre de places. */
+function checkThreshold(pricingMode: string, seats: number, minPassengers: number | null) {
+  if (minPassengers === null) return;
+  if (pricingMode !== 'per_seat') throw new BadRequestException('Le seuil de départ ne s’applique qu’à la vente à la place');
+  if (minPassengers < 1 || minPassengers > seats) throw new BadRequestException('Seuil de départ : entre 1 et le nombre de places');
+}
+
 function checkSchedule(l: { startDate: string; endDate: string | null; departureTime: string; returnTime: string | null }) {
   const real = (d: string) => addDays(d, 0) === d; // rejette le 31 février
   if (!real(l.startDate) || (l.endDate && !real(l.endDate))) throw new BadRequestException('Date invalide (AAAA-MM-JJ)');
@@ -608,6 +781,7 @@ const lineView = (l: Line) => ({
   pricingMode: l.pricingMode,
   priceCents: l.priceCents,
   durationMin: l.durationMin,
+  minPassengers: l.minPassengers ?? null,
   conditions: l.conditions,
   status: l.status,
 });
@@ -623,4 +797,7 @@ const departureView = (d: Departure) => ({
   priceCents: d.priceCents,
   pricingMode: d.pricingMode,
   status: d.status,
+  minPassengers: d.minPassengers ?? null,
+  guaranteed: Boolean(d.guaranteedAt),
+  thresholdMissed: Boolean(d.thresholdMissedAt),
 });

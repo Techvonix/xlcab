@@ -101,6 +101,8 @@ export class TripsService {
       type: trip.type,
       // instant | line | market : « Réserver le retour » ouvre l'écran correspondant.
       source: trip.source,
+      // Ligne régulière : seuil de départ garanti (« confirmé » ou « en attente de passagers »).
+      lineGuarantee: trip.lineDepartureId ? await this.lines.guaranteeById(trip.lineDepartureId) : null,
       status: trip.status,
       shuttleType: trip.shuttleType,
       origin: { address: trip.originAddress, lat: trip.originLat, lng: trip.originLng },
