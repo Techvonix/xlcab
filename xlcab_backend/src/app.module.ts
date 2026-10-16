@@ -27,6 +27,7 @@ import { SecurityModule } from './security/security.module';
 import { HealthModule } from './health/health.controller';
 import { I18nModule } from './i18n/localized-exception.filter';
 import { FeedbackModule } from './feedback/feedback.controller';
+import { MeetingPointsModule } from './meeting-points/meeting-points';
 import { OperatorsModule } from './operators/operators.module';
 import { LineBookingsModule } from './line-bookings/line-bookings.module';
 import { MarketModule } from './market/market.module';
@@ -44,6 +45,7 @@ import { validateEnv } from './security/env.validation';
     HealthModule,
     FeedbackModule,
     OperatorsModule,
+    MeetingPointsModule,
     LineBookingsModule,
     MarketModule,
     PrismaModule,

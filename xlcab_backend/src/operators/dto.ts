@@ -17,6 +17,7 @@ import {
   MaxLength,
   Min,
   MinLength,
+  ValidateNested,
 } from 'class-validator';
 import { OPERATOR_KINDS, OPERATOR_SERVICES, PRICING_MODES } from './line-schedule';
 
@@ -160,8 +161,42 @@ export class UpdateLineDto {
   conditions?: string;
 }
 
+/** Arrêt intermédiaire : un point du catalogue, son heure de passage et son prix depuis le départ. */
+export class StopDto {
+  @IsUUID('4', { message: 'Point de rencontre invalide' })
+  meetingPointId!: string;
+
+  /** Minutes après l'heure de départ (sens aller). */
+  @IsInt()
+  @Min(1, { message: 'Heure de passage invalide' })
+  @Max(24 * 60, { message: 'Heure de passage invalide' })
+  offsetMin!: number;
+
+  /** Prix TTC par place du départ jusqu'à cet arrêt, en centimes. */
+  @IsInt()
+  @Min(1, { message: 'Prix invalide' })
+  @Max(1_000_000, { message: 'Prix invalide' })
+  fareFromOriginCents!: number;
+}
+
+export class StopsDto {
+  @IsArray()
+  @ArrayMaxSize(8, { message: '8 arrêts au maximum' })
+  @ValidateNested({ each: true })
+  @Type(() => StopDto)
+  stops!: StopDto[];
+}
+
 /** Trajet, véhicule, capacité et prix : communs à une ligne régulière et à un départ ponctuel. */
 export class DepartureOfferDto {
+  /** Arrêts intermédiaires (vente à la place), dans le sens aller. */
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(8, { message: '8 arrêts au maximum' })
+  @ValidateNested({ each: true })
+  @Type(() => StopDto)
+  stops?: StopDto[];
+
   @IsUUID('4', { message: 'Véhicule invalide' })
   vehicleId!: string;
 

@@ -1,9 +1,10 @@
 import { BadRequestException, ConflictException, ForbiddenException, Injectable, NotFoundException, Optional } from '@nestjs/common';
-import { LineDeparture, RecurringLine } from '@prisma/client';
+import { LineDeparture, LineStop, MeetingPoint, RecurringLine } from '@prisma/client';
 import { AuditService } from '../audit/audit.service';
 import { TIMEZONES, addDays, isoWeekday, localDateOf, localTimeOf, minutesOf, zonedToUtc } from '../common/local-time';
 import { NotificationsService } from '../notifications/notifications.service';
 import { haversineKm } from '../parcels/parcels.constants';
+import { RoutePoint, StopInput, checkStops, pointView, routePoints, segmentFare } from './line-stops';
 import { PayoutAccountsService } from '../payouts/payout-accounts';
 import { PrismaService } from '../prisma/prisma.service';
 import {
@@ -14,6 +15,7 @@ import {
   LineExceptionDto,
   LineSearchDto,
   OperatorProfileDto,
+  StopDto,
   UpdateLineDto,
 } from './dto';
 import {
@@ -152,8 +154,10 @@ export class LinesService {
       this.prisma.lineException.findMany({ where: { lineId: { in: ids } }, orderBy: { date: 'asc' } }),
       this.prisma.lineDeparture.findMany({ where: { lineId: { in: ids }, status: 'to_confirm' }, select: { lineId: true } }),
     ]);
+    const stops = await this.stopsByLine(ids);
     return lines.map((l: Line) => ({
       ...lineView(l),
+      stops: stops.get(l.id)?.map(stopView) ?? [],
       exceptions: exceptions.filter((e) => e.lineId === l.id).map((e) => ({ date: e.date, seats: e.seats, reason: e.reason })),
       departuresToConfirm: pending.filter((d: Departure) => d.lineId === l.id).length,
     }));
@@ -169,6 +173,7 @@ export class LinesService {
     if (dto.startDate < today) throw new BadRequestException('La date de début ne peut pas être passée');
     checkSchedule({ ...dto, returnTime: dto.returnTime ?? null, endDate: dto.endDate ?? null });
     checkThreshold(dto.pricingMode, dto.seats, dto.minPassengers ?? null);
+    checkStops(dto.stops ?? [], { ...dto, durationMin: dto.durationMin ?? null, jurisdiction: vehicle.jurisdiction }, await this.catalogue(dto.stops));
 
     // Les départs ponctuels ont leur propre plafond.
     const open = await this.prisma.recurringLine.count({ where: { operatorId: userId, kind: 'recurring', status: { in: ['active', 'paused'] } } });
@@ -204,6 +209,7 @@ export class LinesService {
         status: 'active',
       },
     });
+    await this.saveStops(line.id, dto.stops);
     await this.sync(line, now);
     await this.audit.log({ userId, action: 'line.create', entity: 'RecurringLine', entityId: line.id });
     return lineView(line);
@@ -223,6 +229,7 @@ export class LinesService {
     const timezone = TIMEZONES[vehicle.jurisdiction] ?? TIMEZONES.FR;
     checkSchedule({ startDate: dto.date, endDate: dto.date, departureTime: dto.departureTime, returnTime: null });
     checkThreshold(dto.pricingMode, dto.seats, dto.minPassengers ?? null);
+    checkStops(dto.stops ?? [], { ...dto, durationMin: dto.durationMin ?? null, jurisdiction: vehicle.jurisdiction }, await this.catalogue(dto.stops));
 
     const today = localDateOf(now, timezone);
     if (dto.date > addDays(today, LINE_HORIZON_DAYS)) {
@@ -277,6 +284,7 @@ export class LinesService {
         status: 'active',
       },
     });
+    await this.saveStops(line.id, dto.stops);
     await this.sync(line, now);
     await this.prisma.lineDeparture.updateMany({
       where: { lineId: line.id, status: 'to_confirm' },
@@ -305,6 +313,13 @@ export class LinesService {
     // Passage au prix « par véhicule » : le seuil n'a plus de sens, il est retiré.
     if (next.pricingMode === 'per_vehicle' && dto.minPassengers === undefined) next.minPassengers = null;
     checkThreshold(next.pricingMode, next.seats, next.minPassengers ?? null);
+    if (dto.priceCents !== undefined || dto.pricingMode !== undefined || dto.durationMin !== undefined) {
+      const current = (await this.stopsByLine([lineId])).get(lineId) ?? [];
+      const inputs = current.map((x) => ({ meetingPointId: x.stop.meetingPointId, offsetMin: x.stop.offsetMin, fareFromOriginCents: x.stop.fareFromOriginCents }));
+      // Points déjà choisis : un point retiré du catalogue depuis reste valable sur cette ligne.
+      const points = new Map(current.map((x) => [x.point.id, { ...x.point, active: true }]));
+      checkStops(inputs, { ...next, durationMin: next.durationMin ?? null }, points);
+    }
     if (next.minPassengers !== line.minPassengers) dto.minPassengers = next.minPassengers ?? null;
     if (next.endDate && next.endDate < localDateOf(now, line.timezone)) {
       throw new BadRequestException('La date de fin ne peut pas être passée');
@@ -368,6 +383,66 @@ export class LinesService {
     if (count === 0) throw new NotFoundException('Exception introuvable');
     await this.sync(line, now);
     return { deleted: true };
+  }
+
+  // ── Arrêts (points de rencontre du catalogue) ───────────────────────
+
+  /**
+   * Remplace les arrêts d'une ligne. Figés dès qu'une place est vendue sur un
+   * départ à venir : des passagers ont choisi où monter et descendre.
+   */
+  async replaceStops(userId: string, lineId: string, stops: StopDto[], now = new Date()) {
+    const line = await this.ownedLine(userId, lineId);
+    if (line.status === 'closed') throw new ConflictException('Ligne fermée : créez-en une nouvelle');
+    const booked = await this.prisma.lineDeparture.count({ where: { lineId, departureAt: { gt: now }, seatsBooked: { gt: 0 } } });
+    if (booked > 0) throw new ConflictException('Des places sont déjà vendues : les arrêts ne peuvent plus changer');
+    checkStops(stops, line, await this.catalogue(stops));
+    await this.prisma.lineStop.deleteMany({ where: { lineId } });
+    await this.saveStops(lineId, stops);
+    await this.audit.log({ userId, action: 'line.stops.update', entity: 'RecurringLine', entityId: lineId, metadata: { count: stops.length } });
+    return ((await this.stopsByLine([lineId])).get(lineId) ?? []).map(stopView);
+  }
+
+  /** Points du catalogue cités par des arrêts saisis. */
+  private async catalogue(stops?: StopInput[]): Promise<Map<string, MeetingPoint>> {
+    if (!stops?.length) return new Map();
+    const rows = await this.prisma.meetingPoint.findMany({ where: { id: { in: stops.map((x) => x.meetingPointId) } } });
+    return new Map(rows.map((p: MeetingPoint) => [p.id, p]));
+  }
+
+  private async saveStops(lineId: string, stops?: StopInput[]) {
+    if (!stops?.length) return;
+    await this.prisma.lineStop.createMany({
+      data: stops.map((x, i) => ({ lineId, position: i + 1, meetingPointId: x.meetingPointId, offsetMin: x.offsetMin, fareFromOriginCents: x.fareFromOriginCents })),
+    });
+  }
+
+  /** Arrêts (avec leur point) de plusieurs lignes, dans l'ordre. */
+  private async stopsByLine(lineIds: string[]): Promise<Map<string, { stop: LineStop; point: MeetingPoint }[]>> {
+    const stops: LineStop[] = lineIds.length ? await this.prisma.lineStop.findMany({ where: { lineId: { in: lineIds } } }) : [];
+    const points: MeetingPoint[] = stops.length
+      ? await this.prisma.meetingPoint.findMany({ where: { id: { in: [...new Set(stops.map((x) => x.meetingPointId))] } } })
+      : [];
+    const out = new Map<string, { stop: LineStop; point: MeetingPoint }[]>();
+    for (const stop of [...stops].sort((a, b) => a.position - b.position)) {
+      const point = points.find((p) => p.id === stop.meetingPointId);
+      if (!point) continue;
+      out.set(stop.lineId, [...(out.get(stop.lineId) ?? []), { stop, point }]);
+    }
+    return out;
+  }
+
+  /** Trajet d'un départ (départ, arrêts, arrivée) dans son sens, avec horaires et tarifs. */
+  async routeOf(d: Departure, line: Line): Promise<RoutePoint[]> {
+    const stops = (await this.stopsByLine([line.id])).get(line.id) ?? [];
+    return routePoints(line, stops.map((x) => x.stop), new Map(stops.map((x) => [x.point.id, x.point])), d.direction, d.priceCents);
+  }
+
+  /** Point de rencontre d'un arrêt (consignes d'accès pour le passager). */
+  async meetingPointOfStop(stopId: string) {
+    const stop = await this.prisma.lineStop.findUnique({ where: { id: stopId } });
+    const point = stop && (await this.prisma.meetingPoint.findUnique({ where: { id: stop.meetingPointId } }));
+    return point ? { name: point.name, address: point.address, instructions: point.instructions ?? null, transit: point.transit ?? null } : null;
   }
 
   // ── Départs ─────────────────────────────────────────────────────────
@@ -607,6 +682,7 @@ export class LinesService {
     const driverMap = byId(drivers);
     const userMap = byId(users);
     const vehicleMap = byId(vehicles);
+    const stopsMap = await this.stopsByLine(lines.map((l) => l.id));
 
     const from = { lat: q.fromLat, lng: q.fromLng };
     const to = { lat: q.toLat, lng: q.toLng };
@@ -625,14 +701,31 @@ export class LinesService {
       if ((q.luggage ?? 0) > line.luggage) continue;
       if (!(await this.sellable(d, line, now))) continue;
 
-      const outbound = d.direction === 'outbound';
-      const start = outbound ? { lat: line.originLat, lng: line.originLng } : { lat: line.destinationLat, lng: line.destinationLng };
-      const end = outbound ? { lat: line.destinationLat, lng: line.destinationLng } : { lat: line.originLat, lng: line.originLng };
-      const pickupKm = haversineKm(from, start);
-      const dropoffKm = haversineKm(to, end);
-      if (pickupKm > line.pickupRadiusKm || dropoffKm > line.pickupRadiusKm) continue;
+      // Montée et descente : le couple de points (départ, arrêts, arrivée) le plus
+      // proche de la demande, dans le sens du trajet, chacun dans le rayon de la ligne.
+      const stops = stopsMap.get(line.id) ?? [];
+      const route = routePoints(line, stops.map((x) => x.stop), new Map(stops.map((x) => [x.point.id, x.point])), d.direction, d.priceCents);
+      let best: { i: number; j: number; pickupKm: number; dropoffKm: number } | null = null;
+      for (let i = 0; i < route.length - 1; i++) {
+        const pickupKm = haversineKm(from, route[i]);
+        if (pickupKm > line.pickupRadiusKm) continue;
+        for (let j = i + 1; j < route.length; j++) {
+          const dropoffKm = haversineKm(to, route[j]);
+          if (dropoffKm > line.pickupRadiusKm) continue;
+          if (!best || pickupKm + dropoffKm < best.pickupKm + best.dropoffKm) best = { i, j, pickupKm, dropoffKm };
+        }
+      }
+      if (!best) continue;
+      const { pickupKm, dropoffKm } = best;
+      const board = route[best.i];
+      const alight = route[best.j];
+      const fullTrip = best.i === 0 && best.j === route.length - 1;
+      const boardAt = new Date(new Date(d.departureAt).getTime() + board.offsetMin * 60_000);
+      // Vente à la place : prix du tronçon ; véhicule privatisé : prix du véhicule.
+      const unit = d.pricingMode === 'per_seat' && !fullTrip ? segmentFare(route, best.i, best.j) : d.priceCents;
+      const total = d.pricingMode === 'per_seat' ? unit * q.seats : d.priceCents;
 
-      const time = localTimeOf(new Date(d.departureAt), line.timezone);
+      const time = localTimeOf(boardAt, line.timezone);
       const diffMin = q.time ? minutesOf(time) - minutesOf(q.time) : 0;
       if (Math.abs(diffMin) > flex) continue;
 
@@ -648,14 +741,18 @@ export class LinesService {
         departureId: d.id,
         lineId: line.id,
         direction: d.direction,
-        departureAt: d.departureAt,
+        // Heure, lieux et prix du tronçon du passager (montée → descente).
+        departureAt: boardAt,
         localTime: time,
-        durationMin: line.durationMin,
-        origin: outbound ? line.originAddress : line.destinationAddress,
-        destination: outbound ? line.destinationAddress : line.originAddress,
+        durationMin: line.durationMin ? alight.offsetMin - board.offsetMin : null,
+        origin: board.name,
+        destination: alight.name,
+        board: pointView(board, new Date(d.departureAt)),
+        alight: pointView(alight, new Date(d.departureAt)),
+        fullTrip,
         pricingMode: d.pricingMode,
-        unitPriceCents: d.priceCents,
-        totalPriceCents: priceFor(d, q.seats),
+        unitPriceCents: unit,
+        totalPriceCents: total,
         seatsLeft: d.pricingMode === 'per_vehicle' ? d.seatsTotal : seatsLeft,
         luggage: line.luggage,
         conditions: line.conditions,
@@ -674,7 +771,7 @@ export class LinesService {
           missingPassengers: d.minPassengers !== null && !d.guaranteedAt ? Math.max(0, d.minPassengers - d.seatsBooked) : 0,
         },
         reasons,
-        rank: { diffMin: Math.abs(diffMin), pickupKm, price: priceFor(d, q.seats) },
+        rank: { diffMin: Math.abs(diffMin), pickupKm, price: total },
       });
     }
     results.sort((a, b) => a.rank.diffMin - b.rank.diffMin || a.rank.pickupKm - b.rank.pickupKm || a.rank.price - b.rank.price);
@@ -859,6 +956,14 @@ function publicProfile(p: Record<string, any>) {
     termsVersion: operatorTermsVersion(),
   };
 }
+
+const stopView = ({ stop, point }: { stop: LineStop; point: MeetingPoint }) => ({
+  id: stop.id,
+  position: stop.position,
+  offsetMin: stop.offsetMin,
+  fareFromOriginCents: stop.fareFromOriginCents,
+  meetingPoint: { id: point.id, city: point.city, name: point.name, address: point.address, lat: point.lat, lng: point.lng },
+});
 
 const lineView = (l: Line) => ({
   id: l.id,

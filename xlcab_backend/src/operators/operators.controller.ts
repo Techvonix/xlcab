@@ -9,6 +9,7 @@ import {
   LineExceptionDto,
   LineSearchDto,
   OperatorProfileDto,
+  StopsDto,
   UpdateDepartureDto,
   UpdateLineDto,
 } from './dto';
@@ -68,6 +69,12 @@ export class OperatorsController {
   @HttpCode(HttpStatus.OK)
   close(@Req() req: any, @Param('id', ParseUUIDPipe) id: string) {
     return this.lines.setStatus(req.user.sub, id, 'closed');
+  }
+
+  /** Arrêts intermédiaires (points du catalogue), remplacés en bloc. */
+  @Put('lines/:id/stops')
+  replaceStops(@Req() req: any, @Param('id', ParseUUIDPipe) id: string, @Body() dto: StopsDto) {
+    return this.lines.replaceStops(req.user.sub, id, dto.stops);
   }
 
   @Post('lines/:id/exceptions')

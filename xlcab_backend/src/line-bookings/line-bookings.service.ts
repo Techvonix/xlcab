@@ -16,6 +16,7 @@ import { driverCommissionPercent } from '../driver-mode/driver-mode.service';
 import { TRACKING_LEAD_MIN, TripStatus } from '../matching/matching.constants';
 import { NotificationsService } from '../notifications/notifications.service';
 import { linePaymentMode } from '../payouts/payment-mode';
+import { pointIndex, segmentFare } from '../operators/line-stops';
 import { LinesService } from '../operators/lines.service';
 import { PaymentsService } from '../payments/payments.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -91,6 +92,16 @@ export class LineBookingsService {
     if (mine > 0) throw new ConflictException('Vous avez déjà une réservation sur ce départ');
 
     const perSeat = departure.pricingMode === 'per_seat';
+    // Tronçon : montée et descente parmi le départ, les arrêts et l'arrivée (sens du départ).
+    const route = await this.lines.routeOf(departure, line);
+    const from = pointIndex(route, dto.boardStopId, 'board');
+    const to = pointIndex(route, dto.alightStopId, 'alight');
+    if (from < 0 || to < 0 || from >= to || (!perSeat && (dto.boardStopId || dto.alightStopId))) {
+      throw new BadRequestException('Arrêts invalides pour ce départ');
+    }
+    const board = route[from];
+    const alight = route[to];
+    const fullTrip = from === 0 && to === route.length - 1;
     if (dto.seatNumbers) {
       if (!perSeat) throw new BadRequestException('Ce départ se réserve en entier : pas de choix de siège');
       if (dto.seatNumbers.length !== dto.seats) throw new BadRequestException('Choisissez autant de sièges que de places');
@@ -110,8 +121,8 @@ export class LineBookingsService {
         this.prisma.vehicle.findUnique({ where: { id: vehicleId } }),
         this.prisma.jurisdictionConfig.findUnique({ where: { code: line.jurisdiction } }),
       ]);
-      const outbound = departure.direction === 'outbound';
-      const total = held.priceCents;
+      // Prix du tronçon (vente à la place) ; trajet complet ou véhicule : prix du départ.
+      const total = perSeat && !fullTrip ? segmentFare(route, from, to) * dto.seats : held.priceCents;
       const rate = Number(config?.vatPassengerRate ?? 0);
       const base = Math.round(total / (1 + rate / 100));
       const commissionCents = Math.round((base * driverCommissionPercent()) / 100);
@@ -129,14 +140,15 @@ export class LineBookingsService {
             vehicleId,
             acceptedAt: online ? null : now,
             shuttleType: vehicle?.shuttleType ?? 'bleue',
-            originAddress: outbound ? line.originAddress : line.destinationAddress,
-            originLat: outbound ? line.originLat : line.destinationLat,
-            originLng: outbound ? line.originLng : line.destinationLng,
-            destinationAddress: outbound ? line.destinationAddress : line.originAddress,
-            destinationLat: outbound ? line.destinationLat : line.originLat,
-            destinationLng: outbound ? line.destinationLng : line.originLng,
-            durationMin: line.durationMin,
-            scheduledAt: departure.departureAt,
+            // Montée et descente du passager : point de rencontre ou extrémité de la ligne.
+            originAddress: board.address,
+            originLat: board.lat,
+            originLng: board.lng,
+            destinationAddress: alight.address,
+            destinationLat: alight.lat,
+            destinationLng: alight.lng,
+            durationMin: line.durationMin ? alight.offsetMin - board.offsetMin : null,
+            scheduledAt: new Date(departure.departureAt.getTime() + board.offsetMin * 60_000),
             totalPriceCents: total,
             vatCents: total - base,
             commissionCents,
@@ -153,6 +165,8 @@ export class LineBookingsService {
             extraLuggage: (dto.luggage ?? 0) > dto.seats,
             qrCode: randomUUID(),
             notes: dto.notes || null,
+            boardStopId: board.stopId,
+            alightStopId: alight.stopId,
           },
         });
         // Sièges numérotés (vente à la place) : ceux choisis, sinon les premiers libres.
@@ -353,6 +367,10 @@ export class LineBookingsService {
           seatNumbers: seatsOf(t.id),
           childSeats: t.passengerBooking?.childSeats ?? 0,
           checkedIn: t.passengerBooking?.checkedIn ?? false,
+          // Arrêts : montée / descente (adresse du point, ou extrémité de la ligne).
+          pickup: t.originAddress,
+          dropoff: t.destinationAddress,
+          pickupAt: t.scheduledAt,
           status: t.status,
           notes: t.passengerBooking?.notes ?? null,
         };

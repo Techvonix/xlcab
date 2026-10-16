@@ -123,6 +123,11 @@ class Table {
     return project(row, select, this.relations);
   };
 
+  createMany = async ({ data }: Row) => {
+    for (const item of data as Row[]) await this.create({ data: item });
+    return { count: (data as Row[]).length };
+  };
+
   update = async ({ where, data }: Row) => {
     const row = this.rows.find((r) => matches(r, where));
     if (!row) throw new Error('Enregistrement introuvable');
@@ -200,6 +205,8 @@ export function memoryPrisma() {
     userPreference: new Table(() => ({ notifyPush: true, notifyEmail: true, notifySms: false, marketing: false, autoShareTrips: false, preferWomanDriver: false, updatedAt: new Date() })),
     trustedContact: new Table(() => ({ createdAt: new Date() })),
     lineSeat: new Table(() => ({ createdAt: new Date() })),
+    meetingPoint: new Table(() => ({ instructions: null, transit: null, jurisdiction: 'FR', active: true, createdAt: new Date(), updatedAt: new Date() })),
+    lineStop: new Table(),
     tripShare: new Table(() => ({ createdAt: new Date(), revokedAt: null })),
     tripRating: new Table(() => ({ comment: null, tags: [], createdAt: new Date() })),
     operatorProfile: new Table(() => ({
@@ -256,7 +263,7 @@ export function memoryPrisma() {
     { priceLines: (trip, lines) => lines.forEach((l) => tripPriceLine.rows.push({ id: randomUUID(), tripId: trip.id, ...l })) },
   );
   // Relation PassengerBooking → Trip (scan du QR d'un départ de ligne).
-  db.passengerBooking = new Table(() => ({ childSeats: 0, wifiRequested: false, extraLuggage: false, petsAllowed: false, checkedIn: false, notes: null }), {
+  db.passengerBooking = new Table(() => ({ childSeats: 0, wifiRequested: false, extraLuggage: false, petsAllowed: false, checkedIn: false, notes: null, boardStopId: null, alightStopId: null }), {
     trip: (b) => db.trip.rows.find((t: Row) => t.id === b.tripId) ?? null,
   });
   db.parcelBooking = new Table(

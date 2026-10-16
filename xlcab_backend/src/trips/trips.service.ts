@@ -103,6 +103,8 @@ export class TripsService {
       source: trip.source,
       // Ligne régulière : seuil de départ garanti (« confirmé » ou « en attente de passagers »).
       lineGuarantee: trip.lineDepartureId ? await this.lines.guaranteeById(trip.lineDepartureId) : null,
+      // Montée à un point de rencontre : où attendre, transports à proximité.
+      meetingPoint: trip.passengerBooking?.boardStopId ? await this.lines.meetingPointOfStop(trip.passengerBooking.boardStopId) : null,
       status: trip.status,
       shuttleType: trip.shuttleType,
       origin: { address: trip.originAddress, lat: trip.originLat, lng: trip.originLng },

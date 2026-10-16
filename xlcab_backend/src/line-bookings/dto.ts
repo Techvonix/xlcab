@@ -43,6 +43,16 @@ export class BookLineDto {
   @Min(1, { each: true, message: 'Sièges invalides' })
   @Max(60, { each: true, message: 'Sièges invalides' })
   seatNumbers?: number[];
+
+  /** Ligne avec arrêts : arrêt de montée (absent = départ de la ligne). */
+  @IsOptional()
+  @IsUUID('4', { message: 'Arrêt invalide' })
+  boardStopId?: string;
+
+  /** Arrêt de descente (absent = arrivée de la ligne). */
+  @IsOptional()
+  @IsUUID('4', { message: 'Arrêt invalide' })
+  alightStopId?: string;
 }
 
 export class QrCheckInDto {

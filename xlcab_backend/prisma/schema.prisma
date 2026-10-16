@@ -184,6 +184,9 @@ model PassengerBooking {
   qrCode        String  @unique
   checkedIn     Boolean @default(false)
   notes         String?
+  // Ligne avec arrêts : où le passager monte et descend (null = départ / arrivée de la ligne).
+  boardStopId   String?
+  alightStopId  String?
 }
 
 // ── Module 8 (Onboarding chauffeur) ───────────────────────────────────
@@ -910,4 +913,42 @@ model LineSeat {
 
   @@unique([departureId, seatNumber])
   @@index([tripId])
+}
+
+// ── Points de rencontre et arrêts (CLARIFICATION_MODELE.md, section 5.3) ──
+// Catalogue tenu par l'équipe XLCAB : lieux sûrs, éclairés, où l'arrêt est
+// autorisé (règles locales). Les chauffeurs composent leurs arrêts dedans.
+model MeetingPoint {
+  id           String   @id @default(uuid())
+  city         String
+  name         String
+  address      String
+  lat          Float
+  lng          Float
+  // Consignes d'accès (où attendre, repère visible) et transports à proximité.
+  instructions String?
+  transit      String?
+  jurisdiction String   @default("FR")
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([city])
+}
+
+// Arrêt intermédiaire d'une ligne (ou d'un départ ponctuel), dans le sens aller.
+// Au retour, l'ordre s'inverse : décalage = durée − offsetMin, tarif = prix − tarif.
+model LineStop {
+  id                  String @id @default(uuid())
+  lineId              String
+  position            Int // 1, 2, … entre le départ et l'arrivée
+  meetingPointId      String
+  // Minutes après l'heure de départ de la ligne (sens aller).
+  offsetMin           Int
+  // Prix TTC par place depuis le départ de la ligne jusqu'à cet arrêt : le prix
+  // d'un tronçon est la différence entre les tarifs de ses deux extrémités.
+  fareFromOriginCents Int
+
+  @@unique([lineId, position])
+  @@index([lineId])
 }

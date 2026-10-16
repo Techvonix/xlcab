@@ -14,7 +14,9 @@ import { OperatorsModule } from '../operators/operators.module';
 import { PrismaService } from '../prisma/prisma.service';
 import { RedisService } from '../redis/redis.service';
 import { FakeRedis } from '../testing/fake-redis';
+import { MeetingPointsModule } from '../meeting-points/meeting-points';
 import { memoryPrisma } from '../testing/memory-prisma';
+import { mfaProof } from '../testing/two-factor-proof';
 import { TrackingGateway } from '../tracking/tracking.gateway';
 import { DepartureThresholdService } from './departure-threshold';
 import { LineBookingsModule } from './line-bookings.module';
@@ -86,6 +88,7 @@ describe('Seuil de départ garanti (intégration)', () => {
     db.vehicle.rows.push({
       id: VAN, driverId: SAMI, brand: 'Renault', model: 'Trafic', plate: 'AA-001-AA', capacity: 8, dashcamActive: true, shuttleType: 'bleue', jurisdiction: 'FR',
     });
+    db.user.rows.push({ id: 'ops', email: 'ops@xlcab.com', role: 'admin', deletedAt: null });
     for (const [uid, firstName] of [[THOMAS, 'Thomas'], [LEA, 'Léa'], [NINA, 'Nina']]) {
       db.user.rows.push({ id: uid, email: `${firstName}@test.fr`, role: 'passenger', firstName, deletedAt: null });
     }
@@ -113,6 +116,7 @@ describe('Seuil de départ garanti (intégration)', () => {
         AuthModule,
         OperatorsModule,
         LineBookingsModule,
+        MeetingPointsModule,
       ],
     })
       .overrideProvider(TrackingGateway)
@@ -347,5 +351,115 @@ describe('Seuil de départ garanti (intégration)', () => {
       expect(db.recurringLine.rows.find((l: any) => l.id === res.body.id)).toMatchObject({ status: 'closed' });
       expect(db.lineDeparture.rows.filter((d: any) => d.lineId === res.body.id)).toHaveLength(1); // historique gardé
     });
+  });
+
+  // ── Étape 3 : points de rencontre, arrêts, prix par tronçon ─────────
+
+  describe('points de rencontre et arrêts', () => {
+    const CLERMONT = { lat: 45.7786, lng: 3.0816 };
+    const admin = { Authorization: as('ops', 'admin'), 'X-2FA-Token': mfaProof(JWT_SECRET, 'ops') };
+    const inTwoDays = addDays(tomorrow, 1);
+    let clermontId: string;
+
+    const addPoint = (body: Record<string, unknown>) => http().post('/api/v1/admin/meeting-points').set(admin).send(body);
+    const publish = (extra: Record<string, unknown> = {}) =>
+      http().post('/api/v1/operators/me/departures').set('Authorization', as(SAMI, 'driver')).send({
+        vehicleId: VAN,
+        originAddress: 'Gare de Lyon Part-Dieu', originLat: LYON.lat, originLng: LYON.lng,
+        destinationAddress: 'Gare de Limoges-Bénédictins', destinationLat: LIMOGES.lat, destinationLng: LIMOGES.lng,
+        date: inTwoDays, departureTime: '09:30', seats: 7, luggage: 7, pricingMode: 'per_seat', priceCents: 3000, durationMin: 270,
+        stops: [{ meetingPointId: clermontId, offsetMin: 150, fareFromOriginCents: 1800 }],
+        ...extra,
+      });
+    const searchFrom = (from: { lat: number; lng: number }, to: { lat: number; lng: number }, seats = 1) =>
+      http().get('/api/v1/lines/search').set('Authorization', as(NINA, 'passenger')).query({
+        fromLat: from.lat, fromLng: from.lng, toLat: to.lat, toLng: to.lng, date: inTwoDays, seats,
+      });
+
+    beforeEach(async () => {
+      const res = await addPoint({
+        city: 'Clermont-Ferrand', name: 'Gare routière', address: 'Gare routière, Clermont-Ferrand', lat: CLERMONT.lat, lng: CLERMONT.lng,
+        instructions: 'Quai 4, devant l’abri vitré', transit: 'Tram A — arrêt Gaillard',
+      });
+      expect(res.status).toBe(201);
+      clermontId = res.body.id;
+    });
+
+    it('catalogue tenu par l’équipe : création (2FA), doublon refusé, retrait ; chauffeurs : points actifs seulement', async () => {
+      expect((await http().post('/api/v1/admin/meeting-points').set('Authorization', as('ops', 'admin')).send({})).status).toBe(403); // sans 2FA
+      expect((await http().post('/api/v1/admin/meeting-points').set('Authorization', as(SAMI, 'driver')).send({})).status).toBe(403);
+      const dup = await addPoint({ city: 'Clermont-Ferrand', name: 'Gare routière', address: 'x x x', lat: 45.7, lng: 3.1 });
+      expect(dup.status).toBe(400);
+
+      const list = await http().get('/api/v1/meeting-points').set('Authorization', as(SAMI, 'driver')).query({ lat: 45.77, lng: 3.08, radiusKm: 20 });
+      expect(list.body).toEqual([expect.objectContaining({ id: clermontId, name: 'Gare routière', transit: 'Tram A — arrêt Gaillard' })]);
+
+      const off = await http().patch(`/api/v1/admin/meeting-points/${clermontId}`).set(admin).send({ active: false });
+      expect(off.body.active).toBe(false);
+      expect((await http().get('/api/v1/meeting-points').set('Authorization', as(SAMI, 'driver'))).body).toHaveLength(0);
+      expect((await publish()).status).toBe(400); // point retiré : plus proposé pour de nouveaux arrêts
+    });
+
+    it('tronçons : chaque passager trouve et paie sa partie du trajet ; le trajet complet reste au prix complet', async () => {
+      const res = await publish();
+      expect(res.status).toBe(201);
+      const departureId = res.body.departure.id;
+
+      const lyonClermont = (await searchFrom(LYON, CLERMONT)).body.find((r: any) => r.departureId === departureId);
+      expect(lyonClermont).toMatchObject({ origin: 'Gare de Lyon Part-Dieu', destination: 'Gare routière', unitPriceCents: 1800, fullTrip: false, durationMin: 150 });
+
+      const clermontLimoges = (await searchFrom(CLERMONT, LIMOGES, 2)).body.find((r: any) => r.departureId === departureId);
+      expect(clermontLimoges).toMatchObject({ localTime: '12:00', origin: 'Gare routière', unitPriceCents: 1200, totalPriceCents: 2400, durationMin: 120 });
+      expect(clermontLimoges.board).toMatchObject({ stopId: expect.any(String), instructions: 'Quai 4, devant l’abri vitré' });
+
+      const full = (await searchFrom(LYON, LIMOGES)).body.find((r: any) => r.departureId === departureId);
+      expect(full).toMatchObject({ unitPriceCents: 3000, fullTrip: true });
+
+      // Réservation Clermont → Limoges : 2 places à 12 €, montée à 12 h, point de rencontre et consignes.
+      const booked = await http().post('/api/v1/lines/bookings').set('Authorization', as(LEA, 'passenger'))
+        .send({ departureId, seats: 2, boardStopId: clermontLimoges.board.stopId });
+      expect(booked.status).toBe(201);
+      expect(booked.body.totalPriceCents).toBe(2400);
+      const trip = db.trip.rows.find((t: any) => t.id === booked.body.tripId);
+      expect(trip).toMatchObject({ originAddress: 'Gare routière, Clermont-Ferrand', destinationAddress: 'Gare de Limoges-Bénédictins', durationMin: 120, commissionCents: 240 });
+      expect(trip.scheduledAt.getTime() - departure2(departureId).departureAt.getTime()).toBe(150 * MIN);
+
+      const view = await http().get(`/api/v1/trips/${trip.id}`).set('Authorization', as(LEA, 'passenger'));
+      expect(view.body.meetingPoint).toMatchObject({ name: 'Gare routière', instructions: 'Quai 4, devant l’abri vitré', transit: 'Tram A — arrêt Gaillard' });
+
+      const manifest = await http().get(`/api/v1/operators/me/departures/${departureId}/manifest`).set('Authorization', as(SAMI, 'driver'));
+      expect(manifest.body.passengers[0]).toMatchObject({ pickup: 'Gare routière, Clermont-Ferrand', dropoff: 'Gare de Limoges-Bénédictins' });
+
+      // Arrêts figés dès la première place vendue.
+      const change = await http().put(`/api/v1/operators/me/lines/${res.body.id}/stops`).set('Authorization', as(SAMI, 'driver')).send({ stops: [] });
+      expect(change.status).toBe(409);
+    });
+
+    it('réservation refusée : descente avant la montée, arrêt d’un autre départ', async () => {
+      const res = await publish();
+      const departureId = res.body.departure.id;
+      const stopId = db.lineStop.rows.find((x: any) => x.lineId === res.body.id).id;
+      const book = (body: Record<string, unknown>) =>
+        http().post('/api/v1/lines/bookings').set('Authorization', as(LEA, 'passenger')).send({ departureId, seats: 1, ...body });
+      expect((await book({ alightStopId: stopId, boardStopId: stopId })).status).toBe(400);
+      expect((await book({ boardStopId: '00000000-0000-4000-8000-999999999999' })).status).toBe(400);
+      expect(db.trip.rows.filter((t: any) => t.lineDepartureId === departureId)).toHaveLength(0);
+    });
+
+    it('arrêts refusés : prix non croissants, véhicule privatisé ; remplacés tant que rien n’est vendu', async () => {
+      expect((await publish({ stops: [{ meetingPointId: clermontId, offsetMin: 150, fareFromOriginCents: 3000 }] })).status).toBe(400);
+      expect((await publish({ pricingMode: 'per_vehicle', priceCents: 39000 })).status).toBe(400);
+
+      const res = await publish({ stops: [] });
+      expect(res.status).toBe(201);
+      const put = await http().put(`/api/v1/operators/me/lines/${res.body.id}/stops`).set('Authorization', as(SAMI, 'driver'))
+        .send({ stops: [{ meetingPointId: clermontId, offsetMin: 140, fareFromOriginCents: 1700 }] });
+      expect(put.status).toBe(200);
+      expect(put.body).toEqual([expect.objectContaining({ position: 1, offsetMin: 140, meetingPoint: expect.objectContaining({ name: 'Gare routière' }) })]);
+      const mine = await http().get('/api/v1/operators/me/lines').set('Authorization', as(SAMI, 'driver'));
+      expect(mine.body.find((l: any) => l.id === res.body.id).stops).toHaveLength(1);
+    });
+
+    const departure2 = (departureId: string) => db.lineDeparture.rows.find((d: any) => d.id === departureId);
   });
 });

@@ -64,6 +64,7 @@ async function main() {
     await prisma.lineSeat.deleteMany({ where: { departureId: { in: oldDepartures } } });
     await prisma.lineDeparture.deleteMany({ where: { lineId: { in: oldLines } } });
     await prisma.lineException.deleteMany({ where: { lineId: { in: oldLines } } });
+    await prisma.lineStop.deleteMany({ where: { lineId: { in: oldLines } } });
     await prisma.recurringLine.deleteMany({ where: { id: { in: oldLines } } });
     await prisma.operatorProfile.deleteMany({ where: { id: { in: oldIds } } });
     await prisma.tripRating.deleteMany({ where: { OR: [{ passengerId: { in: oldIds } }, { driverId: { in: oldIds } }] } });
@@ -231,12 +232,24 @@ async function main() {
     departureTime: '19:00', returnTime: '22:30', daysOfWeek: everyDay, startDate: tomorrow, seats: 13, luggage: 20,
     pricingMode: 'per_vehicle', priceCents: 39000, durationMin: 110,
   });
+  // Catalogue de points de rencontre (tenu par l'équipe XLCAB) : créé s'il n'existe pas.
+  // Lieux exacts d'attente à choisir et vérifier sur place par l'équipe (règles d'arrêt locales).
+  const point = async (city: string, name: string, address: string, lat: number, lng: number, transit: string) =>
+    (await prisma.meetingPoint.findFirst({ where: { city, name } })) ??
+    prisma.meetingPoint.create({ data: { city, name, address, lat, lng, transit } });
+  await point('Paris', 'Porte Maillot', 'Place de la Porte Maillot, 75017 Paris', 48.8781, 2.2834, 'Métro 1, RER C (Neuilly – Porte Maillot)');
+  await point('Paris', 'Porte de Saint-Cloud', 'Place de la Porte de Saint-Cloud, 75016 Paris', 48.8378, 2.2567, 'Métro 9');
+  await point('Paris', 'Porte d’Orléans', 'Place du 25 Août 1944, 75014 Paris', 48.8235, 2.3253, 'Métro 4, tram T3a');
+  const clermontPoint = await point('Clermont-Ferrand', 'Gare de Clermont-Ferrand', 'Avenue de l’Union Soviétique, 63000 Clermont-Ferrand', 45.7786, 3.1003, 'Tram A, bus');
+
   // Seuil de départ garanti (CLARIFICATION_MODELE.md) : Sami part d'office dès 4 passagers sur 7.
   const limogesLine = await lines.create(sami.id, {
     vehicleId: vanSami.id, originAddress: LYON.address, originLat: LYON.lat, originLng: LYON.lng,
     destinationAddress: LIMOGES.address, destinationLat: LIMOGES.lat, destinationLng: LIMOGES.lng,
     departureTime: '08:00', daysOfWeek: everyDay, startDate: tomorrow, seats: 7, luggage: 7, pricingMode: 'per_seat', priceCents: 3000,
     durationMin: 270, minPassengers: 4, conditions: '1 valise et 1 bagage cabine par personne',
+    // Arrêt à Clermont-Ferrand : Lyon → Clermont 18 €, Clermont → Limoges 12 €.
+    stops: [{ meetingPointId: clermontPoint.id, offsetMin: 150, fareFromOriginCents: 1800 }],
   });
   for (const id of [djamel.id, chris.id, sami.id]) await lines.confirm(id, { until: addDays(tomorrow, 6) });
 
