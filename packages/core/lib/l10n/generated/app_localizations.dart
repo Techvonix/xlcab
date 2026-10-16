@@ -6584,6 +6584,12 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Départ retiré : vos passagers sont remboursés.'**
   String get gtDepartRetire;
+
+  /// No description provided for @gtAnnulationGratuite.
+  ///
+  /// In fr, this message translates to:
+  /// **'Gratuit tant que le départ n’est pas confirmé : vous êtes remboursé intégralement.'**
+  String get gtAnnulationGratuite;
 }
 
 class _AppLocalizationsDelegate

@@ -3842,4 +3842,8 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get gtDepartRetire =>
       'Departure withdrawn: your passengers are refunded.';
+
+  @override
+  String get gtAnnulationGratuite =>
+      'Free as long as the departure is not confirmed: you are refunded in full.';
 }

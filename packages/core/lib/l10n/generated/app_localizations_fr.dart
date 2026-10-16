@@ -3863,4 +3863,8 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get gtDepartRetire => 'Départ retiré : vos passagers sont remboursés.';
+
+  @override
+  String get gtAnnulationGratuite =>
+      'Gratuit tant que le départ n’est pas confirmé : vous êtes remboursé intégralement.';
 }

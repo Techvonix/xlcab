@@ -267,11 +267,15 @@ export class TripsService {
     if (trip.type === 'parcel') await this.parcels.assertCancellable(tripId);
 
     const now = new Date();
+    // Place sur un départ à seuil pas encore confirmé : le chauffeur ne s'est
+    // pas engagé, le passager non plus (décision du 2026-10-16) — annulation gratuite.
+    const guarantee = trip.lineDepartureId ? await this.lines.guaranteeById(trip.lineDepartureId) : null;
+    const notYetGuaranteed = guarantee !== null && guarantee.minPassengers !== null && !guarantee.guaranteed;
     // Frais des CGV seulement si un chauffeur était engagé : facturer une
     // course que XLCAB n'a pas pu assurer (aucun chauffeur trouvé) serait
     // abusif. Annulation par un admin XLCAB : jamais de frais.
     const fee =
-      !isAdmin && trip.status === TripStatus.ACCEPTED
+      !isAdmin && trip.status === TripStatus.ACCEPTED && !notYetGuaranteed
         ? cancellationFee(trip.totalPriceCents, trip.scheduledAt, now)
         : { percent: 0, feeCents: 0 };
     const updated = await this.prisma.trip.updateMany({

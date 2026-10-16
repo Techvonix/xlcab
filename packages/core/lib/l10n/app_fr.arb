@@ -2219,5 +2219,6 @@
   "gtJeParsTexte": "Votre départ devient ferme : vos passagers sont prévenus, et une annulation de votre part suivra le protocole habituel (chauffeur de secours, pénalités).",
   "gtJeParsFait": "Départ confirmé : vos passagers sont prévenus.",
   "gtRetirerExplication": "Votre seuil n’est pas atteint : vos passagers seront remboursés intégralement, sans chauffeur de secours et sans pénalité pour vous.",
-  "gtDepartRetire": "Départ retiré : vos passagers sont remboursés."
+  "gtDepartRetire": "Départ retiré : vos passagers sont remboursés.",
+  "gtAnnulationGratuite": "Gratuit tant que le départ n’est pas confirmé : vous êtes remboursé intégralement."
 }

@@ -222,9 +222,9 @@ class _Body extends ConsumerWidget {
       context: context,
       builder: (context) => AlertDialog(
         title: Text(l10n.annulerLaReservation2),
+        // Départ à seuil pas encore confirmé : annulation gratuite (décision du 2026-10-16).
         content: Text(
-          l10n.gratuitJusquA24H +
-          l10n.puis50DeFraisJusqu,
+          trip.lineGuarantee?.pending == true ? l10n.gtAnnulationGratuite : l10n.gratuitJusquA24H + l10n.puis50DeFraisJusqu,
         ),
         actions: [
           TextButton(onPressed: () => Navigator.of(context).pop(false), child: Text(l10n.garder)),

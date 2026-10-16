@@ -1080,5 +1080,6 @@
   "gtJeParsTexte": "Your departure becomes firm: your passengers are notified, and a cancellation on your side will follow the usual protocol (backup driver, penalties).",
   "gtJeParsFait": "Departure confirmed: your passengers have been notified.",
   "gtRetirerExplication": "Your threshold has not been reached: your passengers will be refunded in full, with no backup driver and no penalty for you.",
-  "gtDepartRetire": "Departure withdrawn: your passengers are refunded."
+  "gtDepartRetire": "Departure withdrawn: your passengers are refunded.",
+  "gtAnnulationGratuite": "Free as long as the departure is not confirmed: you are refunded in full."
 }

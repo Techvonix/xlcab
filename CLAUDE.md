@@ -537,7 +537,8 @@ référence — les exigences de la Partie 8 priment.
   secours habituel. Vues : `guarantee` dans la recherche (+ `missingPassengers`), la réservation, `/trips/:id`
   (`lineGuarantee`), `assignments`, `manifest` ; `departures` (minPassengers, guaranteed, thresholdMissed,
   thresholdDeadline). Conséquence voulue : un départ à seuil à moins de 24 h n'est jamais vendable s'il n'est pas déjà
-  garanti. Apps : `core/models/departure_guarantee.dart` ; chauffeur : interrupteur « Seuil de départ garanti » du
+  garanti. Annulation par le passager GRATUITE tant que le départ n'est pas garanti (décision du 2026-10-16,
+  `TripsService.cancel`, clé ARB `gtAnnulationGratuite`) ; frais des CGV ensuite. Apps : `core/models/departure_guarantee.dart` ; chauffeur : interrupteur « Seuil de départ garanti » du
   formulaire de ligne (moitié des places proposée), carte « Encore N passagers » + « Je pars quand même » et
   explication du retrait sans pénalité dans `departure_screen`, état dans la liste des départs et `AssignmentTile` ;
   passager : `screens/market/guarantee_line.dart` (`GuaranteeLine`) sur la carte de résultat, dans `BookLineSheet`

@@ -209,6 +209,24 @@ describe('Seuil de départ garanti (intégration)', () => {
     expect((await threshold.tick()).released).toBe(1);
   });
 
+  it('annulation par le passager : gratuite tant que le départ n’est pas confirmé, frais des CGV ensuite', async () => {
+    // Pays à échéance courte (6 h) : un départ non garanti peut exister à moins de 24 h.
+    db.jurisdictionConfig.rows.find((c: any) => c.code === 'FR').lineThresholdDeadlineHours = 6;
+    moveDeparture(10 * 60);
+    const thomas = await book(THOMAS, 2);
+    const cancel = (pax: string, tripId: string) =>
+      http().post(`/api/v1/trips/${tripId}/cancel`).set('Authorization', as(pax, 'passenger')).send({ reason: 'Changement de programme' });
+    const free = await cancel(THOMAS, thomas.body.tripId);
+    expect(free.status).toBe(200);
+    expect(free.body.feeCents).toBe(0);
+
+    await book(LEA, 4); // seuil atteint : départ confirmé
+    expect(departure().guaranteedAt).toBeInstanceOf(Date);
+    const nina = await book(NINA, 1);
+    const paid = await cancel(NINA, nina.body.tripId);
+    expect(paid.body.feeCents).toBe(1500); // 50 % entre 24 h et 2 h
+  });
+
   it('« Je pars quand même » : le chauffeur garantit son départ sous le seuil, les passagers sont prévenus', async () => {
     await book(THOMAS, 2);
     expect((await http().post(`/api/v1/operators/me/departures/${departure().id}/guarantee`).set('Authorization', as(OTHER, 'driver'))).status).toBe(404);
