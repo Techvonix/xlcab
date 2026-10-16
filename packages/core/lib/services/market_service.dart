@@ -129,6 +129,8 @@ class MarketService {
     int luggage = 0,
     String? notes,
     List<int>? seatNumbers,
+    String? boardStopId,
+    String? alightStopId,
   }) =>
       guardOperatorCall(() async {
         final res = await _dio.post<Map<String, dynamic>>('/api/v1/lines/bookings', data: {
@@ -139,6 +141,9 @@ class MarketService {
           if (notes != null && notes.isNotEmpty) 'notes': notes,
           // Sièges choisis ; absents : le serveur attribue les premiers libres.
           if (seatNumbers != null && seatNumbers.isNotEmpty) 'seatNumbers': seatNumbers,
+          // Tronçon : arrêts de montée / descente (absents = extrémités de la ligne).
+          if (boardStopId != null) 'boardStopId': boardStopId,
+          if (alightStopId != null) 'alightStopId': alightStopId,
         });
         return LineBooking.fromJson(res.data);
       });

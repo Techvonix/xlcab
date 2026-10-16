@@ -141,14 +141,19 @@ class FakeMarketService extends MarketService {
     int luggage = 0,
     String? notes,
     List<int>? seatNumbers,
+    String? boardStopId,
+    String? alightStopId,
   }) async {
     _act('bookLine:$departureId:$seats:$childSeats:$luggage');
     bookedSeatNumbers = seatNumbers;
+    bookedStops = (boardStopId, alightStopId);
     return LineBooking(tripId: 'trip-1', payment: bookingPayment);
   }
 
   /// Sièges demandés à la dernière réservation (null = attribution automatique).
   List<int>? bookedSeatNumbers;
+  /// Arrêts de montée / descente demandés à la dernière réservation.
+  (String?, String?)? bookedStops;
   SeatMap seats = const SeatMap(seatsTotal: 8, taken: {2, 5}, choosable: true);
 
   @override

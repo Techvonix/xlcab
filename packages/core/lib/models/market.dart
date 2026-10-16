@@ -1,4 +1,5 @@
 import 'departure_guarantee.dart';
+import 'meeting_point.dart';
 import 'place.dart';
 
 // Bourse de transport (xlcab_backend/src/market) : demandes publiées par les
@@ -307,7 +308,17 @@ class LineSearchResult {
     this.vehicleLabel,
     this.reasons = const [],
     this.guarantee,
+    this.board,
+    this.alight,
+    this.fullTrip = true,
   });
+
+  /// Montée et descente du passager (point de rencontre, ou extrémités de la ligne).
+  final RoutePointView? board;
+  final RoutePointView? alight;
+
+  /// Trajet complet ; sinon un tronçon, au prix du tronçon.
+  final bool fullTrip;
 
   /// Seuil de départ garanti : « départ confirmé » ou « encore N passagers ».
   final DepartureGuarantee? guarantee;
@@ -353,6 +364,9 @@ class LineSearchResult {
       operatorRatingCount: op is Map ? _int(op['ratingCount']) ?? 0 : 0,
       vehicleLabel: v is Map ? [_str(v['brand']), _str(v['model'])].whereType<String>().join(' ') : null,
       guarantee: DepartureGuarantee.fromJson(json['guarantee']),
+      board: RoutePointView.fromJson(json['board']),
+      alight: RoutePointView.fromJson(json['alight']),
+      fullTrip: json['fullTrip'] != false,
       reasons: json['reasons'] is List
           ? (json['reasons'] as List).whereType<Map>().where((r) => r['code'] is String).map((r) {
               final value = r['km'] ?? r['diffMin'] ?? r['count'];

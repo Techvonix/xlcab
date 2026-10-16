@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:xlcab_core/models/meeting_point.dart';
 import 'package:xlcab_core/models/operator.dart';
 import 'package:xlcab_core/models/payouts.dart';
 import 'package:xlcab_core/services/api_service.dart';
@@ -59,6 +60,16 @@ class OperatorService {
       });
 
   Future<void> createLine(LineDraft draft) => _guard(() => _dio.post<void>('$_me/lines', data: draft.toJson()));
+
+  /// Points de rencontre actifs du catalogue (arrêts des lignes).
+  Future<List<MeetingPoint>> meetingPoints() => _guard(() async {
+        final res = await _dio.get<List<dynamic>>('/api/v1/meeting-points');
+        return (res.data ?? const []).map(MeetingPoint.fromJson).whereType<MeetingPoint>().toList();
+      });
+
+  /// Remplace les arrêts d'une ligne (refusé dès qu'une place est vendue).
+  Future<void> replaceStops(String lineId, List<StopDraft> stops) =>
+      _guard(() => _dio.put<void>('$_me/lines/${_id(lineId)}/stops', data: {'stops': stops.map((s) => s.toJson()).toList()}));
 
   /// Départ ponctuel : publié et mis en vente aussitôt (le jour = `startDate` du brouillon).
   Future<void> publishDeparture(LineDraft draft) => _guard(() => _dio.post<void>('$_me/departures', data: draft.toOneOffJson()));

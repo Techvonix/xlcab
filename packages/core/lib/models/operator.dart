@@ -1,4 +1,5 @@
 import 'departure_guarantee.dart';
+import 'meeting_point.dart';
 import 'place.dart';
 
 // Espace opérateur (bourse de transport, étapes 1 et 2) : profil, lignes
@@ -156,6 +157,7 @@ class RecurringLine {
     this.departuresToConfirm = 0,
     this.minPassengers,
     this.oneOff = false,
+    this.stops = const [],
   });
 
   final String id;
@@ -182,6 +184,8 @@ class RecurringLine {
   final int? minPassengers;
   /// Départ ponctuel (un seul jour = [startDate]) plutôt que ligne régulière.
   final bool oneOff;
+  /// Arrêts intermédiaires (points de rencontre), dans le sens aller.
+  final List<LineStopView> stops;
 
   static RecurringLine? fromJson(Object? json) {
     if (json is! Map || json['id'] is! String) return null;
@@ -213,6 +217,7 @@ class RecurringLine {
       departuresToConfirm: _int(m['departuresToConfirm']) ?? 0,
       minPassengers: _int(m['minPassengers']),
       oneOff: m['kind'] == 'one_off',
+      stops: m['stops'] is List ? (m['stops'] as List).map(LineStopView.fromJson).whereType<LineStopView>().toList() : const [],
     );
   }
 }
@@ -234,6 +239,7 @@ class LineDraft {
     this.durationMin,
     this.conditions,
     this.minPassengers,
+    this.stops = const [],
   });
 
   final String vehicleId;
@@ -251,6 +257,8 @@ class LineDraft {
   final String? conditions;
   /// Seuil de départ garanti (vente à la place seulement ; null = sans seuil).
   final int? minPassengers;
+  /// Arrêts intermédiaires (vente à la place seulement).
+  final List<StopDraft> stops;
 
   Map<String, dynamic> toJson() => {
         'vehicleId': vehicleId,
@@ -271,6 +279,7 @@ class LineDraft {
         if (durationMin != null) 'durationMin': durationMin,
         if (conditions != null && conditions!.isNotEmpty) 'conditions': conditions,
         if (perSeat && minPassengers != null) 'minPassengers': minPassengers,
+        if (perSeat && stops.isNotEmpty) 'stops': stops.map((s) => s.toJson()).toList(),
       };
 
   /// Départ ponctuel (POST /operators/me/departures) : un seul jour, sans retour ni jours de la semaine.
@@ -477,9 +486,14 @@ class ManifestPassenger {
     this.phone,
     this.notes,
     this.seatNumbers = const [],
+    this.pickup,
+    this.dropoff,
   });
 
   final String tripId;
+  /// Où le passager monte et descend (adresse du point de rencontre ou de l'extrémité de la ligne).
+  final String? pickup;
+  final String? dropoff;
   final String? firstName;
   /// Visible seulement dans l'heure qui précède le départ.
   final String? phone;
@@ -544,6 +558,8 @@ class Manifest {
                     checkedIn: p['checkedIn'] == true,
                     started: p['status'] == 'started',
                     notes: _str(p['notes']),
+                    pickup: _str(p['pickup']),
+                    dropoff: _str(p['dropoff']),
                   ))
               .toList()
           : const [],

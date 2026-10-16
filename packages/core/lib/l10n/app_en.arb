@@ -1088,5 +1088,21 @@
   "poJourDuDepart": "Departure day",
   "poDepartPublie": "Departure published: it is on sale.",
   "poApresPublication": "Your departure goes on sale as soon as it is published. Travellers find it in “Find a seat”.",
-  "poDepartPonctuelLe": "One-off departure on {date} at {time}"
+  "poDepartPonctuelLe": "One-off departure on {date} at {time}",
+  "stArrets": "Stops",
+  "stArretsAide": "Optional: XLCAB meeting points along your route. Each traveller pays only their part of the trip (difference between the prices from departure).",
+  "stAjouterUnArret": "Add a stop",
+  "stAjouter": "Add",
+  "stRetirerArret": "Remove the {name} stop",
+  "stPassagePrix": "Passing {offset} · {price} from departure",
+  "stArretLigne": "Stop: {name} ({offset}, {price} from departure)",
+  "stChargementDesPoints": "Loading meeting points",
+  "stAucunPoint": "No other meeting point in the catalogue yet.",
+  "stPassageMinutes": "Passing time, in minutes after departure",
+  "stPrixDepuisDepart": "Price per seat from departure",
+  "stDureeRequise": "Enter the trip duration to place stops.",
+  "stMonteA": "boards at {place}",
+  "stDescendA": "gets off at {place}",
+  "stTroncon": "Part of the route: you only pay for your section.",
+  "stPointDeRencontre": "Meeting point: {name}"
 }

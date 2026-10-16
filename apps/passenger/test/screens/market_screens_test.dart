@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:xlcab_core/models/departure_guarantee.dart';
+import 'package:xlcab_core/models/meeting_point.dart';
 import 'package:xlcab_core/models/market.dart';
 import 'package:xlcab_core/providers/clock_provider.dart';
 import 'package:xlcab_core/providers/market_provider.dart';
@@ -66,9 +67,11 @@ Future<void> pump(WidgetTester tester, Widget screen) async {
   await tester.pumpAndSettle();
 }
 
-LineSearchResult departure({DepartureGuarantee? guarantee}) => LineSearchResult(
+LineSearchResult departure({DepartureGuarantee? guarantee, RoutePointView? board, bool fullTrip = true}) => LineSearchResult(
       departureId: 'd1',
       guarantee: guarantee,
+      board: board,
+      fullTrip: fullTrip,
       departureAt: DateTime(2026, 10, 12, 5),
       localTime: '05:00',
       origin: 'Porte Maillot, Paris',
@@ -165,6 +168,31 @@ void main() {
       await tester.tap(find.text('Réserver'));
       await tester.pumpAndSettle();
       expect(find.textContaining('vous êtes remboursé intégralement'), findsOneWidget);
+    });
+
+    testWidgets('tronçon depuis un point de rencontre : point et transports affichés, arrêt transmis à la réservation', (tester) async {
+      market.lineResults = [
+        departure(
+          fullTrip: false,
+          board: const RoutePointView(stopId: 's1', name: 'Porte d’Orléans', address: 'Place du 25 Août 1944', transit: 'Métro 4, tram T3a'),
+        ),
+      ];
+      await pump(tester, const LineSearchScreen());
+      await tester.tap(find.text('Départ'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Arrivée'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Rechercher'));
+      await tester.pumpAndSettle();
+      expect(find.text('Point de rencontre : Porte d’Orléans'), findsOneWidget);
+      expect(find.text('Métro 4, tram T3a'), findsOneWidget);
+      expect(find.text('Une partie du trajet : vous payez seulement votre tronçon.'), findsOneWidget);
+
+      await tester.tap(find.text('Réserver'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.textContaining('Confirmer ·'));
+      await tester.pumpAndSettle();
+      expect(market.bookedStops, ('s1', null));
     });
 
     testWidgets('départ déjà confirmé : affiché comme tel', (tester) async {

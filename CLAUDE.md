@@ -562,6 +562,35 @@ référence — les exigences de la Partie 8 priment.
   `OperatorService.publishDeparture`, `RecurringLine.oneOff` (« Départ ponctuel le … à … » dans Mes lignes). Clés
   ARB `po*`. Tests : serveur dans `departure-threshold.integration.spec.ts` (groupe « départ ponctuel ») ; app dans
   `operator_screens_test.dart` et `core/test/models/departure_guarantee_test.dart`.
+- Points de rencontre, arrêts, prix par tronçon (étape 3, 2026-10-16, migration `meeting_points`) : `MeetingPoint`
+  (catalogue de l'équipe : ville, nom, adresse, position FIGÉE, consignes, transports, pays, actif) ;
+  `src/meeting-points/meeting-points.ts` = `GET /meeting-points` (tout compte connecté, actifs seulement, par ville ou
+  autour d'une position) et admin 2FA `GET|POST /admin/meeting-points`, `PATCH /admin/meeting-points/:id` (nom,
+  consignes, transports, retrait ; doublon ville+nom = 400). `LineStop` (position, `offsetMin` après le départ aller,
+  `fareFromOriginCents` = prix cumulé par place depuis le départ). `src/operators/line-stops.ts` (pur, testé) :
+  `routePoints` (départ, arrêts, arrivée ; au retour ordre inversé, décalage = durée − décalage, tarif = prix − tarif),
+  `segmentFare` = différence des tarifs, `checkStops` (vente à la place, durée connue, 8 max, points actifs du même pays,
+  décalages et tarifs strictement croissants et inférieurs à la durée / au prix complet). Arrêts saisis à la création
+  (ligne ou départ ponctuel, champ `stops`) ou `PUT /operators/me/lines/:id/stops` (409 dès qu'une place est vendue sur
+  un départ à venir) ; `update` revérifie les arrêts si prix / mode / durée changent. Recherche : meilleur couple
+  montée/descente dans le rayon de la ligne → résultat au tronçon (`departureAt`/`localTime` de la montée, `origin`/
+  `destination` = noms des points, `unitPriceCents` du tronçon, `board`/`alight` avec consignes, `fullTrip`).
+  Réservation : `boardStopId`/`alightStopId` (absents = extrémités ; ordre vérifié, 400 sinon ; refusés sur un
+  véhicule privatisé) → prix du tronçon × places, course aux adresses des points, `scheduledAt` = heure de montée,
+  `PassengerBooking.boardStopId/alightStopId` ; `/trips/:id` → `meetingPoint` (nom, adresse, consignes, transports) ;
+  liste d'embarquement → `pickup`/`dropoff`/`pickupAt`. LIMITE v1 (à faire évoluer) : une place vendue sur un tronçon
+  reste occupée sur tout le trajet (pas de revente de la place après la descente) ; le départ démarre en bloc.
+  Admin : page « Points de rencontre » (`features/meeting-points/MeetingPointsPage.tsx`, route `/points-de-rencontre`,
+  clés i18n `mp*`, test `src/features/meeting-points.test.tsx`). Apps : `core/models/meeting_point.dart` (`MeetingPoint`,
+  `LineStopView`, `StopDraft`, `RoutePointView`) ; chauffeur : `screens/operator/stops_editor.dart` (`StopsEditor` +
+  `StopSheet`, points en pastilles) dans `LineFormScreen` (vente à la place ; durée exigée), arrêts dans le détail de la
+  ligne, « monte à / descend à » dans la liste d'embarquement, `meetingPointsProvider` ; passager :
+  `screens/market/meeting_point_line.dart` (`MeetingPointLine`) sur la carte de résultat (+ « une partie du trajet »),
+  arrêts transmis par `BookLineSheet`, consignes sur l'écran 8. Clés ARB `st*`. Tests : `operators/line-stops.spec.ts`,
+  groupe « points de rencontre et arrêts » de `departure-threshold.integration.spec.ts`, `operator_screens_test.dart`,
+  `market_screens_test.dart`. Démo : Porte Maillot, Porte de Saint-Cloud, Porte d'Orléans, Gare de Clermont-Ferrand
+  (positions approximatives, consignes à préciser par l'équipe sur place) ; ligne de Sami avec arrêt à Clermont (+2 h 30,
+  18 € depuis Lyon, donc Clermont → Limoges 12 €).
 - Migrations : `init_xlcab` appliquée sur la base locale ; toute modification de
   `prisma/schema.prisma` demande désormais `npx prisma migrate dev --name <nom>`. Référentiel :
   `npx prisma db seed` (config FR uniquement).

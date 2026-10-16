@@ -161,7 +161,7 @@ class _DepartureScreenState extends ConsumerState<DepartureScreen> {
                 ),
 
               SectionTitle(l10n.opListeDEmbarquement),
-              for (final p in m.passengers) _PassengerTile(passenger: p),
+              for (final p in m.passengers) _PassengerTile(passenger: p, manifest: m),
               const SizedBox(height: AppSpacing.md),
               if (!m.started) ...[
                 OutlinedButton.icon(onPressed: _busy ? null : _scan, icon: const Icon(Icons.qr_code_scanner), label: Text(l10n.opScannerUnQr)),
@@ -183,9 +183,10 @@ class _DepartureScreenState extends ConsumerState<DepartureScreen> {
 }
 
 class _PassengerTile extends ConsumerWidget {
-  const _PassengerTile({required this.passenger});
+  const _PassengerTile({required this.passenger, required this.manifest});
 
   final ManifestPassenger passenger;
+  final Manifest manifest;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -194,6 +195,9 @@ class _PassengerTile extends ConsumerWidget {
       l10n.opPlaces(p.seats),
       if (p.seatNumbers.isNotEmpty) l10n.sgNumeros(p.seatNumbers.length, p.seatNumbers.join(', ')),
       if (p.childSeats > 0) l10n.opSiegesEnfant(p.childSeats),
+      // Passager d'un tronçon : où il monte et où il descend.
+      if (p.pickup != null && p.pickup != manifest.origin) l10n.stMonteA(p.pickup!),
+      if (p.dropoff != null && p.dropoff != manifest.destination) l10n.stDescendA(p.dropoff!),
       if (p.notes != null) p.notes!,
     ].join(' · ');
     return ListTile(

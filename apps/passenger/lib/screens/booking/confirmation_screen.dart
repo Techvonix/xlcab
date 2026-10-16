@@ -17,6 +17,7 @@ import 'package:xlcab_core/utils/formatters.dart';
 import 'package:xlcab_ui/widgets/primary_button.dart';
 import 'package:xlcab_core/l10n/l10n.dart';
 import '../market/guarantee_line.dart';
+import '../market/meeting_point_line.dart';
 
 /// Ouverture d'un lien externe (PDF de facture) — injectable pour les tests.
 final externalLinkOpenerProvider = Provider<Future<bool> Function(Uri)>(
@@ -122,6 +123,9 @@ class _Body extends ConsumerWidget {
         ],
         const SizedBox(height: AppSpacing.lg),
         _Recap(trip: trip, locale: locale),
+        // Montée à un point de rencontre : où attendre, transports à proximité.
+        if (trip.meetingPoint != null && !cancelled && !completed)
+          Padding(padding: const EdgeInsets.only(top: AppSpacing.sm), child: MeetingPointLine(point: trip.meetingPoint!, detailed: true)),
         // Place sur une ligne à seuil : départ confirmé, ou en attente d'autres passagers.
         if (trip.isLine && !cancelled && !completed && trip.lineGuarantee?.minPassengers != null)
           GuaranteeLine(guarantee: trip.lineGuarantee!, showRefund: true),

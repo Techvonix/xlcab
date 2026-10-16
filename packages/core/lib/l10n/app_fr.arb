@@ -2237,5 +2237,72 @@
         "type": "String"
       }
     }
+  },
+  "stArrets": "Arrêts",
+  "stArretsAide": "Facultatif : des points de rencontre XLCAB sur votre trajet. Chaque voyageur paie seulement sa partie du trajet (différence entre les prix depuis le départ).",
+  "stAjouterUnArret": "Ajouter un arrêt",
+  "stAjouter": "Ajouter",
+  "stRetirerArret": "Retirer l’arrêt {name}",
+  "@stRetirerArret": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "stPassagePrix": "Passage {offset} · {price} depuis le départ",
+  "@stPassagePrix": {
+    "placeholders": {
+      "offset": {
+        "type": "String"
+      },
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "stArretLigne": "Arrêt : {name} ({offset}, {price} depuis le départ)",
+  "@stArretLigne": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "offset": {
+        "type": "String"
+      },
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "stChargementDesPoints": "Chargement des points de rencontre",
+  "stAucunPoint": "Aucun autre point de rencontre au catalogue pour le moment.",
+  "stPassageMinutes": "Passage, en minutes après le départ",
+  "stPrixDepuisDepart": "Prix par place depuis le départ",
+  "stDureeRequise": "Indiquez la durée du trajet pour placer des arrêts.",
+  "stMonteA": "monte à {place}",
+  "@stMonteA": {
+    "placeholders": {
+      "place": {
+        "type": "String"
+      }
+    }
+  },
+  "stDescendA": "descend à {place}",
+  "@stDescendA": {
+    "placeholders": {
+      "place": {
+        "type": "String"
+      }
+    }
+  },
+  "stTroncon": "Une partie du trajet : vous payez seulement votre tronçon.",
+  "stPointDeRencontre": "Point de rencontre : {name}",
+  "@stPointDeRencontre": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
   }
 }

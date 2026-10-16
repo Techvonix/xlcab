@@ -3870,4 +3870,65 @@ class AppLocalizationsEn extends AppLocalizations {
   String poDepartPonctuelLe(String date, String time) {
     return 'One-off departure on $date at $time';
   }
+
+  @override
+  String get stArrets => 'Stops';
+
+  @override
+  String get stArretsAide =>
+      'Optional: XLCAB meeting points along your route. Each traveller pays only their part of the trip (difference between the prices from departure).';
+
+  @override
+  String get stAjouterUnArret => 'Add a stop';
+
+  @override
+  String get stAjouter => 'Add';
+
+  @override
+  String stRetirerArret(String name) {
+    return 'Remove the $name stop';
+  }
+
+  @override
+  String stPassagePrix(String offset, String price) {
+    return 'Passing $offset · $price from departure';
+  }
+
+  @override
+  String stArretLigne(String name, String offset, String price) {
+    return 'Stop: $name ($offset, $price from departure)';
+  }
+
+  @override
+  String get stChargementDesPoints => 'Loading meeting points';
+
+  @override
+  String get stAucunPoint => 'No other meeting point in the catalogue yet.';
+
+  @override
+  String get stPassageMinutes => 'Passing time, in minutes after departure';
+
+  @override
+  String get stPrixDepuisDepart => 'Price per seat from departure';
+
+  @override
+  String get stDureeRequise => 'Enter the trip duration to place stops.';
+
+  @override
+  String stMonteA(String place) {
+    return 'boards at $place';
+  }
+
+  @override
+  String stDescendA(String place) {
+    return 'gets off at $place';
+  }
+
+  @override
+  String get stTroncon => 'Part of the route: you only pay for your section.';
+
+  @override
+  String stPointDeRencontre(String name) {
+    return 'Meeting point: $name';
+  }
 }

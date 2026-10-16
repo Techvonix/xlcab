@@ -14,6 +14,8 @@ import 'package:xlcab_ui/widgets/primary_button.dart';
 import 'package:xlcab_ui/screens/address_search_screen.dart' show addressPickerProvider;
 import 'package:xlcab_ui/widgets/async_widgets.dart';
 import 'package:xlcab_core/l10n/l10n.dart';
+import 'package:xlcab_core/models/meeting_point.dart';
+import 'stops_editor.dart';
 
 /// Nouvelle ligne régulière : trajet (non modifiable ensuite), véhicule,
 /// horaires, jours, capacité, prix. Les départs sont créés « à confirmer ».
@@ -47,6 +49,8 @@ class _LineFormScreenState extends ConsumerState<LineFormScreen> {
   bool _perSeat = false;
   /// Seuil de départ garanti : « je pars d'office dès N passagers ».
   bool _threshold = false;
+  /// Arrêts intermédiaires (points de rencontre du catalogue).
+  List<StopDraft> _stops = [];
   bool _busy = false;
   String? _error;
 
@@ -104,6 +108,10 @@ class _LineFormScreenState extends ConsumerState<LineFormScreen> {
       setState(() => _error = l10n.opChoisissezAuMoinsUnJour);
       return;
     }
+    if (_perSeat && _stops.isNotEmpty && int.tryParse(_duration.text) == null) {
+      setState(() => _error = l10n.stDureeRequise);
+      return;
+    }
     final draft = LineDraft(
       vehicleId: _vehicleId!,
       origin: _origin!,
@@ -119,6 +127,7 @@ class _LineFormScreenState extends ConsumerState<LineFormScreen> {
       durationMin: int.tryParse(_duration.text),
       conditions: _conditions.text.trim(),
       minPassengers: _perSeat && _threshold ? int.tryParse(_minPassengers.text) : null,
+      stops: _perSeat ? _stops : const [],
     );
     setState(() => _busy = true);
     try {
@@ -307,6 +316,10 @@ class _LineFormScreenState extends ConsumerState<LineFormScreen> {
                   inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                   decoration: InputDecoration(labelText: l10n.opDureeEstimeeMinutes),
                 ),
+                if (_perSeat) ...[
+                  SectionTitle(l10n.stArrets),
+                  StopsEditor(stops: _stops, onChanged: (stops) => setState(() => _stops = stops)),
+                ],
                 const SizedBox(height: AppSpacing.sm),
                 TextFormField(
                   controller: _conditions,

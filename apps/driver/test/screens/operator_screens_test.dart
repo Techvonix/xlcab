@@ -83,7 +83,7 @@ Future<void> pump(WidgetTester tester, Widget screen, {double height = 4200}) as
   await tester.pumpAndSettle();
 }
 
-Manifest manifest({bool ready = false, bool checkedIn = false, bool started = false, DepartureGuarantee? guarantee}) => Manifest(
+Manifest manifest({bool ready = false, bool checkedIn = false, bool started = false, DepartureGuarantee? guarantee, String? tomPickup}) => Manifest(
       departureId: 'd1',
       guarantee: guarantee,
       departureAt: DateTime(2026, 10, 12, 5),
@@ -93,7 +93,7 @@ Manifest manifest({bool ready = false, bool checkedIn = false, bool started = fa
       seatsBooked: 5,
       passengers: [
         ManifestPassenger(tripId: 't1', firstName: 'Léa', phone: '+33622222222', seats: 3, childSeats: 1, checkedIn: checkedIn, started: started),
-        ManifestPassenger(tripId: 't2', firstName: 'Tom', seats: 2, childSeats: 0, checkedIn: false, started: started),
+        ManifestPassenger(tripId: 't2', firstName: 'Tom', seats: 2, childSeats: 0, checkedIn: false, started: started, pickup: tomPickup, dropoff: 'Aéroport de Beauvais'),
       ],
     );
 
@@ -248,6 +248,42 @@ void main() {
       expect(json.containsKey('startDate'), isFalse);
     });
 
+    testWidgets('arrêts : point du catalogue, passage et prix depuis le départ ; durée exigée ; envoyés avec la ligne', (tester) async {
+      await pump(tester, const LineFormScreen(oneOff: true), height: 9000);
+      await tester.tap(find.text('Départ'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Arrivée'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Renault Trafic · 8 places'));
+      await tester.pump();
+      await tester.enterText(find.widgetWithText(TextFormField, 'Bagages par départ'), '7');
+      await tester.tap(find.text('Par place'));
+      await tester.pump();
+      await tester.enterText(find.widgetWithText(TextFormField, 'Prix par place (TTC)'), '30');
+
+      await tester.tap(find.text('Ajouter un arrêt'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Gare de Clermont-Ferrand · Clermont-Ferrand'));
+      await tester.pump();
+      await tester.enterText(find.widgetWithText(TextFormField, 'Passage, en minutes après le départ'), '150');
+      await tester.enterText(find.widgetWithText(TextFormField, 'Prix par place depuis le départ'), '18');
+      await tester.tap(find.widgetWithText(FilledButton, 'Ajouter'));
+      await tester.pumpAndSettle();
+      expect(find.textContaining('18,00'), findsOneWidget);
+
+      await tester.tap(find.text('Publier et mettre en vente'));
+      await tester.pumpAndSettle();
+      expect(find.text('Indiquez la durée du trajet pour placer des arrêts.'), findsOneWidget);
+      expect(operators.createdLine, isNull);
+
+      await tester.enterText(find.widgetWithText(TextFormField, 'Durée estimée (minutes)'), '270');
+      await tester.tap(find.text('Publier et mettre en vente'));
+      await tester.pumpAndSettle();
+      expect(operators.createdLine!.toOneOffJson()['stops'], [
+        {'meetingPointId': 'p-clermont', 'offsetMin': 150, 'fareFromOriginCents': 1800},
+      ]);
+    });
+
     testWidgets('plus de places que le véhicule : refusé avant l’envoi ; erreur du serveur affichée', (tester) async {
       await pump(tester, const LineFormScreen(), height: 7800);
       await tester.tap(find.text('Départ'));
@@ -360,6 +396,13 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.textContaining('sans chauffeur de secours et sans pénalité'), findsOneWidget);
       expect(find.textContaining('pénalité de 260 €'), findsNothing);
+    });
+
+    testWidgets('liste d’embarquement : passager d’un tronçon, arrêt de montée indiqué', (tester) async {
+      operators.currentManifest = manifest(tomPickup: 'Porte d’Orléans');
+      await pump(tester, const DepartureScreen(departureId: 'd1'));
+      expect(find.textContaining('monte à Porte d’Orléans'), findsOneWidget);
+      expect(find.textContaining('descend à'), findsNothing); // descend à l'arrivée de la ligne
     });
 
     testWidgets('seuil atteint : « Départ confirmé », plus de bouton', (tester) async {

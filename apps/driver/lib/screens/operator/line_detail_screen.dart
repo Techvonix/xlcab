@@ -10,6 +10,7 @@ import 'package:xlcab_core/utils/formatters.dart';
 import 'my_lines_screen.dart' show lineStatusLabel;
 import 'package:xlcab_ui/widgets/async_widgets.dart';
 import 'package:xlcab_core/l10n/l10n.dart';
+import 'stops_editor.dart';
 
 /// Détail d'une de mes lignes : départs à venir (confirmer, arrêter ou
 /// rouvrir la vente), jours sans départ, chauffeurs de réserve, pause et
@@ -106,6 +107,11 @@ class _LineDetailScreenState extends ConsumerState<LineDetailScreen> {
                 ),
                 Text(line.perSeat ? l10n.opPrixParPlace(price, line.seats) : l10n.opPrixVehicule(price, line.seats)),
                 if (line.conditions != null) Text(line.conditions!, style: AppTypography.caption),
+                for (final s in line.stops)
+                  Text(
+                    l10n.stArretLigne(s.point.name, offsetLabel(s.offsetMin), formatPrice(s.fareFromOriginCents, locale: locale)),
+                    style: AppTypography.caption,
+                  ),
                 const SizedBox(height: AppSpacing.sm),
                 Wrap(spacing: AppSpacing.sm, runSpacing: AppSpacing.sm, crossAxisAlignment: WrapCrossAlignment.center, children: [
                   StatusPill(label: lineStatusLabel(line.status)),

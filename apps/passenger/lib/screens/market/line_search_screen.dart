@@ -23,6 +23,7 @@ import '../../models/return_trip.dart';
 import '../../services/payment_service.dart';
 import 'seat_picker.dart';
 import 'guarantee_line.dart';
+import 'meeting_point_line.dart';
 
 /// Recherche d'un départ de ligne régulière et réservation de places.
 class LineSearchScreen extends ConsumerStatefulWidget {
@@ -217,6 +218,9 @@ class LineResultCard extends ConsumerWidget {
         ),
         Text(r.perSeat ? l10n.mkcPrixParPlace(formatPrice(r.unitPriceCents, locale: locale)) : l10n.mkcVehiculeEntier, style: AppTypography.caption),
         if (r.conditions != null) Text(r.conditions!, style: AppTypography.caption),
+        // Tronçon : le passager ne paie que sa partie du trajet.
+        if (!r.fullTrip) Text(l10n.stTroncon, style: AppTypography.caption),
+        if (r.board != null && r.board!.isMeetingPoint) MeetingPointLine(point: r.board!),
         if (r.guarantee != null) GuaranteeLine(guarantee: r.guarantee!, missing: r.guarantee!.missingPassengers),
         const SizedBox(height: AppSpacing.xs),
         Wrap(spacing: AppSpacing.sm, runSpacing: AppSpacing.xs, children: [for (final s in reasons) StatusPill(label: s)]),
@@ -277,6 +281,8 @@ class _BookLineSheetState extends ConsumerState<BookLineSheet> {
             luggage: _luggage,
             notes: _notes.text.trim(),
             seatNumbers: _picked.isEmpty ? null : _picked,
+            boardStopId: widget.result.board?.stopId,
+            alightStopId: widget.result.alight?.stopId,
           );
       final tripId = booking.tripId;
       // Paiement en ligne : la réservation n'est confirmée qu'une fois payée.

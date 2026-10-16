@@ -1,4 +1,5 @@
 import 'departure_guarantee.dart';
+import 'meeting_point.dart';
 import 'shuttle.dart';
 import 'trip.dart';
 
@@ -24,7 +25,11 @@ class TripDetail {
     this.invoiceId,
     this.invoiceNumber,
     this.lineGuarantee,
+    this.meetingPoint,
   });
+
+  /// Montée à un point de rencontre : nom, consignes d'accès, transports.
+  final RoutePointView? meetingPoint;
 
   /// Place sur une ligne : seuil de départ garanti (« confirmé » ou « en attente de passagers »).
   final DepartureGuarantee? lineGuarantee;
@@ -92,6 +97,7 @@ class TripDetail {
       id: json['id'] as String,
       source: json['source'] is String ? json['source'] as String : null,
       lineGuarantee: DepartureGuarantee.fromJson(json['lineGuarantee']),
+      meetingPoint: RoutePointView.fromJson(json['meetingPoint']),
       originLat: origin['lat'] is num ? (origin['lat'] as num).toDouble() : null,
       originLng: origin['lng'] is num ? (origin['lng'] as num).toDouble() : null,
       destinationLat: destination['lat'] is num ? (destination['lat'] as num).toDouble() : null,

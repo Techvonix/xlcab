@@ -1,0 +1,18 @@
+{
+  "stArrets": { "fr": "Arrêts", "en": "Stops" },
+  "stArretsAide": { "fr": "Facultatif : des points de rencontre XLCAB sur votre trajet. Chaque voyageur paie seulement sa partie du trajet (différence entre les prix depuis le départ).", "en": "Optional: XLCAB meeting points along your route. Each traveller pays only their part of the trip (difference between the prices from departure)." },
+  "stAjouterUnArret": { "fr": "Ajouter un arrêt", "en": "Add a stop" },
+  "stAjouter": { "fr": "Ajouter", "en": "Add" },
+  "stRetirerArret": { "fr": "Retirer l’arrêt {name}", "en": "Remove the {name} stop", "p": { "name": "String" } },
+  "stPassagePrix": { "fr": "Passage {offset} · {price} depuis le départ", "en": "Passing {offset} · {price} from departure", "p": { "offset": "String", "price": "String" } },
+  "stArretLigne": { "fr": "Arrêt : {name} ({offset}, {price} depuis le départ)", "en": "Stop: {name} ({offset}, {price} from departure)", "p": { "name": "String", "offset": "String", "price": "String" } },
+  "stChargementDesPoints": { "fr": "Chargement des points de rencontre", "en": "Loading meeting points" },
+  "stAucunPoint": { "fr": "Aucun autre point de rencontre au catalogue pour le moment.", "en": "No other meeting point in the catalogue yet." },
+  "stPassageMinutes": { "fr": "Passage, en minutes après le départ", "en": "Passing time, in minutes after departure" },
+  "stPrixDepuisDepart": { "fr": "Prix par place depuis le départ", "en": "Price per seat from departure" },
+  "stDureeRequise": { "fr": "Indiquez la durée du trajet pour placer des arrêts.", "en": "Enter the trip duration to place stops." },
+  "stMonteA": { "fr": "monte à {place}", "en": "boards at {place}", "p": { "place": "String" } },
+  "stDescendA": { "fr": "descend à {place}", "en": "gets off at {place}", "p": { "place": "String" } },
+  "stTroncon": { "fr": "Une partie du trajet : vous payez seulement votre tronçon.", "en": "Part of the route: you only pay for your section." },
+  "stPointDeRencontre": { "fr": "Point de rencontre : {name}", "en": "Meeting point: {name}", "p": { "name": "String" } }
+}

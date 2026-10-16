@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:xlcab_core/models/market.dart';
 import 'package:xlcab_core/models/payment.dart';
+import 'package:xlcab_core/models/meeting_point.dart';
 import 'package:xlcab_core/models/operator.dart';
 import 'package:xlcab_core/models/payouts.dart';
 import 'package:xlcab_core/models/place.dart';
@@ -94,6 +95,14 @@ class FakeOperatorService extends OperatorService {
     _act('createLine');
     createdLine = draft;
   }
+
+  /// Catalogue de points de rencontre.
+  List<MeetingPoint> catalogue = const [
+    MeetingPoint(id: 'p-clermont', city: 'Clermont-Ferrand', name: 'Gare de Clermont-Ferrand', address: 'Avenue de l’Union Soviétique', lat: 45.78, lng: 3.10, transit: 'Tram A'),
+  ];
+
+  @override
+  Future<List<MeetingPoint>> meetingPoints() async => catalogue;
 
   @override
   Future<void> publishDeparture(LineDraft draft) async {
@@ -314,14 +323,19 @@ class FakeMarketService extends MarketService {
     int luggage = 0,
     String? notes,
     List<int>? seatNumbers,
+    String? boardStopId,
+    String? alightStopId,
   }) async {
     _act('bookLine:$departureId:$seats:$childSeats:$luggage');
     bookedSeatNumbers = seatNumbers;
+    bookedStops = (boardStopId, alightStopId);
     return LineBooking(tripId: 'trip-1', payment: bookingPayment);
   }
 
   /// Sièges demandés à la dernière réservation (null = attribution automatique).
   List<int>? bookedSeatNumbers;
+  /// Arrêts de montée / descente demandés à la dernière réservation.
+  (String?, String?)? bookedStops;
   SeatMap seats = const SeatMap(seatsTotal: 8, taken: {2, 5}, choosable: true);
 
   @override

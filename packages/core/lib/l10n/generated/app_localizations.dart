@@ -6632,6 +6632,102 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Départ ponctuel le {date} à {time}'**
   String poDepartPonctuelLe(String date, String time);
+
+  /// No description provided for @stArrets.
+  ///
+  /// In fr, this message translates to:
+  /// **'Arrêts'**
+  String get stArrets;
+
+  /// No description provided for @stArretsAide.
+  ///
+  /// In fr, this message translates to:
+  /// **'Facultatif : des points de rencontre XLCAB sur votre trajet. Chaque voyageur paie seulement sa partie du trajet (différence entre les prix depuis le départ).'**
+  String get stArretsAide;
+
+  /// No description provided for @stAjouterUnArret.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajouter un arrêt'**
+  String get stAjouterUnArret;
+
+  /// No description provided for @stAjouter.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajouter'**
+  String get stAjouter;
+
+  /// No description provided for @stRetirerArret.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retirer l’arrêt {name}'**
+  String stRetirerArret(String name);
+
+  /// No description provided for @stPassagePrix.
+  ///
+  /// In fr, this message translates to:
+  /// **'Passage {offset} · {price} depuis le départ'**
+  String stPassagePrix(String offset, String price);
+
+  /// No description provided for @stArretLigne.
+  ///
+  /// In fr, this message translates to:
+  /// **'Arrêt : {name} ({offset}, {price} depuis le départ)'**
+  String stArretLigne(String name, String offset, String price);
+
+  /// No description provided for @stChargementDesPoints.
+  ///
+  /// In fr, this message translates to:
+  /// **'Chargement des points de rencontre'**
+  String get stChargementDesPoints;
+
+  /// No description provided for @stAucunPoint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun autre point de rencontre au catalogue pour le moment.'**
+  String get stAucunPoint;
+
+  /// No description provided for @stPassageMinutes.
+  ///
+  /// In fr, this message translates to:
+  /// **'Passage, en minutes après le départ'**
+  String get stPassageMinutes;
+
+  /// No description provided for @stPrixDepuisDepart.
+  ///
+  /// In fr, this message translates to:
+  /// **'Prix par place depuis le départ'**
+  String get stPrixDepuisDepart;
+
+  /// No description provided for @stDureeRequise.
+  ///
+  /// In fr, this message translates to:
+  /// **'Indiquez la durée du trajet pour placer des arrêts.'**
+  String get stDureeRequise;
+
+  /// No description provided for @stMonteA.
+  ///
+  /// In fr, this message translates to:
+  /// **'monte à {place}'**
+  String stMonteA(String place);
+
+  /// No description provided for @stDescendA.
+  ///
+  /// In fr, this message translates to:
+  /// **'descend à {place}'**
+  String stDescendA(String place);
+
+  /// No description provided for @stTroncon.
+  ///
+  /// In fr, this message translates to:
+  /// **'Une partie du trajet : vous payez seulement votre tronçon.'**
+  String get stTroncon;
+
+  /// No description provided for @stPointDeRencontre.
+  ///
+  /// In fr, this message translates to:
+  /// **'Point de rencontre : {name}'**
+  String stPointDeRencontre(String name);
 }
 
 class _AppLocalizationsDelegate

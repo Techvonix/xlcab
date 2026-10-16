@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:xlcab_core/models/operator.dart';
 import 'package:xlcab_core/models/payouts.dart';
 import '../services/operator_service.dart';
+import 'package:xlcab_core/models/meeting_point.dart';
 
 export 'package:xlcab_core/providers/market_provider.dart';
 
@@ -11,6 +12,9 @@ export 'package:xlcab_core/providers/market_provider.dart';
 final operatorProfileProvider = FutureProvider.autoDispose<OperatorProfile>((ref) => ref.watch(operatorServiceProvider).profile());
 
 final operatorVehiclesProvider = FutureProvider.autoDispose<List<OperatorVehicle>>((ref) => ref.watch(operatorServiceProvider).vehicles());
+
+/// Points de rencontre du catalogue XLCAB (arrêts des lignes).
+final meetingPointsProvider = FutureProvider.autoDispose<List<MeetingPoint>>((ref) => ref.watch(operatorServiceProvider).meetingPoints());
 
 final myLinesProvider = FutureProvider.autoDispose<List<RecurringLine>>((ref) => ref.watch(operatorServiceProvider).lines());
 
