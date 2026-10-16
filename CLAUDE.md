@@ -519,8 +519,10 @@ référence — les exigences de la Partie 8 priment.
   REMPLACE le message affiché (`removeCurrentSnackBar`) au lieu de le mettre en file.
 - Clarification du modèle (2026-10-14, `CLARIFICATION_MODELE.md`, demandée AVANT de nouvelles vidéos explicatives) :
   régimes de transport (pro seulement au lancement, covoiturage = second produit, avis juridique), seuil de départ
-  garanti, départ ponctuel, points de rencontre / arrêts, colis sur les lignes, dashcam ; décisions D1-D13 EN ATTENTE
-  du porteur de projet. Ne rien construire ni tourner avant ses décisions.
+  garanti, départ ponctuel, points de rencontre / arrêts, colis sur les lignes, dashcam ; décisions D1-D13 TOUTES VALIDÉES
+  le 2026-10-14, portée européenne (paramètres par pays dans `JurisdictionConfig`, jamais en dur). Ordre de travail :
+  section 10 du dossier (1. seuil de départ garanti, 2. départ ponctuel, 3. points de rencontre, 4. colis sur les
+  lignes, 5. dashcam, 6. Stripe réel, 7. vidéos explicatives en dernier).
 - Migrations : `init_xlcab` appliquée sur la base locale ; toute modification de
   `prisma/schema.prisma` demande désormais `npx prisma migrate dev --name <nom>`. Référentiel :
   `npx prisma db seed` (config FR uniquement).

@@ -228,9 +228,23 @@ passagers : 171,82 € net.
 8. TVA des pénalités et des frais d'annulation ; facture de pénalité.
 9. Clause « commission de 10 % garantie » : durée de l'engagement, conditions de révision.
 
-## 9. Décisions à prendre
+## 9. Décisions
 
-| # | Décision | Recommandation |
+**Toutes les recommandations D1 à D13 sont VALIDÉES par le porteur de projet le 14 octobre 2026.**
+
+Portée : le modèle doit s'appliquer **dans chaque grande ville européenne** où XLCAB s'implantera, sous réserve
+des contraintes juridiques locales. Conséquences pour la conception :
+
+- tout paramètre qui dépend du pays (TVA, licence exigée pour vendre à la place, échéance du seuil, distance
+  minimale, textes légaux, devise) vit dans la configuration de la juridiction (`JurisdictionConfig`), jamais en
+  dur dans le code ;
+- les points de rencontre sont rattachés à une **ville** et choisis avec la réglementation locale de l'arrêt ;
+- l'ouverture d'un pays suppose son propre avis juridique (questions de la section 8 reprises pays par pays)
+  et une configuration de juridiction relue ; tant qu'elle manque, le pays reste fermé ;
+- textes de l'appli traduits (déjà en place pour le français et l'anglais) et heures en heure locale de la
+  ligne (déjà en place : fuseau par ligne).
+
+| # | Décision | Recommandation (validée) |
 |---|---|---|
 | D1 | Périmètre du lancement | Transport professionnel seulement (navettes, lignes, départs ponctuels, bourse) ; covoiturage = second produit après avis juridique ; pas de transport urbain régulier |
 | D2 | Seuil de départ garanti | Oui, fixé par le chauffeur à la publication |
