@@ -565,6 +565,14 @@ export const MESSAGES_EN: Record<string, string> = {
   'Réservation annulée': 'Booking cancelled',
   'Ce départ n’est plus disponible : vous êtes remboursé intégralement.': 'This departure is no longer available: you are refunded in full.',
 
+  // Départ ponctuel (2026-10-16)
+  'Un départ ponctuel se publie {} jours à l’avance au plus': 'A one-off departure can be published at most {} days in advance',
+  'Publiez votre départ au moins {} minutes à l’avance': 'Publish your departure at least {} minutes in advance',
+  'Avec un seuil de départ, publiez au moins {} h avant le départ (ou sans seuil)':
+    'With a departure threshold, publish at least {} h before departure (or without a threshold)',
+  '{} départs ponctuels à venir au maximum': '{} upcoming one-off departures maximum',
+  'Départ ponctuel : la date ne se modifie pas, publiez un nouveau départ': 'One-off departure: the date cannot be changed, publish a new departure',
+
   // Seuil de départ garanti (2026-10-14)
   'Seuil de départ : entre 1 et le nombre de places': 'Departure threshold: between 1 and the number of seats',
   'Le seuil de départ ne s’applique qu’à la vente à la place': 'The departure threshold only applies to per-seat sales',

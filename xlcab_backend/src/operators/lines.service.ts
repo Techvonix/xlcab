@@ -1,7 +1,7 @@
 import { BadRequestException, ConflictException, ForbiddenException, Injectable, NotFoundException, Optional } from '@nestjs/common';
 import { LineDeparture, RecurringLine } from '@prisma/client';
 import { AuditService } from '../audit/audit.service';
-import { TIMEZONES, addDays, localDateOf, localTimeOf, minutesOf } from '../common/local-time';
+import { TIMEZONES, addDays, isoWeekday, localDateOf, localTimeOf, minutesOf, zonedToUtc } from '../common/local-time';
 import { NotificationsService } from '../notifications/notifications.service';
 import { haversineKm } from '../parcels/parcels.constants';
 import { PayoutAccountsService } from '../payouts/payout-accounts';
@@ -9,6 +9,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import {
   ConfirmDeparturesDto,
   CreateLineDto,
+  CreateOneOffDto,
   DeparturesQueryDto,
   LineExceptionDto,
   LineSearchDto,
@@ -34,6 +35,8 @@ type Departure = LineDeparture;
 
 /** Courses qui comptent pour le seuil : payées (ou confirmées sans paiement en ligne). */
 const SEATED = ['accepted', 'started'];
+/** Départs ponctuels à venir par opérateur. */
+const MAX_ONE_OFF_PER_OPERATOR = 30;
 const THRESHOLD_CACHE_MS = 60_000;
 
 /** État du seuil de départ garanti d'un départ, tel que l'affichent les applis. */
@@ -167,7 +170,8 @@ export class LinesService {
     checkSchedule({ ...dto, returnTime: dto.returnTime ?? null, endDate: dto.endDate ?? null });
     checkThreshold(dto.pricingMode, dto.seats, dto.minPassengers ?? null);
 
-    const open = await this.prisma.recurringLine.count({ where: { operatorId: userId, status: { in: ['active', 'paused'] } } });
+    // Les départs ponctuels ont leur propre plafond.
+    const open = await this.prisma.recurringLine.count({ where: { operatorId: userId, kind: 'recurring', status: { in: ['active', 'paused'] } } });
     if (open >= MAX_LINES_PER_OPERATOR) {
       throw new BadRequestException(`${MAX_LINES_PER_OPERATOR} lignes au maximum : fermez-en une d’abord`);
     }
@@ -205,9 +209,94 @@ export class LinesService {
     return lineView(line);
   }
 
+  /**
+   * Départ ponctuel (« je pars demain à 8 h, il me reste 3 places ») : une
+   * ligne d'un seul jour, mise en vente aussitôt — publier vaut confirmer sa
+   * capacité. Tout le reste (réservation, sièges, seuil, secours, paiement,
+   * reversement) est celui des lignes régulières.
+   */
+  async createOneOff(userId: string, dto: CreateOneOffDto, now = new Date()) {
+    await this.approvedDriver(userId);
+    await this.termsAccepted(userId);
+    await this.checkPricing(userId, dto.pricingMode);
+    const vehicle = await this.ownedVehicle(userId, dto.vehicleId, dto.seats);
+    const timezone = TIMEZONES[vehicle.jurisdiction] ?? TIMEZONES.FR;
+    checkSchedule({ startDate: dto.date, endDate: dto.date, departureTime: dto.departureTime, returnTime: null });
+    checkThreshold(dto.pricingMode, dto.seats, dto.minPassengers ?? null);
+
+    const today = localDateOf(now, timezone);
+    if (dto.date > addDays(today, LINE_HORIZON_DAYS)) {
+      throw new BadRequestException(`Un départ ponctuel se publie ${LINE_HORIZON_DAYS} jours à l’avance au plus`);
+    }
+    const departureAt = zonedToUtc(dto.date, dto.departureTime, timezone);
+    if (departureAt.getTime() <= now.getTime() + LINE_BOOKING_LEAD_MIN * 60_000) {
+      throw new BadRequestException(`Publiez votre départ au moins ${LINE_BOOKING_LEAD_MIN} minutes à l’avance`);
+    }
+    // Avec un seuil, il faut laisser aux passagers le temps de l'atteindre avant l'échéance.
+    if (dto.minPassengers) {
+      const hours = await this.thresholdHours(vehicle.jurisdiction);
+      if (now >= thresholdDeadline(departureAt, hours)) {
+        throw new BadRequestException(`Avec un seuil de départ, publiez au moins ${hours} h avant le départ (ou sans seuil)`);
+      }
+    }
+    // Publier = mettre en vente : compte de versement exigé en paiement en ligne.
+    await this.payouts.assertReady(userId);
+    const pending = await this.prisma.recurringLine.count({
+      where: { operatorId: userId, kind: 'one_off', status: 'active', startDate: { gte: today } },
+    });
+    if (pending >= MAX_ONE_OFF_PER_OPERATOR) {
+      throw new BadRequestException(`${MAX_ONE_OFF_PER_OPERATOR} départs ponctuels à venir au maximum`);
+    }
+
+    const line = await this.prisma.recurringLine.create({
+      data: {
+        operatorId: userId,
+        kind: 'one_off',
+        vehicleId: dto.vehicleId,
+        originAddress: dto.originAddress,
+        originLat: dto.originLat,
+        originLng: dto.originLng,
+        destinationAddress: dto.destinationAddress,
+        destinationLat: dto.destinationLat,
+        destinationLng: dto.destinationLng,
+        pickupRadiusKm: dto.pickupRadiusKm ?? 5,
+        departureTime: dto.departureTime,
+        returnTime: null,
+        timezone,
+        jurisdiction: vehicle.jurisdiction,
+        daysOfWeek: [isoWeekday(dto.date)],
+        startDate: dto.date,
+        endDate: dto.date,
+        seats: dto.seats,
+        luggage: dto.luggage,
+        pricingMode: dto.pricingMode,
+        priceCents: dto.priceCents,
+        durationMin: dto.durationMin ?? null,
+        minPassengers: dto.minPassengers ?? null,
+        conditions: dto.conditions || null,
+        status: 'active',
+      },
+    });
+    await this.sync(line, now);
+    await this.prisma.lineDeparture.updateMany({
+      where: { lineId: line.id, status: 'to_confirm' },
+      data: { status: 'open', confirmedAt: now, ...(line.minPassengers === null ? { guaranteedAt: now } : {}) },
+    });
+    const departure = await this.prisma.lineDeparture.findFirst({ where: { lineId: line.id } });
+    await this.audit.log({ userId, action: 'line.one_off.create', entity: 'RecurringLine', entityId: line.id, metadata: { date: dto.date } });
+    return {
+      ...lineView(line),
+      departure: departure ? { ...departureView(departure), thresholdDeadline: (await this.guaranteeOf(departure, line)).deadline } : null,
+    };
+  }
+
   async update(userId: string, lineId: string, dto: UpdateLineDto, now = new Date()) {
     const line = await this.ownedLine(userId, lineId);
     if (line.status === 'closed') throw new ConflictException('Ligne fermée : créez-en une nouvelle');
+    // Départ ponctuel : son jour ne change pas (on le retire et on en publie un autre).
+    if (line.kind === 'one_off' && (dto.daysOfWeek || dto.endDate !== undefined || dto.returnTime)) {
+      throw new BadRequestException('Départ ponctuel : la date ne se modifie pas, publiez un nouveau départ');
+    }
     const next = { ...line, ...dto };
     if (dto.daysOfWeek) next.daysOfWeek = [...dto.daysOfWeek].sort();
     if (dto.pricingMode) await this.checkPricing(userId, dto.pricingMode);
@@ -597,7 +686,14 @@ export class LinesService {
   /** Passe quotidienne du planificateur : fenêtre glissante de 30 jours. */
   async syncAll(now = new Date()) {
     const lines = await this.prisma.recurringLine.findMany({ where: { status: { in: ['active', 'paused'] } } });
-    for (const line of lines) await this.sync(line, now);
+    for (const line of lines) {
+      // Départ ponctuel dont le jour est passé : la « ligne » est close (ses départs restent en historique).
+      if (line.kind === 'one_off' && line.endDate && line.endDate < localDateOf(now, line.timezone)) {
+        await this.prisma.recurringLine.update({ where: { id: line.id }, data: { status: 'closed', closedAt: now } });
+        continue;
+      }
+      await this.sync(line, now);
+    }
     return lines.length;
   }
 
@@ -766,6 +862,8 @@ function publicProfile(p: Record<string, any>) {
 
 const lineView = (l: Line) => ({
   id: l.id,
+  // recurring | one_off (départ ponctuel : startDate = endDate = son jour).
+  kind: l.kind ?? 'recurring',
   vehicleId: l.vehicleId,
   origin: { address: l.originAddress, lat: l.originLat, lng: l.originLng },
   destination: { address: l.destinationAddress, lat: l.destinationLat, lng: l.destinationLng },

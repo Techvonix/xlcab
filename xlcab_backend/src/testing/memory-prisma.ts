@@ -208,7 +208,7 @@ export function memoryPrisma() {
     })),
     recurringLine: new Table(() => ({
       pickupRadiusKm: 5, returnTime: null, timezone: 'Europe/Paris', jurisdiction: 'FR', endDate: null, durationMin: null,
-      conditions: null, minPassengers: null, status: 'active', closedAt: null, createdAt: new Date(), updatedAt: new Date(),
+      conditions: null, minPassengers: null, kind: 'recurring', status: 'active', closedAt: null, createdAt: new Date(), updatedAt: new Date(),
     })),
     lineException: new Table(() => ({ seats: null, reason: null })),
     lineDeparture: new Table(() => ({

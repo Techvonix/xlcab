@@ -9,6 +9,7 @@ import { AuthModule } from '../auth/auth.module';
 import { addDays, localDateOf } from '../common/local-time';
 import { NotificationsModule } from '../notifications/notifications.service';
 import { DEFAULT_OPERATOR_TERMS_VERSION } from '../operators/line-schedule';
+import { LinesService } from '../operators/lines.service';
 import { OperatorsModule } from '../operators/operators.module';
 import { PrismaService } from '../prisma/prisma.service';
 import { RedisService } from '../redis/redis.service';
@@ -38,6 +39,7 @@ describe('Seuil de départ garanti (intégration)', () => {
   let app: INestApplication;
   let db: ReturnType<typeof memoryPrisma>;
   let threshold: DepartureThresholdService;
+  let lines: LinesService;
   const jwt = new JwtService();
   const as = (sub: string, role: string) => `Bearer ${jwt.sign({ sub, role, jti: `j-${sub}` }, { secret: JWT_SECRET })}`;
   const http = () => request(app.getHttpServer());
@@ -120,6 +122,7 @@ describe('Seuil de départ garanti (intégration)', () => {
     app.useGlobalPipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }));
     await app.init();
     threshold = moduleRef.get(DepartureThresholdService);
+    lines = moduleRef.get(LinesService);
 
     const created = await createLine({ minPassengers: 4 });
     expect(created.status).toBe(201);
@@ -278,5 +281,71 @@ describe('Seuil de départ garanti (intégration)', () => {
     expect(departure()).toMatchObject({ minPassengers: 4, guaranteedAt: null }); // réservé : figé
     const next = db.lineDeparture.rows.find((x: any) => x.lineId === lineId && x.localDate === after);
     expect(next.minPassengers).toBeNull();
+  });
+
+  // ── Étape 2 : départ ponctuel ───────────────────────────────────────
+
+  describe('départ ponctuel (« je pars le …, il me reste N places »)', () => {
+    const inTwoDays = addDays(tomorrow, 1);
+    const publish = (extra: Record<string, unknown> = {}) =>
+      http().post('/api/v1/operators/me/departures').set('Authorization', as(SAMI, 'driver')).send({
+        vehicleId: VAN,
+        originAddress: 'Gare de Lyon Part-Dieu', originLat: LYON.lat, originLng: LYON.lng,
+        destinationAddress: 'Gare de Limoges-Bénédictins', destinationLat: LIMOGES.lat, destinationLng: LIMOGES.lng,
+        date: inTwoDays, departureTime: '09:30', seats: 3, luggage: 3, pricingMode: 'per_seat', priceCents: 3500, durationMin: 270,
+        ...extra,
+      });
+
+    it('publié et mis en vente en un geste ; trouvé et réservé comme un départ de ligne', async () => {
+      const res = await publish();
+      expect(res.status).toBe(201);
+      expect(res.body).toMatchObject({ kind: 'one_off', startDate: inTwoDays, endDate: inTwoDays, seats: 3 });
+      expect(res.body.departure).toMatchObject({ status: 'open', seatsTotal: 3, guaranteed: true, minPassengers: null });
+
+      const found = await http().get('/api/v1/lines/search').set('Authorization', as(NINA, 'passenger')).query({
+        fromLat: LYON.lat, fromLng: LYON.lng, toLat: LIMOGES.lat, toLng: LIMOGES.lng, date: inTwoDays, seats: 2,
+      });
+      const result = found.body.find((r: any) => r.departureId === res.body.departure.id);
+      expect(result).toMatchObject({ localTime: '09:30', seatsLeft: 3, unitPriceCents: 3500, totalPriceCents: 7000 });
+
+      const booked = await http().post('/api/v1/lines/bookings').set('Authorization', as(THOMAS, 'passenger'))
+        .send({ departureId: res.body.departure.id, seats: 2 });
+      expect(booked.status).toBe(201);
+      expect(booked.body).toMatchObject({ status: 'accepted', totalPriceCents: 7000 });
+    });
+
+    it('avec un seuil : en attente de passagers, comme une ligne', async () => {
+      const res = await publish({ minPassengers: 2 });
+      expect(res.status).toBe(201);
+      expect(res.body.departure).toMatchObject({ guaranteed: false, minPassengers: 2, thresholdDeadline: expect.any(String) });
+    });
+
+    it('refusé : passé, trop proche, trop lointain, seuil sans le temps de l’atteindre', async () => {
+      const today = localDateOf(new Date(), 'Europe/Paris');
+      expect((await publish({ date: addDays(today, -1) })).status).toBe(400);
+      expect((await publish({ date: addDays(today, 31) })).status).toBe(400);
+      const soon = new Date(Date.now() + 30 * MIN).toLocaleTimeString('fr-FR', { timeZone: 'Europe/Paris', hour: '2-digit', minute: '2-digit' });
+      const soonDate = new Date(Date.now() + 30 * MIN).toLocaleDateString('sv-SE', { timeZone: 'Europe/Paris' });
+      expect((await publish({ date: soonDate, departureTime: soon })).status).toBe(400);
+
+      // Dans 10 h : sans seuil, accepté ; avec un seuil (échéance 24 h), refusé.
+      const later = new Date(Date.now() + 10 * 60 * MIN);
+      const at = { date: later.toLocaleDateString('sv-SE', { timeZone: 'Europe/Paris' }), departureTime: later.toLocaleTimeString('fr-FR', { timeZone: 'Europe/Paris', hour: '2-digit', minute: '2-digit' }) };
+      const withThreshold = await publish({ ...at, minPassengers: 2 });
+      expect(withThreshold.status).toBe(400);
+      expect(withThreshold.body.message).toContain('24 h');
+      expect((await publish(at)).status).toBe(201);
+    });
+
+    it('sa date ne se modifie pas ; clos par la passe quotidienne une fois le jour passé', async () => {
+      const res = await publish();
+      const patch = await http().patch(`/api/v1/operators/me/lines/${res.body.id}`).set('Authorization', as(SAMI, 'driver')).send({ daysOfWeek: [1, 2] });
+      expect(patch.status).toBe(400);
+      expect((await http().patch(`/api/v1/operators/me/lines/${res.body.id}`).set('Authorization', as(SAMI, 'driver')).send({ priceCents: 3000 })).status).toBe(200);
+
+      await lines.syncAll(new Date(Date.now() + 4 * 24 * 3600_000));
+      expect(db.recurringLine.rows.find((l: any) => l.id === res.body.id)).toMatchObject({ status: 'closed' });
+      expect(db.lineDeparture.rows.filter((d: any) => d.lineId === res.body.id)).toHaveLength(1); // historique gardé
+    });
   });
 });

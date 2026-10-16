@@ -160,7 +160,8 @@ export class UpdateLineDto {
   conditions?: string;
 }
 
-export class CreateLineDto {
+/** Trajet, véhicule, capacité et prix : communs à une ligne régulière et à un départ ponctuel. */
+export class DepartureOfferDto {
   @IsUUID('4', { message: 'Véhicule invalide' })
   vehicleId!: string;
 
@@ -196,25 +197,6 @@ export class CreateLineDto {
 
   @Matches(HHMM, { message: 'Heure invalide (HH:MM)' })
   departureTime!: string;
-
-  @IsOptional()
-  @Matches(HHMM, { message: 'Heure invalide (HH:MM)' })
-  returnTime?: string | null;
-
-  @IsArray()
-  @ArrayMinSize(1, { message: 'Choisissez au moins un jour' })
-  @ArrayUnique()
-  @IsInt({ each: true })
-  @Min(1, { each: true, message: 'Jour invalide (1 = lundi … 7 = dimanche)' })
-  @Max(7, { each: true, message: 'Jour invalide (1 = lundi … 7 = dimanche)' })
-  daysOfWeek!: number[];
-
-  @Matches(DATE, { message: 'Date invalide (AAAA-MM-JJ)' })
-  startDate!: string;
-
-  @IsOptional()
-  @Matches(DATE, { message: 'Date invalide (AAAA-MM-JJ)' })
-  endDate?: string | null;
 
   @IsInt()
   @Min(1, { message: 'Nombre de places invalide' })
@@ -256,6 +238,33 @@ export class CreateLineDto {
   @IsString()
   @MaxLength(1000, { message: 'Conditions limitées à 1000 caractères' })
   conditions?: string;
+}
+
+export class CreateLineDto extends DepartureOfferDto {
+  @IsOptional()
+  @Matches(HHMM, { message: 'Heure invalide (HH:MM)' })
+  returnTime?: string | null;
+
+  @IsArray()
+  @ArrayMinSize(1, { message: 'Choisissez au moins un jour' })
+  @ArrayUnique()
+  @IsInt({ each: true })
+  @Min(1, { each: true, message: 'Jour invalide (1 = lundi … 7 = dimanche)' })
+  @Max(7, { each: true, message: 'Jour invalide (1 = lundi … 7 = dimanche)' })
+  daysOfWeek!: number[];
+
+  @Matches(DATE, { message: 'Date invalide (AAAA-MM-JJ)' })
+  startDate!: string;
+
+  @IsOptional()
+  @Matches(DATE, { message: 'Date invalide (AAAA-MM-JJ)' })
+  endDate?: string | null;
+}
+
+/** Départ ponctuel : « je pars le … à …, il me reste N places » (un seul jour). */
+export class CreateOneOffDto extends DepartureOfferDto {
+  @Matches(DATE, { message: 'Date invalide (AAAA-MM-JJ)' })
+  date!: string;
 }
 
 /** Jour sans départ (sans `seats`) ou à capacité réduite. */

@@ -4,6 +4,7 @@ import { Roles, RolesGuard } from '../auth/guards/roles.guard';
 import {
   ConfirmDeparturesDto,
   CreateLineDto,
+  CreateOneOffDto,
   DeparturesQueryDto,
   LineExceptionDto,
   LineSearchDto,
@@ -83,6 +84,12 @@ export class OperatorsController {
   @Get('departures')
   departures(@Req() req: any, @Query() q: DeparturesQueryDto) {
     return this.lines.departures(req.user.sub, q);
+  }
+
+  /** Départ ponctuel : publié et mis en vente en un geste. */
+  @Post('departures')
+  createOneOff(@Req() req: any, @Body() dto: CreateOneOffDto) {
+    return this.lines.createOneOff(req.user.sub, dto);
   }
 
   @Post('departures/confirm')

@@ -619,6 +619,9 @@ model RecurringLine {
   // Seuil de départ garanti : « je pars d'office dès N passagers » (vente à la
   // place seulement ; null = départ garanti dès sa confirmation).
   minPassengers      Int?
+  // recurring = ligne régulière ; one_off = départ ponctuel (« je pars demain,
+  // il me reste 3 places ») : un seul jour, confirmé dès sa publication.
+  kind               String    @default("recurring")
   conditions         String?
   status             String    @default("active") // active|paused|closed
   createdAt          DateTime  @default(now())
