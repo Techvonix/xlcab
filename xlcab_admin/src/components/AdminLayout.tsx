@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { BadgeCheck, Banknote, BarChart3, Euro, FileClock, Globe, LogOut, ReceiptText, Route, Siren, Star, Store, UserCheck, Users } from 'lucide-react';
+import { BadgeCheck, Banknote, MapPin, BarChart3, Euro, FileClock, Globe, LogOut, ReceiptText, Route, Siren, Star, Store, UserCheck, Users } from 'lucide-react';
 import { Link, NavLink, Outlet } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { logout } from '@/lib/api';
@@ -18,6 +18,7 @@ const NAV = [
   { to: '/incidents', label: t('incidents'), icon: Siren },
   { to: '/operateurs', label: t('boOperateurs'), icon: BadgeCheck },
   { to: '/bourse', label: t('boBourseEtLignes'), icon: Store },
+  { to: '/points-de-rencontre', label: t('mpPointsDeRencontre'), icon: MapPin },
   { to: '/reversements', label: t('rvReversements'), icon: Banknote },
   { to: '/notes', label: t('notesDesPassagers'), icon: Star },
   { to: '/utilisateurs', label: t('utilisateurs'), icon: Users },

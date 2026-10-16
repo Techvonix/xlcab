@@ -1,5 +1,5 @@
 import { ADMIN_ROLE, decodeJwt, useAuth } from './auth-store';
-import type { AdminAnalytics, AdminTrip, AdminUser, AuditLog, Incident, Jurisdiction, NewTariff, Paged, PendingDriver, Tariff, TariffOverview, AdminInvoicePage, AdminRating, RatedDriver, AdminOperator, AtRiskDeparture, RescueCandidate, AdminCancellation, AdminPenalty, AdminMarketRequest, AdminPayout, AdminBonus, PayoutStatus } from './types';
+import type { AdminAnalytics, AdminTrip, AdminUser, AuditLog, Incident, Jurisdiction, NewTariff, Paged, PendingDriver, Tariff, TariffOverview, AdminInvoicePage, AdminRating, RatedDriver, AdminOperator, AtRiskDeparture, RescueCandidate, AdminCancellation, AdminPenalty, AdminMarketRequest, AdminPayout, AdminBonus, PayoutStatus, MeetingPoint, NewMeetingPoint } from './types';
 import { lang, t } from '@/lib/i18n';
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL ?? '';
@@ -210,6 +210,10 @@ export const api = {
   /** Reversements aux opérateurs ; sans statut : ceux qui ne sont pas encore partis. */
   payouts: (status?: string) => apiJson<AdminPayout[]>(`/api/v1/admin/payouts${qs({ status })}`),
   bonuses: () => apiJson<AdminBonus[]>('/api/v1/admin/payouts/bonuses'),
+  meetingPoints: () => apiJson<MeetingPoint[]>('/api/v1/admin/meeting-points'),
+  createMeetingPoint: (body: NewMeetingPoint) => apiJson<MeetingPoint>('/api/v1/admin/meeting-points', { method: 'POST', body }),
+  updateMeetingPoint: (id: string, body: { instructions?: string | null; transit?: string | null; active?: boolean }) =>
+    apiJson<MeetingPoint>(`/api/v1/admin/meeting-points/${encodeURIComponent(id)}`, { method: 'PATCH', body }),
   retryBonus: (id: string) => apiJson<{ id: string; status: AdminBonus['status'] }>(`/api/v1/admin/payouts/bonuses/${encodeURIComponent(id)}/retry`, { method: 'POST' }),
   retryPayout: (id: string) => apiJson<{ id: string; status: PayoutStatus }>(`/api/v1/admin/payouts/${encodeURIComponent(id)}/retry`, { method: 'POST' }),
 };

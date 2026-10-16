@@ -360,3 +360,27 @@ export interface RatedDriver {
   totalTrips: number;
   lowCount: number;
 }
+
+/** Point de rencontre du catalogue (lieux d'arrêt des lignes). */
+export interface MeetingPoint {
+  id: string;
+  city: string;
+  name: string;
+  address: string;
+  lat: number;
+  lng: number;
+  instructions: string | null;
+  transit: string | null;
+  jurisdiction: string;
+  active: boolean;
+}
+
+export interface NewMeetingPoint {
+  city: string;
+  name: string;
+  address: string;
+  lat: number;
+  lng: number;
+  instructions: string | null;
+  transit: string | null;
+}

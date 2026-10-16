@@ -23,6 +23,7 @@ const InvoicesPage = page(() => import('./features/invoices/InvoicesPage'), 'Inv
 const OperatorsPage = page(() => import('./features/operators/OperatorsPage'), 'OperatorsPage');
 const MarketPage = page(() => import('./features/market/MarketPage'), 'MarketPage');
 const PayoutsPage = page(() => import('./features/payouts/PayoutsPage'), 'PayoutsPage');
+const MeetingPointsPage = page(() => import('./features/meeting-points/MeetingPointsPage'), 'MeetingPointsPage');
 
 const loading = (
   <p role="status" className="p-8">
@@ -58,6 +59,7 @@ export function App() {
           <Route path="operateurs" element={<OperatorsPage />} />
           <Route path="bourse" element={<MarketPage />} />
           <Route path="reversements" element={<PayoutsPage />} />
+          <Route path="points-de-rencontre" element={<MeetingPointsPage />} />
           <Route path="utilisateurs" element={<UsersPage />} />
           <Route path="notes" element={<RatingsPage />} />
           <Route path="tarifs" element={<TariffsPage />} />
