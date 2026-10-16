@@ -31,6 +31,7 @@ class _LineFormScreenState extends ConsumerState<LineFormScreen> {
   final _price = TextEditingController();
   final _duration = TextEditingController();
   final _conditions = TextEditingController();
+  final _minPassengers = TextEditingController();
 
   Place? _origin;
   Place? _destination;
@@ -40,12 +41,14 @@ class _LineFormScreenState extends ConsumerState<LineFormScreen> {
   final Set<int> _days = {1, 2, 3, 4, 5};
   DateTime? _start;
   bool _perSeat = false;
+  /// Seuil de départ garanti : « je pars d'office dès N passagers ».
+  bool _threshold = false;
   bool _busy = false;
   String? _error;
 
   @override
   void dispose() {
-    for (final c in [_seats, _luggage, _price, _duration, _conditions]) {
+    for (final c in [_seats, _luggage, _price, _duration, _conditions, _minPassengers]) {
       c.dispose();
     }
     super.dispose();
@@ -109,6 +112,7 @@ class _LineFormScreenState extends ConsumerState<LineFormScreen> {
       priceCents: _cents(_price.text)!,
       durationMin: int.tryParse(_duration.text),
       conditions: _conditions.text.trim(),
+      minPassengers: _perSeat && _threshold ? int.tryParse(_minPassengers.text) : null,
     );
     setState(() => _busy = true);
     try {
@@ -234,6 +238,35 @@ class _LineFormScreenState extends ConsumerState<LineFormScreen> {
                     padding: const EdgeInsets.only(top: AppSpacing.xs),
                     child: Text(l10n.opVenteALaPlaceReservee, style: AppTypography.caption),
                   ),
+                if (_perSeat) ...[
+                  SwitchListTile(
+                    contentPadding: EdgeInsets.zero,
+                    title: Text(l10n.gtSeuilTitre),
+                    subtitle: Text(l10n.gtSeuilAide),
+                    value: _threshold,
+                    onChanged: (on) => setState(() {
+                      _threshold = on;
+                      if (on && _minPassengers.text.isEmpty) {
+                        final seats = int.tryParse(_seats.text);
+                        // Proposition : la moitié des places, arrondie au-dessus.
+                        if (seats != null && seats > 0) _minPassengers.text = '${(seats + 1) ~/ 2}';
+                      }
+                    }),
+                  ),
+                  if (_threshold)
+                    TextFormField(
+                      controller: _minPassengers,
+                      keyboardType: TextInputType.number,
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                      decoration: InputDecoration(labelText: l10n.gtSeuilChamp),
+                      validator: (v) {
+                        final n = int.tryParse(v ?? '');
+                        final seats = int.tryParse(_seats.text) ?? 0;
+                        if (n == null || n < 1 || (seats > 0 && n > seats)) return l10n.gtSeuilInvalide;
+                        return null;
+                      },
+                    ),
+                ],
                 const SizedBox(height: AppSpacing.sm),
                 TextFormField(
                   controller: _price,

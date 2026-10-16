@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:xlcab_core/models/departure_guarantee.dart';
 import 'package:xlcab_core/models/market.dart';
 import 'package:xlcab_core/providers/clock_provider.dart';
 import 'package:xlcab_core/providers/market_provider.dart';
@@ -65,8 +66,9 @@ Future<void> pump(WidgetTester tester, Widget screen) async {
   await tester.pumpAndSettle();
 }
 
-LineSearchResult departure() => LineSearchResult(
+LineSearchResult departure({DepartureGuarantee? guarantee}) => LineSearchResult(
       departureId: 'd1',
+      guarantee: guarantee,
       departureAt: DateTime(2026, 10, 12, 5),
       localTime: '05:00',
       origin: 'Porte Maillot, Paris',
@@ -145,6 +147,36 @@ void main() {
       expect(market.calls.last, 'bookLine:d1:3:1:0');
       expect(market.bookedSeatNumbers, isNull); // aucun siège choisi : attribution automatique
       expect(find.text('réservation trip-1'), findsOneWidget); // récapitulatif et QR
+    });
+
+    testWidgets('seuil de départ : « encore 2 passagers », remboursement intégral annoncé avant de payer', (tester) async {
+      market.lineResults = [
+        departure(guarantee: DepartureGuarantee(guaranteed: false, minPassengers: 4, missingPassengers: 2, deadline: DateTime(2026, 10, 11, 5))),
+      ];
+      await pump(tester, const LineSearchScreen());
+      await tester.tap(find.text('Départ'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Arrivée'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Rechercher'));
+      await tester.pumpAndSettle();
+      expect(find.text('Encore 2 passagers pour confirmer le départ'), findsOneWidget);
+
+      await tester.tap(find.text('Réserver'));
+      await tester.pumpAndSettle();
+      expect(find.textContaining('vous êtes remboursé intégralement'), findsOneWidget);
+    });
+
+    testWidgets('départ déjà confirmé : affiché comme tel', (tester) async {
+      market.lineResults = [departure(guarantee: const DepartureGuarantee(guaranteed: true, minPassengers: 4))];
+      await pump(tester, const LineSearchScreen());
+      await tester.tap(find.text('Départ'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Arrivée'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Rechercher'));
+      await tester.pumpAndSettle();
+      expect(find.text('Départ confirmé'), findsOneWidget);
     });
 
     testWidgets('choix du siège : sièges pris désactivés, choix complet exigé, sièges transmis', (tester) async {

@@ -22,6 +22,7 @@ import 'package:xlcab_core/l10n/l10n.dart';
 import '../../models/return_trip.dart';
 import '../../services/payment_service.dart';
 import 'seat_picker.dart';
+import 'guarantee_line.dart';
 
 /// Recherche d'un départ de ligne régulière et réservation de places.
 class LineSearchScreen extends ConsumerStatefulWidget {
@@ -216,6 +217,7 @@ class LineResultCard extends ConsumerWidget {
         ),
         Text(r.perSeat ? l10n.mkcPrixParPlace(formatPrice(r.unitPriceCents, locale: locale)) : l10n.mkcVehiculeEntier, style: AppTypography.caption),
         if (r.conditions != null) Text(r.conditions!, style: AppTypography.caption),
+        if (r.guarantee != null) GuaranteeLine(guarantee: r.guarantee!, missing: r.guarantee!.missingPassengers),
         const SizedBox(height: AppSpacing.xs),
         Wrap(spacing: AppSpacing.sm, runSpacing: AppSpacing.xs, children: [for (final s in reasons) StatusPill(label: s)]),
         const SizedBox(height: AppSpacing.sm),
@@ -360,6 +362,9 @@ class _BookLineSheetState extends ConsumerState<BookLineSheet> {
             maxLength: 300,
             decoration: InputDecoration(labelText: l10n.mkcMessageAuChauffeur, hintText: l10n.mkcMessageExemple),
           ),
+          // Seuil pas encore atteint : le passager sait avant de payer qu'il sera remboursé sinon.
+          if (r.guarantee?.pending == true && r.guarantee!.deadline != null)
+            Text(l10n.gtRemboursement(formatTripDate(r.guarantee!.deadline!, locale: locale)), style: AppTypography.caption),
           Text(l10n.mkcPaiementPlusTard, style: AppTypography.caption),
           if (_error != null) Text(_error!, style: TextStyle(color: Theme.of(context).colorScheme.error)),
           const SizedBox(height: AppSpacing.sm),

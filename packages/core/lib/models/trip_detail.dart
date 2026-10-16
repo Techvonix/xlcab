@@ -1,3 +1,4 @@
+import 'departure_guarantee.dart';
 import 'shuttle.dart';
 import 'trip.dart';
 
@@ -22,7 +23,11 @@ class TripDetail {
     this.destinationLng,
     this.invoiceId,
     this.invoiceNumber,
+    this.lineGuarantee,
   });
+
+  /// Place sur une ligne : seuil de départ garanti (« confirmé » ou « en attente de passagers »).
+  final DepartureGuarantee? lineGuarantee;
 
   /// Facture émise (course terminée ou frais d'annulation) : téléchargeable.
   final String? invoiceId;
@@ -86,6 +91,7 @@ class TripDetail {
       dispatchAt: dispatchAt is String ? DateTime.tryParse(dispatchAt)?.toLocal() : null,
       id: json['id'] as String,
       source: json['source'] is String ? json['source'] as String : null,
+      lineGuarantee: DepartureGuarantee.fromJson(json['lineGuarantee']),
       originLat: origin['lat'] is num ? (origin['lat'] as num).toDouble() : null,
       originLng: origin['lng'] is num ? (origin['lng'] as num).toDouble() : null,
       destinationLat: destination['lat'] is num ? (destination['lat'] as num).toDouble() : null,

@@ -3765,4 +3765,81 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get expPreparation => 'Preparing the download';
+
+  @override
+  String get gtConfirme => 'Departure confirmed';
+
+  @override
+  String gtEnAttente(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count more passengers needed to confirm the departure',
+      one: '1 more passenger needed to confirm the departure',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get gtEnAttenteCourt =>
+      'Waiting for more passengers to confirm the departure';
+
+  @override
+  String get gtAnnule => 'Departure cancelled: not enough passengers';
+
+  @override
+  String gtRemboursement(String date) {
+    return 'If it is not confirmed by $date, the departure is cancelled and you are refunded in full.';
+  }
+
+  @override
+  String get gtSeuilTitre => 'Guaranteed departure threshold';
+
+  @override
+  String get gtSeuilAide =>
+      'You go automatically as soon as this number of passengers has booked. If it is not reached 24 h before departure, the departure is cancelled at no cost, passengers are refunded and you get no penalty.';
+
+  @override
+  String get gtSeuilChamp => 'I go from … passengers';
+
+  @override
+  String get gtSeuilInvalide => 'Between 1 and the number of seats';
+
+  @override
+  String gtSeuilRappel(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Your threshold: $count passengers.',
+      one: 'Your threshold: 1 passenger.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String gtEcheance(String date) {
+    return 'To be reached by $date';
+  }
+
+  @override
+  String get gtJePars => 'I’ll go anyway';
+
+  @override
+  String get gtJeParsTitre => 'Go without waiting for the threshold?';
+
+  @override
+  String get gtJeParsTexte =>
+      'Your departure becomes firm: your passengers are notified, and a cancellation on your side will follow the usual protocol (backup driver, penalties).';
+
+  @override
+  String get gtJeParsFait =>
+      'Departure confirmed: your passengers have been notified.';
+
+  @override
+  String get gtRetirerExplication =>
+      'Your threshold has not been reached: your passengers will be refunded in full, with no backup driver and no penalty for you.';
+
+  @override
+  String get gtDepartRetire =>
+      'Departure withdrawn: your passengers are refunded.';
 }

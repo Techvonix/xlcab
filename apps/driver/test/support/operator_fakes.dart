@@ -126,6 +126,9 @@ class FakeOperatorService extends OperatorService {
   Future<void> ready(String departureId) async => _act('ready');
 
   @override
+  Future<void> guaranteeDeparture(String departureId) async => _act('guaranteeDeparture');
+
+  @override
   Future<String?> checkIn(String departureId, String qrCode) async {
     _act('checkIn:$qrCode');
     return 'Léa';

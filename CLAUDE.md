@@ -523,6 +523,30 @@ référence — les exigences de la Partie 8 priment.
   le 2026-10-14, portée européenne (paramètres par pays dans `JurisdictionConfig`, jamais en dur). Ordre de travail :
   section 10 du dossier (1. seuil de départ garanti, 2. départ ponctuel, 3. points de rencontre, 4. colis sur les
   lignes, 5. dashcam, 6. Stripe réel, 7. vidéos explicatives en dernier).
+- Seuil de départ garanti (étape 1, 2026-10-16, migrations `line_threshold` + `line_threshold_backfill` qui marque
+  garantis les départs déjà confirmés) : `RecurringLine.minPassengers` (vente à la place seulement, 1..places, null =
+  sans seuil), copié sur `LineDeparture.minPassengers` (plafonné à la capacité du jour, figé dès la 1re réservation) ;
+  `guaranteedAt` = engagement ferme (posé à la confirmation si pas de seuil, sinon par
+  `LinesService.guaranteeIfReached` après chaque réservation confirmée — places des courses accepted|started — ou par
+  `POST /operators/me/departures/:id/guarantee` « Je pars quand même ») → notifications `line.guaranteed` (passagers) et
+  `line.guaranteed.driver` (« Top départ ») ; `thresholdMissedAt`. Échéance = départ − `JurisdictionConfig.
+  lineThresholdDeadlineHours` (24 par défaut, par pays) : après elle, un départ non garanti ne se vend plus
+  (`sellable`) et `DepartureThresholdService.tick` (planificateur) l'annule : courses accepted/awaiting_payment
+  annulées sans frais, remboursées, places et sièges rendus, aucune pénalité ni secours ; ne se rouvre pas. Retrait du
+  chauffeur AVANT le seuil (`cancelDeparture`) = même libération (`driver_withdrew`) ; après le seuil = protocole de
+  secours habituel. Vues : `guarantee` dans la recherche (+ `missingPassengers`), la réservation, `/trips/:id`
+  (`lineGuarantee`), `assignments`, `manifest` ; `departures` (minPassengers, guaranteed, thresholdMissed,
+  thresholdDeadline). Conséquence voulue : un départ à seuil à moins de 24 h n'est jamais vendable s'il n'est pas déjà
+  garanti. Apps : `core/models/departure_guarantee.dart` ; chauffeur : interrupteur « Seuil de départ garanti » du
+  formulaire de ligne (moitié des places proposée), carte « Encore N passagers » + « Je pars quand même » et
+  explication du retrait sans pénalité dans `departure_screen`, état dans la liste des départs et `AssignmentTile` ;
+  passager : `screens/market/guarantee_line.dart` (`GuaranteeLine`) sur la carte de résultat, dans `BookLineSheet`
+  (remboursement intégral annoncé avant de payer) et sur l'écran 8. Clés ARB `gt*`. Tests : serveur
+  `line-bookings/departure-threshold.integration.spec.ts` ; apps (non exécutables ici) dans
+  `operator_screens_test.dart`, `market_screens_test.dart`, `core/test/models/departure_guarantee_test.dart`.
+  Démo : Sami (`sami.operateur`, 9e compte, créé après Chris pour ne pas décaler les numéros des scripts) Lyon Part-Dieu
+  → Limoges 8 h, 7 places à 30 €, seuil 4 ; Karim a 3 places sur le départ d'APRÈS-DEMAIN (« encore 1 passager ») ;
+  Lyon et Limoges dans les favoris de Léa.
 - Migrations : `init_xlcab` appliquée sur la base locale ; toute modification de
   `prisma/schema.prisma` demande désormais `npx prisma migrate dev --name <nom>`. Référentiel :
   `npx prisma db seed` (config FR uniquement).

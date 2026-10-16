@@ -2174,5 +2174,50 @@
   "expExplication": "Votre navigateur va télécharger un fichier avec toutes les données de votre compte : profil, trajets, paiements, préférences, contacts de confiance. Le lien est valable 5 minutes et ne sert qu’une fois. Cinq téléchargements par jour au plus.",
   "expTelecharger": "Télécharger",
   "expOuvert": "Le téléchargement a démarré dans votre navigateur.",
-  "expPreparation": "Préparation du téléchargement"
+  "expPreparation": "Préparation du téléchargement",
+  "gtConfirme": "Départ confirmé",
+  "gtEnAttente": "{count, plural, =1{Encore 1 passager pour confirmer le départ} other{Encore {count} passagers pour confirmer le départ}}",
+  "@gtEnAttente": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "gtEnAttenteCourt": "En attente d’autres passagers pour confirmer le départ",
+  "gtAnnule": "Départ annulé : pas assez de passagers",
+  "gtRemboursement": "S’il n’est pas confirmé avant le {date}, le départ est annulé et vous êtes remboursé intégralement.",
+  "@gtRemboursement": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "gtSeuilTitre": "Seuil de départ garanti",
+  "gtSeuilAide": "Vous partez d’office dès que ce nombre de passagers a réservé. S’il n’est pas atteint 24 h avant le départ, le départ est annulé sans frais, les passagers sont remboursés et vous n’avez aucune pénalité.",
+  "gtSeuilChamp": "Je pars dès … passagers",
+  "gtSeuilInvalide": "Entre 1 et le nombre de places",
+  "gtSeuilRappel": "{count, plural, =1{Votre seuil : 1 passager.} other{Votre seuil : {count} passagers.}}",
+  "@gtSeuilRappel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "gtEcheance": "À atteindre avant le {date}",
+  "@gtEcheance": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "gtJePars": "Je pars quand même",
+  "gtJeParsTitre": "Partir sans attendre le seuil ?",
+  "gtJeParsTexte": "Votre départ devient ferme : vos passagers sont prévenus, et une annulation de votre part suivra le protocole habituel (chauffeur de secours, pénalités).",
+  "gtJeParsFait": "Départ confirmé : vos passagers sont prévenus.",
+  "gtRetirerExplication": "Votre seuil n’est pas atteint : vos passagers seront remboursés intégralement, sans chauffeur de secours et sans pénalité pour vous.",
+  "gtDepartRetire": "Départ retiré : vos passagers sont remboursés."
 }

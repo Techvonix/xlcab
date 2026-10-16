@@ -16,6 +16,7 @@ import 'package:xlcab_ui/theme/app_typography.dart';
 import 'package:xlcab_core/utils/formatters.dart';
 import 'package:xlcab_ui/widgets/primary_button.dart';
 import 'package:xlcab_core/l10n/l10n.dart';
+import '../market/guarantee_line.dart';
 
 /// Ouverture d'un lien externe (PDF de facture) — injectable pour les tests.
 final externalLinkOpenerProvider = Provider<Future<bool> Function(Uri)>(
@@ -121,6 +122,9 @@ class _Body extends ConsumerWidget {
         ],
         const SizedBox(height: AppSpacing.lg),
         _Recap(trip: trip, locale: locale),
+        // Place sur une ligne à seuil : départ confirmé, ou en attente d'autres passagers.
+        if (trip.isLine && !cancelled && !completed && trip.lineGuarantee?.minPassengers != null)
+          GuaranteeLine(guarantee: trip.lineGuarantee!, showRefund: true),
         const SizedBox(height: AppSpacing.lg),
         if (trip.status.isTrackable)
           Padding(

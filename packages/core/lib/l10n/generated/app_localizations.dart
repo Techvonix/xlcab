@@ -6482,6 +6482,108 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Préparation du téléchargement'**
   String get expPreparation;
+
+  /// No description provided for @gtConfirme.
+  ///
+  /// In fr, this message translates to:
+  /// **'Départ confirmé'**
+  String get gtConfirme;
+
+  /// No description provided for @gtEnAttente.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{Encore 1 passager pour confirmer le départ} other{Encore {count} passagers pour confirmer le départ}}'**
+  String gtEnAttente(int count);
+
+  /// No description provided for @gtEnAttenteCourt.
+  ///
+  /// In fr, this message translates to:
+  /// **'En attente d’autres passagers pour confirmer le départ'**
+  String get gtEnAttenteCourt;
+
+  /// No description provided for @gtAnnule.
+  ///
+  /// In fr, this message translates to:
+  /// **'Départ annulé : pas assez de passagers'**
+  String get gtAnnule;
+
+  /// No description provided for @gtRemboursement.
+  ///
+  /// In fr, this message translates to:
+  /// **'S’il n’est pas confirmé avant le {date}, le départ est annulé et vous êtes remboursé intégralement.'**
+  String gtRemboursement(String date);
+
+  /// No description provided for @gtSeuilTitre.
+  ///
+  /// In fr, this message translates to:
+  /// **'Seuil de départ garanti'**
+  String get gtSeuilTitre;
+
+  /// No description provided for @gtSeuilAide.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vous partez d’office dès que ce nombre de passagers a réservé. S’il n’est pas atteint 24 h avant le départ, le départ est annulé sans frais, les passagers sont remboursés et vous n’avez aucune pénalité.'**
+  String get gtSeuilAide;
+
+  /// No description provided for @gtSeuilChamp.
+  ///
+  /// In fr, this message translates to:
+  /// **'Je pars dès … passagers'**
+  String get gtSeuilChamp;
+
+  /// No description provided for @gtSeuilInvalide.
+  ///
+  /// In fr, this message translates to:
+  /// **'Entre 1 et le nombre de places'**
+  String get gtSeuilInvalide;
+
+  /// No description provided for @gtSeuilRappel.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{Votre seuil : 1 passager.} other{Votre seuil : {count} passagers.}}'**
+  String gtSeuilRappel(int count);
+
+  /// No description provided for @gtEcheance.
+  ///
+  /// In fr, this message translates to:
+  /// **'À atteindre avant le {date}'**
+  String gtEcheance(String date);
+
+  /// No description provided for @gtJePars.
+  ///
+  /// In fr, this message translates to:
+  /// **'Je pars quand même'**
+  String get gtJePars;
+
+  /// No description provided for @gtJeParsTitre.
+  ///
+  /// In fr, this message translates to:
+  /// **'Partir sans attendre le seuil ?'**
+  String get gtJeParsTitre;
+
+  /// No description provided for @gtJeParsTexte.
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre départ devient ferme : vos passagers sont prévenus, et une annulation de votre part suivra le protocole habituel (chauffeur de secours, pénalités).'**
+  String get gtJeParsTexte;
+
+  /// No description provided for @gtJeParsFait.
+  ///
+  /// In fr, this message translates to:
+  /// **'Départ confirmé : vos passagers sont prévenus.'**
+  String get gtJeParsFait;
+
+  /// No description provided for @gtRetirerExplication.
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre seuil n’est pas atteint : vos passagers seront remboursés intégralement, sans chauffeur de secours et sans pénalité pour vous.'**
+  String get gtRetirerExplication;
+
+  /// No description provided for @gtDepartRetire.
+  ///
+  /// In fr, this message translates to:
+  /// **'Départ retiré : vos passagers sont remboursés.'**
+  String get gtDepartRetire;
 }
 
 class _AppLocalizationsDelegate

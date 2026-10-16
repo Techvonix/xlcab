@@ -3788,4 +3788,79 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get expPreparation => 'Préparation du téléchargement';
+
+  @override
+  String get gtConfirme => 'Départ confirmé';
+
+  @override
+  String gtEnAttente(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Encore $count passagers pour confirmer le départ',
+      one: 'Encore 1 passager pour confirmer le départ',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get gtEnAttenteCourt =>
+      'En attente d’autres passagers pour confirmer le départ';
+
+  @override
+  String get gtAnnule => 'Départ annulé : pas assez de passagers';
+
+  @override
+  String gtRemboursement(String date) {
+    return 'S’il n’est pas confirmé avant le $date, le départ est annulé et vous êtes remboursé intégralement.';
+  }
+
+  @override
+  String get gtSeuilTitre => 'Seuil de départ garanti';
+
+  @override
+  String get gtSeuilAide =>
+      'Vous partez d’office dès que ce nombre de passagers a réservé. S’il n’est pas atteint 24 h avant le départ, le départ est annulé sans frais, les passagers sont remboursés et vous n’avez aucune pénalité.';
+
+  @override
+  String get gtSeuilChamp => 'Je pars dès … passagers';
+
+  @override
+  String get gtSeuilInvalide => 'Entre 1 et le nombre de places';
+
+  @override
+  String gtSeuilRappel(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Votre seuil : $count passagers.',
+      one: 'Votre seuil : 1 passager.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String gtEcheance(String date) {
+    return 'À atteindre avant le $date';
+  }
+
+  @override
+  String get gtJePars => 'Je pars quand même';
+
+  @override
+  String get gtJeParsTitre => 'Partir sans attendre le seuil ?';
+
+  @override
+  String get gtJeParsTexte =>
+      'Votre départ devient ferme : vos passagers sont prévenus, et une annulation de votre part suivra le protocole habituel (chauffeur de secours, pénalités).';
+
+  @override
+  String get gtJeParsFait => 'Départ confirmé : vos passagers sont prévenus.';
+
+  @override
+  String get gtRetirerExplication =>
+      'Votre seuil n’est pas atteint : vos passagers seront remboursés intégralement, sans chauffeur de secours et sans pénalité pour vous.';
+
+  @override
+  String get gtDepartRetire => 'Départ retiré : vos passagers sont remboursés.';
 }

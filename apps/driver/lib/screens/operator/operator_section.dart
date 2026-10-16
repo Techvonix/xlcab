@@ -244,9 +244,14 @@ class AssignmentTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final a = assignment;
     final locale = Localizations.localeOf(context).languageCode;
-    final state = a.started ? l10n.opEnCours : (a.ready ? l10n.opEnRoute : l10n.opAConfirmerEnRoute);
+    final pending = a.guarantee?.pending == true;
+    final state = a.started
+        ? l10n.opEnCours
+        : pending
+            ? l10n.gtEnAttente(((a.guarantee!.minPassengers ?? 0) - a.passengers).clamp(1, 99))
+            : (a.ready ? l10n.opEnRoute : l10n.opAConfirmerEnRoute);
     return OpCard(
-      highlight: !a.ready && !a.started,
+      highlight: !a.ready && !a.started && !pending,
       child: InkWell(
         onTap: () => context.push(AppRoutes.departureFor(a.departureId)),
         child: Row(children: [

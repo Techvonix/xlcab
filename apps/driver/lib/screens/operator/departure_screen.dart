@@ -68,13 +68,26 @@ class _DepartureScreenState extends ConsumerState<DepartureScreen> {
     if (ok) await _do(() => _service.completeDeparture(widget.departureId), success: l10n.opDepartTermine);
   }
 
-  Future<void> _cancel() async {
-    final ok = await confirmDialog(context, title: l10n.opAnnulerCeDepart, body: l10n.opAnnulerCeDepartExplication, action: l10n.opContinuer);
+  Future<void> _guarantee() async {
+    final ok = await confirmDialog(context, title: l10n.gtJeParsTitre, body: l10n.gtJeParsTexte, action: l10n.gtJePars);
+    if (ok) await _do(() => _service.guaranteeDeparture(widget.departureId), success: l10n.gtJeParsFait);
+  }
+
+  Future<void> _cancel(Manifest m) async {
+    // Avant le seuil, le chauffeur ne s'était pas engagé : retrait sans secours ni pénalité.
+    final pending = m.guarantee?.pending == true;
+    final ok = await confirmDialog(
+      context,
+      title: l10n.opAnnulerCeDepart,
+      body: pending ? l10n.gtRetirerExplication : l10n.opAnnulerCeDepartExplication,
+      action: l10n.opContinuer,
+    );
     if (!ok || !mounted) return;
     final reason = await textDialog(context, title: l10n.opAnnulerCeDepart, label: l10n.opMotif, action: l10n.opAnnulerLeDepart);
     if (reason == null || !mounted) return;
     setState(() => _busy = true);
-    final done = await runAction(context, () => _service.cancelDeparture(widget.departureId, reason), success: l10n.opDepartConfieAuSecours);
+    final done = await runAction(context, () => _service.cancelDeparture(widget.departureId, reason),
+        success: pending ? l10n.gtDepartRetire : l10n.opDepartConfieAuSecours);
     if (!mounted) return;
     setState(() => _busy = false);
     if (done) {
@@ -102,6 +115,28 @@ class _DepartureScreenState extends ConsumerState<DepartureScreen> {
               Text(l10n.opTrajet(m.origin, m.destination)),
               Text(l10n.opPassagersReservations(m.seatsBooked, m.passengers.length), style: AppTypography.caption),
               const SizedBox(height: AppSpacing.md),
+              if (m.guarantee?.pending == true && !m.started)
+                OpCard(
+                  highlight: true,
+                  child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+                    Text(l10n.gtEnAttente((m.guarantee!.minPassengers! - m.seatsBooked).clamp(1, 99)), style: AppTypography.bodyBold),
+                    const SizedBox(height: AppSpacing.xs),
+                    Text(l10n.gtSeuilRappel(m.guarantee!.minPassengers!)),
+                    if (m.guarantee!.deadline != null)
+                      Text(l10n.gtEcheance(formatTripDate(m.guarantee!.deadline!, locale: locale)), style: AppTypography.caption),
+                    const SizedBox(height: AppSpacing.sm),
+                    OutlinedButton.icon(onPressed: _busy ? null : _guarantee, icon: const Icon(Icons.check), label: Text(l10n.gtJePars)),
+                  ]),
+                )
+              else if (m.guarantee?.guaranteed == true && m.guarantee?.minPassengers != null && !m.started)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                  child: Row(children: [
+                    const ExcludeSemantics(child: Icon(Icons.verified, color: AppColors.success)),
+                    const SizedBox(width: AppSpacing.sm),
+                    Expanded(child: Text(l10n.gtConfirme, style: AppTypography.bodyBold)),
+                  ]),
+                ),
               if (!m.ready && !m.started)
                 OpCard(
                   highlight: true,
@@ -134,7 +169,7 @@ class _DepartureScreenState extends ConsumerState<DepartureScreen> {
                 PrimaryButton(icon: Icons.play_arrow, label: l10n.opDemarrerLeDepart, onPressed: _busy ? null : () => _start(m)),
                 const SizedBox(height: AppSpacing.lg),
                 TextButton(
-                  onPressed: _busy ? null : _cancel,
+                  onPressed: _busy ? null : () => _cancel(m),
                   child: Text(l10n.opAnnulerCeDepart, style: TextStyle(color: Theme.of(context).colorScheme.error)),
                 ),
               ] else

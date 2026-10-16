@@ -210,7 +210,11 @@ class _DepartureTile extends StatelessWidget {
     final d = departure;
     final status = switch (d.status) {
       DepartureStatus.toConfirm => l10n.opAConfirmer,
+      // Seuil de départ : « en attente de N passagers » tant qu'il n'est pas atteint.
+      DepartureStatus.open when d.awaitingPassengers => l10n.gtEnAttente((d.minPassengers! - d.seatsBooked).clamp(1, 99)),
+      DepartureStatus.open when d.minPassengers != null => '${l10n.opEnVente} · ${l10n.gtConfirme}',
       DepartureStatus.open => l10n.opEnVente,
+      DepartureStatus.closed when d.thresholdMissed => l10n.gtAnnule,
       DepartureStatus.closed => l10n.opVenteArretee,
     };
     return ListTile(
@@ -218,7 +222,7 @@ class _DepartureTile extends StatelessWidget {
       leading: Icon(d.isReturn ? Icons.u_turn_left : Icons.arrow_forward),
       title: Text('${formatTripDate(d.departureAt, locale: locale)} · ${d.isReturn ? l10n.opRetour : l10n.opAller}'),
       subtitle: Text('${l10n.opPlacesReservees(d.seatsBooked, d.seatsTotal)} · $status'),
-      trailing: onToggle == null || d.status == DepartureStatus.toConfirm
+      trailing: onToggle == null || d.status == DepartureStatus.toConfirm || d.thresholdMissed
           ? null
           : TextButton(
               onPressed: busy ? null : onToggle,

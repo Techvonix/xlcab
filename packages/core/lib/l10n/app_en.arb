@@ -1063,5 +1063,22 @@
   "expExplication": "Your browser will download a file with all your account data: profile, trips, payments, preferences, trusted contacts. The link is valid for 5 minutes and works only once. Five downloads per day at most.",
   "expTelecharger": "Download",
   "expOuvert": "The download has started in your browser.",
-  "expPreparation": "Preparing the download"
+  "expPreparation": "Preparing the download",
+  "gtConfirme": "Departure confirmed",
+  "gtEnAttente": "{count, plural, =1{1 more passenger needed to confirm the departure} other{{count} more passengers needed to confirm the departure}}",
+  "gtEnAttenteCourt": "Waiting for more passengers to confirm the departure",
+  "gtAnnule": "Departure cancelled: not enough passengers",
+  "gtRemboursement": "If it is not confirmed by {date}, the departure is cancelled and you are refunded in full.",
+  "gtSeuilTitre": "Guaranteed departure threshold",
+  "gtSeuilAide": "You go automatically as soon as this number of passengers has booked. If it is not reached 24 h before departure, the departure is cancelled at no cost, passengers are refunded and you get no penalty.",
+  "gtSeuilChamp": "I go from … passengers",
+  "gtSeuilInvalide": "Between 1 and the number of seats",
+  "gtSeuilRappel": "{count, plural, =1{Your threshold: 1 passenger.} other{Your threshold: {count} passengers.}}",
+  "gtEcheance": "To be reached by {date}",
+  "gtJePars": "I’ll go anyway",
+  "gtJeParsTitre": "Go without waiting for the threshold?",
+  "gtJeParsTexte": "Your departure becomes firm: your passengers are notified, and a cancellation on your side will follow the usual protocol (backup driver, penalties).",
+  "gtJeParsFait": "Departure confirmed: your passengers have been notified.",
+  "gtRetirerExplication": "Your threshold has not been reached: your passengers will be refunded in full, with no backup driver and no penalty for you.",
+  "gtDepartRetire": "Departure withdrawn: your passengers are refunded."
 }

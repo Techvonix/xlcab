@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:xlcab_core/models/departure_guarantee.dart';
 import 'package:xlcab_core/models/market.dart';
 import 'package:xlcab_core/models/operator.dart';
 import 'package:xlcab_core/models/place.dart';
@@ -82,8 +83,9 @@ Future<void> pump(WidgetTester tester, Widget screen, {double height = 4200}) as
   await tester.pumpAndSettle();
 }
 
-Manifest manifest({bool ready = false, bool checkedIn = false, bool started = false}) => Manifest(
+Manifest manifest({bool ready = false, bool checkedIn = false, bool started = false, DepartureGuarantee? guarantee}) => Manifest(
       departureId: 'd1',
+      guarantee: guarantee,
       departureAt: DateTime(2026, 10, 12, 5),
       origin: 'Porte Maillot, Paris',
       destination: 'Aéroport de Beauvais',
@@ -181,6 +183,38 @@ void main() {
       expect(find.text('accueil'), findsOneWidget); // retour après publication
     });
 
+    testWidgets('vente à la place avec seuil de départ garanti : seuil proposé (moitié des places), modifiable, envoyé', (tester) async {
+      await pump(tester, const LineFormScreen(), height: 9000);
+      await tester.tap(find.text('Départ'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Arrivée'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Renault Trafic · 8 places'));
+      await tester.pump();
+      await tester.enterText(find.widgetWithText(TextFormField, 'Bagages par départ'), '8');
+      await tester.tap(find.text('Par place'));
+      await tester.pump();
+      expect(find.text('Seuil de départ garanti'), findsOneWidget);
+      await tester.tap(find.text('Seuil de départ garanti'));
+      await tester.pump();
+      final field = find.widgetWithText(TextFormField, 'Je pars dès … passagers');
+      expect(tester.widget<TextFormField>(field).controller!.text, '4');
+
+      await tester.enterText(field, '9'); // plus que les places
+      await tester.enterText(find.widgetWithText(TextFormField, 'Prix par place (TTC)'), '30');
+      await tester.tap(find.text('Publier la ligne'));
+      await tester.pumpAndSettle();
+      expect(find.text('Entre 1 et le nombre de places'), findsOneWidget);
+      expect(operators.createdLine, isNull);
+
+      await tester.enterText(field, '5');
+      await tester.tap(find.text('Publier la ligne'));
+      await tester.pumpAndSettle();
+      final json = operators.createdLine!.toJson();
+      expect(json, containsPair('pricingMode', 'per_seat'));
+      expect(json, containsPair('minPassengers', 5));
+    });
+
     testWidgets('plus de places que le véhicule : refusé avant l’envoi ; erreur du serveur affichée', (tester) async {
       await pump(tester, const LineFormScreen(), height: 7800);
       await tester.tap(find.text('Départ'));
@@ -266,6 +300,50 @@ void main() {
       await tester.pumpAndSettle();
       expect(operators.calls, ['cancelDeparture:Panne moteur ce matin']);
       expect(find.text('accueil'), findsOneWidget);
+    });
+  });
+
+  group('seuil de départ garanti', () {
+    const pending = DepartureGuarantee(guaranteed: false, minPassengers: 7);
+
+    testWidgets('en attente : passagers manquants, seuil rappelé ; « Je pars quand même » après confirmation', (tester) async {
+      operators.currentManifest = manifest(guarantee: pending);
+      await pump(tester, const DepartureScreen(departureId: 'd1'));
+      expect(find.text('Encore 2 passagers pour confirmer le départ'), findsOneWidget);
+      expect(find.text('Votre seuil : 7 passagers.'), findsOneWidget);
+
+      await tester.tap(find.widgetWithText(OutlinedButton, 'Je pars quand même'));
+      await tester.pumpAndSettle();
+      expect(find.text('Partir sans attendre le seuil ?'), findsOneWidget);
+      await tester.tap(find.widgetWithText(FilledButton, 'Je pars quand même'));
+      await tester.pumpAndSettle();
+      expect(operators.calls, ['guaranteeDeparture']);
+    });
+
+    testWidgets('retrait avant le seuil : ni secours ni pénalité annoncés', (tester) async {
+      operators.currentManifest = manifest(guarantee: pending);
+      await pump(tester, const DepartureScreen(departureId: 'd1'));
+      await tester.tap(find.text('Annuler ce départ'));
+      await tester.pumpAndSettle();
+      expect(find.textContaining('sans chauffeur de secours et sans pénalité'), findsOneWidget);
+      expect(find.textContaining('pénalité de 260 €'), findsNothing);
+    });
+
+    testWidgets('seuil atteint : « Départ confirmé », plus de bouton', (tester) async {
+      operators.currentManifest = manifest(guarantee: const DepartureGuarantee(guaranteed: true, minPassengers: 4));
+      await pump(tester, const DepartureScreen(departureId: 'd1'));
+      expect(find.text('Départ confirmé'), findsOneWidget);
+      expect(find.text('Je pars quand même'), findsNothing);
+    });
+
+    testWidgets('accessibilité de la carte « en attente »', (tester) async {
+      final handle = tester.ensureSemantics();
+      operators.currentManifest = manifest(guarantee: pending);
+      await pump(tester, const DepartureScreen(departureId: 'd1'));
+      await expectLater(tester, meetsGuideline(textContrastGuideline));
+      await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
+      await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
+      handle.dispose();
     });
   });
 

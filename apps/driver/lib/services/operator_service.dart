@@ -103,6 +103,9 @@ class OperatorService {
         return Manifest.fromJson(res.data);
       });
 
+  /// « Je pars quand même » : départ garanti sans attendre le seuil.
+  Future<void> guaranteeDeparture(String departureId) => _guard(() => _dio.post<void>('$_me/departures/${_id(departureId)}/guarantee'));
+
   Future<void> ready(String departureId) => _guard(() => _dio.post<void>('$_me/departures/${_id(departureId)}/ready'));
 
   /// Scan du QR d'un passager ; renvoie son prénom.

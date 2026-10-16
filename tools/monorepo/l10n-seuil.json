@@ -1,0 +1,40 @@
+{
+  "gtConfirme": { "fr": "Départ confirmé", "en": "Departure confirmed" },
+  "gtEnAttente": {
+    "fr": "{count, plural, =1{Encore 1 passager pour confirmer le départ} other{Encore {count} passagers pour confirmer le départ}}",
+    "en": "{count, plural, =1{1 more passenger needed to confirm the departure} other{{count} more passengers needed to confirm the departure}}",
+    "p": { "count": "int" }
+  },
+  "gtEnAttenteCourt": { "fr": "En attente d’autres passagers pour confirmer le départ", "en": "Waiting for more passengers to confirm the departure" },
+  "gtAnnule": { "fr": "Départ annulé : pas assez de passagers", "en": "Departure cancelled: not enough passengers" },
+  "gtRemboursement": {
+    "fr": "S’il n’est pas confirmé avant le {date}, le départ est annulé et vous êtes remboursé intégralement.",
+    "en": "If it is not confirmed by {date}, the departure is cancelled and you are refunded in full.",
+    "p": { "date": "String" }
+  },
+  "gtSeuilTitre": { "fr": "Seuil de départ garanti", "en": "Guaranteed departure threshold" },
+  "gtSeuilAide": {
+    "fr": "Vous partez d’office dès que ce nombre de passagers a réservé. S’il n’est pas atteint 24 h avant le départ, le départ est annulé sans frais, les passagers sont remboursés et vous n’avez aucune pénalité.",
+    "en": "You go automatically as soon as this number of passengers has booked. If it is not reached 24 h before departure, the departure is cancelled at no cost, passengers are refunded and you get no penalty."
+  },
+  "gtSeuilChamp": { "fr": "Je pars dès … passagers", "en": "I go from … passengers" },
+  "gtSeuilInvalide": { "fr": "Entre 1 et le nombre de places", "en": "Between 1 and the number of seats" },
+  "gtSeuilRappel": {
+    "fr": "{count, plural, =1{Votre seuil : 1 passager.} other{Votre seuil : {count} passagers.}}",
+    "en": "{count, plural, =1{Your threshold: 1 passenger.} other{Your threshold: {count} passengers.}}",
+    "p": { "count": "int" }
+  },
+  "gtEcheance": { "fr": "À atteindre avant le {date}", "en": "To be reached by {date}", "p": { "date": "String" } },
+  "gtJePars": { "fr": "Je pars quand même", "en": "I’ll go anyway" },
+  "gtJeParsTitre": { "fr": "Partir sans attendre le seuil ?", "en": "Go without waiting for the threshold?" },
+  "gtJeParsTexte": {
+    "fr": "Votre départ devient ferme : vos passagers sont prévenus, et une annulation de votre part suivra le protocole habituel (chauffeur de secours, pénalités).",
+    "en": "Your departure becomes firm: your passengers are notified, and a cancellation on your side will follow the usual protocol (backup driver, penalties)."
+  },
+  "gtJeParsFait": { "fr": "Départ confirmé : vos passagers sont prévenus.", "en": "Departure confirmed: your passengers have been notified." },
+  "gtRetirerExplication": {
+    "fr": "Votre seuil n’est pas atteint : vos passagers seront remboursés intégralement, sans chauffeur de secours et sans pénalité pour vous.",
+    "en": "Your threshold has not been reached: your passengers will be refunded in full, with no backup driver and no penalty for you."
+  },
+  "gtDepartRetire": { "fr": "Départ retiré : vos passagers sont remboursés.", "en": "Departure withdrawn: your passengers are refunded." }
+}

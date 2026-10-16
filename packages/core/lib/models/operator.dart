@@ -1,3 +1,4 @@
+import 'departure_guarantee.dart';
 import 'place.dart';
 
 // Espace opérateur (bourse de transport, étapes 1 et 2) : profil, lignes
@@ -153,6 +154,7 @@ class RecurringLine {
     this.conditions,
     this.exceptions = const [],
     this.departuresToConfirm = 0,
+    this.minPassengers,
   });
 
   final String id;
@@ -175,6 +177,8 @@ class RecurringLine {
   final LineStatus status;
   final List<LineException> exceptions;
   final int departuresToConfirm;
+  /// Seuil de départ garanti : « je pars d'office dès N passagers » (null = sans seuil).
+  final int? minPassengers;
 
   static RecurringLine? fromJson(Object? json) {
     if (json is! Map || json['id'] is! String) return null;
@@ -204,6 +208,7 @@ class RecurringLine {
               .toList()
           : const [],
       departuresToConfirm: _int(m['departuresToConfirm']) ?? 0,
+      minPassengers: _int(m['minPassengers']),
     );
   }
 }
@@ -224,6 +229,7 @@ class LineDraft {
     this.returnTime,
     this.durationMin,
     this.conditions,
+    this.minPassengers,
   });
 
   final String vehicleId;
@@ -239,6 +245,8 @@ class LineDraft {
   final int priceCents;
   final int? durationMin;
   final String? conditions;
+  /// Seuil de départ garanti (vente à la place seulement ; null = sans seuil).
+  final int? minPassengers;
 
   Map<String, dynamic> toJson() => {
         'vehicleId': vehicleId,
@@ -258,6 +266,7 @@ class LineDraft {
         'priceCents': priceCents,
         if (durationMin != null) 'durationMin': durationMin,
         if (conditions != null && conditions!.isNotEmpty) 'conditions': conditions,
+        if (perSeat && minPassengers != null) 'minPassengers': minPassengers,
       };
 }
 
@@ -282,6 +291,10 @@ class LineDeparture {
     required this.seatsTotal,
     required this.seatsBooked,
     required this.status,
+    this.minPassengers,
+    this.guaranteed = true,
+    this.thresholdMissed = false,
+    this.thresholdDeadline,
   });
 
   final String id;
@@ -291,6 +304,14 @@ class LineDeparture {
   final int seatsTotal;
   final int seatsBooked;
   final DepartureStatus status;
+  /// Seuil de départ garanti (null = garanti dès la confirmation).
+  final int? minPassengers;
+  final bool guaranteed;
+  final bool thresholdMissed;
+  final DateTime? thresholdDeadline;
+
+  /// Confirmé et en vente, mais seuil pas encore atteint.
+  bool get awaitingPassengers => status == DepartureStatus.open && minPassengers != null && !guaranteed && !thresholdMissed;
 
   static LineDeparture? fromJson(Object? json) {
     if (json is! Map || json['id'] is! String) return null;
@@ -304,6 +325,11 @@ class LineDeparture {
       seatsTotal: _int(json['seatsTotal']) ?? 0,
       seatsBooked: _int(json['seatsBooked']) ?? 0,
       status: DepartureStatus.fromApi(_str(json['status'])),
+      minPassengers: _int(json['minPassengers']),
+      // Serveur plus ancien (sans seuil) : départ confirmé = garanti.
+      guaranteed: json['guaranteed'] is bool ? json['guaranteed'] as bool : true,
+      thresholdMissed: json['thresholdMissed'] == true,
+      thresholdDeadline: _date(json['thresholdDeadline']),
     );
   }
 }
@@ -393,12 +419,15 @@ class Assignment {
     required this.started,
     required this.ready,
     required this.rescued,
+    this.guarantee,
   });
 
   final String departureId;
   final DateTime departureAt;
   final String origin;
   final String destination;
+  /// Seuil de départ garanti (null : serveur plus ancien).
+  final DepartureGuarantee? guarantee;
   final int passengers;
   final int bookings;
   final bool started;
@@ -421,6 +450,7 @@ class Assignment {
       started: json['started'] == true,
       ready: json['ready'] == true,
       rescued: json['rescued'] == true,
+      guarantee: DepartureGuarantee.fromJson(json['guarantee']),
     );
   }
 }
@@ -462,8 +492,11 @@ class Manifest {
     required this.ready,
     required this.seatsBooked,
     required this.passengers,
+    this.guarantee,
   });
 
+  /// Seuil de départ garanti (null : serveur plus ancien).
+  final DepartureGuarantee? guarantee;
   final String departureId;
   final DateTime departureAt;
   final String origin;
@@ -485,6 +518,7 @@ class Manifest {
       destination: _str(m['destination']) ?? '',
       ready: m['ready'] == true,
       seatsBooked: _int(m['seatsBooked']) ?? 0,
+      guarantee: DepartureGuarantee.fromJson(m['guarantee']),
       passengers: m['passengers'] is List
           ? (m['passengers'] as List)
               .whereType<Map>()

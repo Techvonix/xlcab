@@ -26,6 +26,8 @@ const nextYear = new Date(Date.now() + 365 * 24 * HOUR);
 const PARIS = { address: 'Gare de Lyon, 75012 Paris', lat: 48.8443, lng: 2.3744 };
 const ROUEN = { address: 'Gare de Rouen-Rive-Droite, Rouen', lat: 49.4488, lng: 1.0942 };
 const ORLEANS = { address: 'Gare d’Orléans, Orléans', lat: 47.9077, lng: 1.9046 };
+const LYON = { address: 'Gare de Lyon-Part-Dieu, Lyon', lat: 45.7606, lng: 4.8594 };
+const LIMOGES = { address: 'Gare de Limoges-Bénédictins, Limoges', lat: 45.8364, lng: 1.2681 };
 const MAILLOT = { address: 'Porte Maillot, 75017 Paris', lat: 48.8781, lng: 2.2834 };
 const BEAUVAIS = { address: 'Aéroport de Beauvais-Tillé', lat: 49.4544, lng: 2.1128 };
 
@@ -178,6 +180,8 @@ async function main() {
   // ── Bourse de transport : opérateurs, lignes régulières, réserves, demande ──
   const djamel = await user('Opérateur Djamel (ligne Paris–Beauvais 5 h, à la place)', 'djamel.operateur', 'driver', 'Djamel', 'Haddad', '+33600000007');
   const chris = await user('Opérateur Chris (ligne Paris–Orléans 19 h, van 14 places)', 'chris.operateur', 'driver', 'Chris', 'Moreau', '+33600000008');
+  // Créé après Chris : les numéros des comptes précédents (scripts de tournage) ne changent pas.
+  const sami = await user('Opérateur Sami (Lyon → Limoges 8 h, seuil de départ : 4 passagers)', 'sami.operateur', 'driver', 'Sami', 'Benamar', '+33600000009');
   const operator = async (u: { id: string }, n: number, kind: string, legalName: string, brand: string, model: string, capacity: number) => {
     await prisma.driverProfile.create({
       data: {
@@ -201,6 +205,7 @@ async function main() {
   // « Van de 9 places » = 8 passagers ; « van de 14 places » = 13 passagers (conducteur non compris).
   const vanDjamel = await operator(djamel, 1, 'independent', 'Djamel Navettes', 'Renault', 'Trafic', 8);
   const vanChris = await operator(chris, 2, 'collective', 'Chris Transports', 'Mercedes', 'Sprinter', 13);
+  const vanSami = await operator(sami, 3, 'independent', 'Sami Navettes', 'Peugeot', 'Expert Traveller', 8);
   // Nadia aussi est opératrice vérifiée : elle voit la bourse et peut être réserve.
   await prisma.operatorProfile.create({
     data: {
@@ -226,7 +231,14 @@ async function main() {
     departureTime: '19:00', returnTime: '22:30', daysOfWeek: everyDay, startDate: tomorrow, seats: 13, luggage: 20,
     pricingMode: 'per_vehicle', priceCents: 39000, durationMin: 110,
   });
-  for (const id of [djamel.id, chris.id]) await lines.confirm(id, { until: addDays(tomorrow, 6) });
+  // Seuil de départ garanti (CLARIFICATION_MODELE.md) : Sami part d'office dès 4 passagers sur 7.
+  const limogesLine = await lines.create(sami.id, {
+    vehicleId: vanSami.id, originAddress: LYON.address, originLat: LYON.lat, originLng: LYON.lng,
+    destinationAddress: LIMOGES.address, destinationLat: LIMOGES.lat, destinationLng: LIMOGES.lng,
+    departureTime: '08:00', daysOfWeek: everyDay, startDate: tomorrow, seats: 7, luggage: 7, pricingMode: 'per_seat', priceCents: 3000,
+    durationMin: 270, minPassengers: 4, conditions: '1 valise et 1 bagage cabine par personne',
+  });
+  for (const id of [djamel.id, chris.id, sami.id]) await lines.confirm(id, { until: addDays(tomorrow, 6) });
 
   // Réserves de la ligne de Djamel : Chris (n° 2, confirmé), Nadia (n° 3, invitation à accepter dans son app).
   await prisma.lineBackup.createMany({
@@ -255,6 +267,25 @@ async function main() {
     await prisma.lineSeat.createMany({ data: [1, 2, 3].map((seatNumber) => ({ departureId: first.id, seatNumber, tripId: leaLineTrip.id })) });
   }
 
+  // Sami : 3 places déjà vendues (Karim) sur le départ d'après-demain — l'échéance du seuil (24 h
+  // avant) est encore loin. Il manque 1 passager : la réservation de Léa déclenche le « top départ ».
+  const limogesDeparture = await prisma.lineDeparture.findFirst({ where: { lineId: limogesLine.id, localDate: addDays(tomorrow, 1), direction: 'outbound' } });
+  if (limogesDeparture) {
+    const held = await lines.reserveSeats(limogesDeparture.id, 3);
+    const karimTrip = await prisma.trip.create({
+      data: {
+        type: 'passenger', status: 'accepted', source: 'line', lineDepartureId: limogesDeparture.id, passengerId: karim.id, driverId: sami.id, vehicleId: vanSami.id,
+        acceptedAt: new Date(), shuttleType: 'bleue', jurisdiction: 'FR', durationMin: 270, scheduledAt: limogesDeparture.departureAt,
+        originAddress: LYON.address, originLat: LYON.lat, originLng: LYON.lng,
+        destinationAddress: LIMOGES.address, destinationLat: LIMOGES.lat, destinationLng: LIMOGES.lng,
+        totalPriceCents: held.priceCents, vatCents: 0, commissionCents: Math.round(held.priceCents / 10),
+        priceLines: { create: [{ regime: 'passenger', baseCents: held.priceCents, ratePercent: 0, vatCents: 0 }] },
+        passengerBooking: { create: { seats: 3, childSeats: 0, qrCode: randomUUID() } },
+      },
+    });
+    await prisma.lineSeat.createMany({ data: [1, 2, 3].map((seatNumber) => ({ departureId: limogesDeparture.id, seatNumber, tripId: karimTrip.id })) });
+  }
+
   // Adresses favorites de Léa : proposées en tête de la recherche d'adresse, elles
   // permettent de parcourir l'app sans clé Google Places (démo, vidéo).
   await prisma.savedAddress.createMany({
@@ -262,6 +293,8 @@ async function main() {
       { userId: lea.id, label: 'Porte Maillot', address: MAILLOT.address, lat: MAILLOT.lat, lng: MAILLOT.lng },
       { userId: lea.id, label: 'Aéroport de Beauvais', address: BEAUVAIS.address, lat: BEAUVAIS.lat, lng: BEAUVAIS.lng },
       { userId: lea.id, label: 'Gare de Rouen', address: ROUEN.address, lat: ROUEN.lat, lng: ROUEN.lng },
+      { userId: lea.id, label: 'Gare de Lyon-Part-Dieu', address: LYON.address, lat: LYON.lat, lng: LYON.lng },
+      { userId: lea.id, label: 'Gare de Limoges', address: LIMOGES.address, lat: LIMOGES.lat, lng: LIMOGES.lng },
     ],
   });
 

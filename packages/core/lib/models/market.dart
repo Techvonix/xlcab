@@ -1,3 +1,4 @@
+import 'departure_guarantee.dart';
 import 'place.dart';
 
 // Bourse de transport (xlcab_backend/src/market) : demandes publiées par les
@@ -305,8 +306,11 @@ class LineSearchResult {
     this.operatorRating,
     this.vehicleLabel,
     this.reasons = const [],
+    this.guarantee,
   });
 
+  /// Seuil de départ garanti : « départ confirmé » ou « encore N passagers ».
+  final DepartureGuarantee? guarantee;
   final String departureId;
   final DateTime departureAt;
   final String localTime;
@@ -348,6 +352,7 @@ class LineSearchResult {
       operatorRating: op is Map ? _double(op['rating']) : null,
       operatorRatingCount: op is Map ? _int(op['ratingCount']) ?? 0 : 0,
       vehicleLabel: v is Map ? [_str(v['brand']), _str(v['model'])].whereType<String>().join(' ') : null,
+      guarantee: DepartureGuarantee.fromJson(json['guarantee']),
       reasons: json['reasons'] is List
           ? (json['reasons'] as List).whereType<Map>().where((r) => r['code'] is String).map((r) {
               final value = r['km'] ?? r['diffMin'] ?? r['count'];
