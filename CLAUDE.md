@@ -548,6 +548,20 @@ référence — les exigences de la Partie 8 priment.
   Démo : Sami (`sami.operateur`, 9e compte, créé après Chris pour ne pas décaler les numéros des scripts) Lyon Part-Dieu
   → Limoges 8 h, 7 places à 30 €, seuil 4 ; Karim a 3 places sur le départ d'APRÈS-DEMAIN (« encore 1 passager ») ;
   Lyon et Limoges dans les favoris de Léa.
+- Départ ponctuel (étape 2, 2026-10-16, migration `one_off_departure`) : `RecurringLine.kind` recurring | one_off. Un
+  départ ponctuel = une « ligne » d'un seul jour (startDate = endDate = date, daysOfWeek = [jour ISO], sans retour),
+  `POST /operators/me/departures` (`CreateOneOffDto`, qui partage `DepartureOfferDto` avec `CreateLineDto`) →
+  `LinesService.createOneOff` : mêmes contrôles qu'une ligne (chauffeur validé, CG opérateur, vente à la place vérifiée,
+  véhicule, seuil), 30 jours à l'avance au plus, ≥ 60 min avant le départ, avec seuil seulement si l'échéance n'est pas
+  passée, compte de versement exigé (publier = mettre en vente) ; mis en vente AUSSITÔT (open + confirmedAt, garanti
+  s'il n'a pas de seuil). Plafond séparé (30 départs ponctuels à venir ; les 20 lignes ne comptent que les recurring).
+  Date non modifiable (400) ; la passe quotidienne `syncAll` clôt un départ ponctuel dont le jour est passé (départs
+  gardés en historique). Tout le reste (recherche, réservation, sièges, seuil, secours, paiement, reversement) est celui
+  des lignes. App chauffeur : `LineFormScreen(oneOff: true)` (route `AppRoutes.departureNew` = /driver/departures/new,
+  déclarée AVANT la route paramétrée ; entrée « Publier un départ » de l'onglet Départ), `LineDraft.toOneOffJson`,
+  `OperatorService.publishDeparture`, `RecurringLine.oneOff` (« Départ ponctuel le … à … » dans Mes lignes). Clés
+  ARB `po*`. Tests : serveur dans `departure-threshold.integration.spec.ts` (groupe « départ ponctuel ») ; app dans
+  `operator_screens_test.dart` et `core/test/models/departure_guarantee_test.dart`.
 - Migrations : `init_xlcab` appliquée sur la base locale ; toute modification de
   `prisma/schema.prisma` demande désormais `npx prisma migrate dev --name <nom>`. Référentiel :
   `npx prisma db seed` (config FR uniquement).

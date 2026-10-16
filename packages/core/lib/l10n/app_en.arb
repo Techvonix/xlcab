@@ -1081,5 +1081,12 @@
   "gtJeParsFait": "Departure confirmed: your passengers have been notified.",
   "gtRetirerExplication": "Your threshold has not been reached: your passengers will be refunded in full, with no backup driver and no penalty for you.",
   "gtDepartRetire": "Departure withdrawn: your passengers are refunded.",
-  "gtAnnulationGratuite": "Free as long as the departure is not confirmed: you are refunded in full."
+  "gtAnnulationGratuite": "Free as long as the departure is not confirmed: you are refunded in full.",
+  "poPublierUnDepart": "Publish a departure",
+  "poPublierLeDepart": "Publish and put on sale",
+  "poDateEtHeure": "Date and time",
+  "poJourDuDepart": "Departure day",
+  "poDepartPublie": "Departure published: it is on sale.",
+  "poApresPublication": "Your departure goes on sale as soon as it is published. Travellers find it in “Find a seat”.",
+  "poDepartPonctuelLe": "One-off departure on {date} at {time}"
 }

@@ -65,6 +65,7 @@ class DepartureTab extends ConsumerWidget {
                             : [for (final a in list) AssignmentTile(assignment: a)],
                       ),
                   SectionTitle(l10n.drvOutils),
+                  _Entry(icon: Icons.add_location_alt_outlined, label: l10n.poPublierUnDepart, route: AppRoutes.departureNew),
                   _Entry(icon: Icons.alt_route, label: l10n.opMesLignes, route: AppRoutes.myLines),
                   _Entry(icon: Icons.storefront_outlined, label: l10n.mkBourse, route: AppRoutes.driverMarket),
                 ],

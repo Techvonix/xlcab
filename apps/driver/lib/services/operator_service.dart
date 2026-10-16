@@ -60,6 +60,9 @@ class OperatorService {
 
   Future<void> createLine(LineDraft draft) => _guard(() => _dio.post<void>('$_me/lines', data: draft.toJson()));
 
+  /// Départ ponctuel : publié et mis en vente aussitôt (le jour = `startDate` du brouillon).
+  Future<void> publishDeparture(LineDraft draft) => _guard(() => _dio.post<void>('$_me/departures', data: draft.toOneOffJson()));
+
   Future<void> setLineStatus(String lineId, LineStatus status) => _guard(() => _dio.post<void>(
         '$_me/lines/${_id(lineId)}/${switch (status) { LineStatus.active => 'resume', LineStatus.paused => 'pause', LineStatus.closed => 'close' }}',
       ));

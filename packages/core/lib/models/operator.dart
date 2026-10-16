@@ -155,6 +155,7 @@ class RecurringLine {
     this.exceptions = const [],
     this.departuresToConfirm = 0,
     this.minPassengers,
+    this.oneOff = false,
   });
 
   final String id;
@@ -179,6 +180,8 @@ class RecurringLine {
   final int departuresToConfirm;
   /// Seuil de départ garanti : « je pars d'office dès N passagers » (null = sans seuil).
   final int? minPassengers;
+  /// Départ ponctuel (un seul jour = [startDate]) plutôt que ligne régulière.
+  final bool oneOff;
 
   static RecurringLine? fromJson(Object? json) {
     if (json is! Map || json['id'] is! String) return null;
@@ -209,6 +212,7 @@ class RecurringLine {
           : const [],
       departuresToConfirm: _int(m['departuresToConfirm']) ?? 0,
       minPassengers: _int(m['minPassengers']),
+      oneOff: m['kind'] == 'one_off',
     );
   }
 }
@@ -268,6 +272,13 @@ class LineDraft {
         if (conditions != null && conditions!.isNotEmpty) 'conditions': conditions,
         if (perSeat && minPassengers != null) 'minPassengers': minPassengers,
       };
+
+  /// Départ ponctuel (POST /operators/me/departures) : un seul jour, sans retour ni jours de la semaine.
+  Map<String, dynamic> toOneOffJson() {
+    final json = toJson()..remove('daysOfWeek')..remove('returnTime');
+    json['date'] = json.remove('startDate');
+    return json;
+  }
 }
 
 enum DepartureStatus {

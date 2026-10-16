@@ -18,7 +18,11 @@ import 'package:xlcab_core/l10n/l10n.dart';
 /// Nouvelle ligne régulière : trajet (non modifiable ensuite), véhicule,
 /// horaires, jours, capacité, prix. Les départs sont créés « à confirmer ».
 class LineFormScreen extends ConsumerStatefulWidget {
-  const LineFormScreen({super.key});
+  const LineFormScreen({super.key, this.oneOff = false});
+
+  /// Départ ponctuel (« je pars le …, il me reste N places ») : un seul jour,
+  /// mis en vente dès sa publication, au lieu d'une ligne régulière.
+  final bool oneOff;
 
   @override
   ConsumerState<LineFormScreen> createState() => _LineFormScreenState();
@@ -73,7 +77,9 @@ class _LineFormScreenState extends ConsumerState<LineFormScreen> {
 
   Future<void> _pickStart() async {
     final today = _today;
-    final picked = await ref.read(datePickerProvider)(context, today, today.add(const Duration(days: 365)), _start ?? today);
+    // Départ ponctuel : publiable 30 jours à l'avance au plus (fenêtre de vente du serveur).
+    final last = today.add(Duration(days: widget.oneOff ? 30 : 365));
+    final picked = await ref.read(datePickerProvider)(context, today, last, _start ?? today);
     if (picked != null && mounted) setState(() => _start = picked);
   }
 
@@ -94,7 +100,7 @@ class _LineFormScreenState extends ConsumerState<LineFormScreen> {
       setState(() => _error = l10n.opChoisissezUnVehicule);
       return;
     }
-    if (_days.isEmpty) {
+    if (!widget.oneOff && _days.isEmpty) {
       setState(() => _error = l10n.opChoisissezAuMoinsUnJour);
       return;
     }
@@ -116,10 +122,11 @@ class _LineFormScreenState extends ConsumerState<LineFormScreen> {
     );
     setState(() => _busy = true);
     try {
-      await ref.read(operatorServiceProvider).createLine(draft);
+      final service = ref.read(operatorServiceProvider);
+      await (widget.oneOff ? service.publishDeparture(draft) : service.createLine(draft));
       ref.invalidate(myLinesProvider);
       if (!mounted) return;
-      showToast(context, l10n.opLignePublieeConfirmez);
+      showToast(context, widget.oneOff ? l10n.poDepartPublie : l10n.opLignePublieeConfirmez);
       context.pop();
     } on ApiException catch (e) {
       if (mounted) setState(() => _error = e.message);
@@ -135,7 +142,7 @@ class _LineFormScreenState extends ConsumerState<LineFormScreen> {
     final perSeatAllowed = profile?.perSeatAllowed == true;
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.opNouvelleLigne)),
+      appBar: AppBar(title: Text(widget.oneOff ? l10n.poPublierUnDepart : l10n.opNouvelleLigne)),
       body: AsyncBody(
         value: vehicles,
         loadingLabel: l10n.opChargementDesVehicules,
@@ -166,7 +173,18 @@ class _LineFormScreenState extends ConsumerState<LineFormScreen> {
                     ),
                 ]),
 
-                SectionTitle(l10n.opHorairesEtJours),
+                SectionTitle(widget.oneOff ? l10n.poDateEtHeure : l10n.opHorairesEtJours),
+                if (widget.oneOff)
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: const Icon(Icons.event),
+                    title: Text(l10n.poJourDuDepart),
+                    trailing: Text(
+                      MaterialLocalizations.of(context).formatMediumDate(_start ?? _today.add(const Duration(days: 1))),
+                      style: AppTypography.bodyBold,
+                    ),
+                    onTap: _pickStart,
+                  ),
                 ListTile(
                   contentPadding: EdgeInsets.zero,
                   leading: const Icon(Icons.schedule),
@@ -174,33 +192,35 @@ class _LineFormScreenState extends ConsumerState<LineFormScreen> {
                   trailing: Text(_departure.format(context), style: AppTypography.bodyBold),
                   onTap: () => _pickTime(false),
                 ),
-                ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  leading: const Icon(Icons.u_turn_left),
-                  title: Text(l10n.opRetourLeMemeJour),
-                  subtitle: Text(_return == null ? l10n.opPasDeRetour : _return!.format(context)),
-                  trailing: _return == null
-                      ? TextButton(onPressed: () => _pickTime(true), child: Text(l10n.opAjouterUnRetour))
-                      : IconButton(tooltip: l10n.opRetirerLeRetour, icon: const Icon(Icons.close), onPressed: () => setState(() => _return = null)),
-                ),
-                Wrap(spacing: AppSpacing.sm, runSpacing: AppSpacing.xs, children: [
-                  for (var d = 1; d <= 7; d++)
-                    FilterChip(
-                      label: Text(dayShort(d)),
-                      selected: _days.contains(d),
-                      onSelected: (on) => setState(() => on ? _days.add(d) : _days.remove(d)),
-                    ),
-                ]),
-                ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  leading: const Icon(Icons.event),
-                  title: Text(l10n.opPremierJour),
-                  trailing: Text(
-                    MaterialLocalizations.of(context).formatMediumDate(_start ?? _today.add(const Duration(days: 1))),
-                    style: AppTypography.bodyBold,
+                if (!widget.oneOff) ...[
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: const Icon(Icons.u_turn_left),
+                    title: Text(l10n.opRetourLeMemeJour),
+                    subtitle: Text(_return == null ? l10n.opPasDeRetour : _return!.format(context)),
+                    trailing: _return == null
+                        ? TextButton(onPressed: () => _pickTime(true), child: Text(l10n.opAjouterUnRetour))
+                        : IconButton(tooltip: l10n.opRetirerLeRetour, icon: const Icon(Icons.close), onPressed: () => setState(() => _return = null)),
                   ),
-                  onTap: _pickStart,
-                ),
+                  Wrap(spacing: AppSpacing.sm, runSpacing: AppSpacing.xs, children: [
+                    for (var d = 1; d <= 7; d++)
+                      FilterChip(
+                        label: Text(dayShort(d)),
+                        selected: _days.contains(d),
+                        onSelected: (on) => setState(() => on ? _days.add(d) : _days.remove(d)),
+                      ),
+                  ]),
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: const Icon(Icons.event),
+                    title: Text(l10n.opPremierJour),
+                    trailing: Text(
+                      MaterialLocalizations.of(context).formatMediumDate(_start ?? _today.add(const Duration(days: 1))),
+                      style: AppTypography.bodyBold,
+                    ),
+                    onTap: _pickStart,
+                  ),
+                ],
 
                 SectionTitle(l10n.opCapaciteEtPrix),
                 TextFormField(
@@ -301,9 +321,13 @@ class _LineFormScreenState extends ConsumerState<LineFormScreen> {
                     child: Text(_error!, style: AppTypography.body.copyWith(color: Theme.of(context).colorScheme.error)),
                   ),
                 const SizedBox(height: AppSpacing.md),
-                PrimaryButton(label: l10n.opPublierLaLigne, icon: Icons.check, onPressed: _busy ? null : _submit),
+                PrimaryButton(
+                  label: widget.oneOff ? l10n.poPublierLeDepart : l10n.opPublierLaLigne,
+                  icon: Icons.check,
+                  onPressed: _busy ? null : _submit,
+                ),
                 const SizedBox(height: AppSpacing.sm),
-                Text(l10n.opApresPublication, style: AppTypography.caption, textAlign: TextAlign.center),
+                Text(widget.oneOff ? l10n.poApresPublication : l10n.opApresPublication, style: AppTypography.caption, textAlign: TextAlign.center),
               ],
             ),
           );

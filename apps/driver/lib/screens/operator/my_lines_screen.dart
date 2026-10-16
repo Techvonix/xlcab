@@ -182,7 +182,9 @@ class LineTile extends StatelessWidget {
           Text(l10n.opTrajet(line.origin.address, line.destination.address), style: AppTypography.bodyBold),
           const SizedBox(height: AppSpacing.xs),
           Text(
-            line.returnTime == null
+            line.oneOff
+                ? l10n.poDepartPonctuelLe(MaterialLocalizations.of(context).formatMediumDate(DateTime.parse(line.startDate)), line.departureTime)
+                : line.returnTime == null
                 ? l10n.opHoraireJours(line.departureTime, daysLabel(line.daysOfWeek))
                 : l10n.opHoraireRetourJours(line.departureTime, line.returnTime!, daysLabel(line.daysOfWeek)),
             style: AppTypography.caption,

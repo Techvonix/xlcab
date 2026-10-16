@@ -83,6 +83,8 @@ final routerProvider = Provider<GoRouter>((ref) {
       // Avant la route paramétrée : « new » n'est pas un identifiant de ligne.
       GoRoute(path: AppRoutes.lineNew, builder: (context, state) => const LineFormScreen()),
       GoRoute(path: AppRoutes.lineDetail, builder: (context, state) => LineDetailScreen(lineId: state.pathParameters['lineId']!)),
+      // Avant la route paramétrée, comme pour les lignes.
+      GoRoute(path: AppRoutes.departureNew, builder: (context, state) => const LineFormScreen(oneOff: true)),
       GoRoute(path: AppRoutes.departure, builder: (context, state) => DepartureScreen(departureId: state.pathParameters['departureId']!)),
       GoRoute(path: AppRoutes.operatorProfile, builder: (context, state) => const OperatorProfileScreen()),
       GoRoute(path: AppRoutes.driverMarket, builder: (context, state) => const MarketFeedScreen()),

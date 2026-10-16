@@ -6590,6 +6590,48 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Gratuit tant que le départ n’est pas confirmé : vous êtes remboursé intégralement.'**
   String get gtAnnulationGratuite;
+
+  /// No description provided for @poPublierUnDepart.
+  ///
+  /// In fr, this message translates to:
+  /// **'Publier un départ'**
+  String get poPublierUnDepart;
+
+  /// No description provided for @poPublierLeDepart.
+  ///
+  /// In fr, this message translates to:
+  /// **'Publier et mettre en vente'**
+  String get poPublierLeDepart;
+
+  /// No description provided for @poDateEtHeure.
+  ///
+  /// In fr, this message translates to:
+  /// **'Date et heure'**
+  String get poDateEtHeure;
+
+  /// No description provided for @poJourDuDepart.
+  ///
+  /// In fr, this message translates to:
+  /// **'Jour du départ'**
+  String get poJourDuDepart;
+
+  /// No description provided for @poDepartPublie.
+  ///
+  /// In fr, this message translates to:
+  /// **'Départ publié : il est en vente.'**
+  String get poDepartPublie;
+
+  /// No description provided for @poApresPublication.
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre départ est mis en vente dès sa publication. Les voyageurs le trouvent dans « Trouver une place ».'**
+  String get poApresPublication;
+
+  /// No description provided for @poDepartPonctuelLe.
+  ///
+  /// In fr, this message translates to:
+  /// **'Départ ponctuel le {date} à {time}'**
+  String poDepartPonctuelLe(String date, String time);
 }
 
 class _AppLocalizationsDelegate

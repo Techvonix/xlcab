@@ -2220,5 +2220,22 @@
   "gtJeParsFait": "Départ confirmé : vos passagers sont prévenus.",
   "gtRetirerExplication": "Votre seuil n’est pas atteint : vos passagers seront remboursés intégralement, sans chauffeur de secours et sans pénalité pour vous.",
   "gtDepartRetire": "Départ retiré : vos passagers sont remboursés.",
-  "gtAnnulationGratuite": "Gratuit tant que le départ n’est pas confirmé : vous êtes remboursé intégralement."
+  "gtAnnulationGratuite": "Gratuit tant que le départ n’est pas confirmé : vous êtes remboursé intégralement.",
+  "poPublierUnDepart": "Publier un départ",
+  "poPublierLeDepart": "Publier et mettre en vente",
+  "poDateEtHeure": "Date et heure",
+  "poJourDuDepart": "Jour du départ",
+  "poDepartPublie": "Départ publié : il est en vente.",
+  "poApresPublication": "Votre départ est mis en vente dès sa publication. Les voyageurs le trouvent dans « Trouver une place ».",
+  "poDepartPonctuelLe": "Départ ponctuel le {date} à {time}",
+  "@poDepartPonctuelLe": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  }
 }

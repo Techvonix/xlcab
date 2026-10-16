@@ -1,0 +1,34 @@
+{
+  "poPublierUnDepart": {
+    "fr": "Publier un départ",
+    "en": "Publish a departure"
+  },
+  "poPublierLeDepart": {
+    "fr": "Publier et mettre en vente",
+    "en": "Publish and put on sale"
+  },
+  "poDateEtHeure": {
+    "fr": "Date et heure",
+    "en": "Date and time"
+  },
+  "poJourDuDepart": {
+    "fr": "Jour du départ",
+    "en": "Departure day"
+  },
+  "poDepartPublie": {
+    "fr": "Départ publié : il est en vente.",
+    "en": "Departure published: it is on sale."
+  },
+  "poApresPublication": {
+    "fr": "Votre départ est mis en vente dès sa publication. Les voyageurs le trouvent dans « Trouver une place ».",
+    "en": "Your departure goes on sale as soon as it is published. Travellers find it in “Find a seat”."
+  },
+  "poDepartPonctuelLe": {
+    "fr": "Départ ponctuel le {date} à {time}",
+    "en": "One-off departure on {date} at {time}",
+    "p": {
+      "date": "String",
+      "time": "String"
+    }
+  }
+}

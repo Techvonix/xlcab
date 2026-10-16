@@ -96,6 +96,12 @@ class FakeOperatorService extends OperatorService {
   }
 
   @override
+  Future<void> publishDeparture(LineDraft draft) async {
+    _act('publishDeparture');
+    createdLine = draft;
+  }
+
+  @override
   Future<void> setLineStatus(String lineId, LineStatus status) async => _act('setLineStatus:${status.name}');
 
   @override

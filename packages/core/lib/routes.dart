@@ -33,6 +33,8 @@ class AppRoutes {
   static const lineNew = '/driver/lines/new';
   static const lineDetail = '/driver/lines/:lineId';
   static String lineDetailFor(String lineId) => '/driver/lines/$lineId';
+  /// Départ ponctuel (« je pars le …, il me reste N places »).
+  static const departureNew = '/driver/departures/new';
   static const departure = '/driver/departures/:departureId';
   static String departureFor(String departureId) => '/driver/departures/$departureId';
   static const operatorProfile = '/driver/operator';

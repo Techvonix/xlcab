@@ -215,6 +215,39 @@ void main() {
       expect(json, containsPair('minPassengers', 5));
     });
 
+    testWidgets('départ ponctuel : un jour, pas de retour ni de jours de la semaine, publié et mis en vente', (tester) async {
+      await pump(tester, const LineFormScreen(oneOff: true), height: 8000);
+      expect(find.text('Publier un départ'), findsOneWidget);
+      expect(find.text('Retour le même jour'), findsNothing);
+      expect(find.byType(FilterChip), findsNothing);
+
+      await tester.tap(find.text('Départ'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Arrivée'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Renault Trafic · 8 places'));
+      await tester.tap(find.text('Jour du départ'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Heure de départ'));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.widgetWithText(TextFormField, 'Places par départ'), '3');
+      await tester.enterText(find.widgetWithText(TextFormField, 'Bagages par départ'), '3');
+      await tester.tap(find.text('Par place'));
+      await tester.pump();
+      await tester.enterText(find.widgetWithText(TextFormField, 'Prix par place (TTC)'), '35');
+      await tester.tap(find.text('Publier et mettre en vente'));
+      await tester.pumpAndSettle();
+
+      expect(operators.calls, ['publishDeparture']);
+      final json = operators.createdLine!.toOneOffJson();
+      expect(json, containsPair('date', '2026-10-12'));
+      expect(json, containsPair('departureTime', '05:00'));
+      expect(json, containsPair('seats', 3));
+      expect(json, containsPair('priceCents', 3500));
+      expect(json.containsKey('daysOfWeek'), isFalse);
+      expect(json.containsKey('startDate'), isFalse);
+    });
+
     testWidgets('plus de places que le véhicule : refusé avant l’envoi ; erreur du serveur affichée', (tester) async {
       await pump(tester, const LineFormScreen(), height: 7800);
       await tester.tap(find.text('Départ'));

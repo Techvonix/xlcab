@@ -3846,4 +3846,28 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get gtAnnulationGratuite =>
       'Free as long as the departure is not confirmed: you are refunded in full.';
+
+  @override
+  String get poPublierUnDepart => 'Publish a departure';
+
+  @override
+  String get poPublierLeDepart => 'Publish and put on sale';
+
+  @override
+  String get poDateEtHeure => 'Date and time';
+
+  @override
+  String get poJourDuDepart => 'Departure day';
+
+  @override
+  String get poDepartPublie => 'Departure published: it is on sale.';
+
+  @override
+  String get poApresPublication =>
+      'Your departure goes on sale as soon as it is published. Travellers find it in “Find a seat”.';
+
+  @override
+  String poDepartPonctuelLe(String date, String time) {
+    return 'One-off departure on $date at $time';
+  }
 }

@@ -3867,4 +3867,28 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get gtAnnulationGratuite =>
       'Gratuit tant que le départ n’est pas confirmé : vous êtes remboursé intégralement.';
+
+  @override
+  String get poPublierUnDepart => 'Publier un départ';
+
+  @override
+  String get poPublierLeDepart => 'Publier et mettre en vente';
+
+  @override
+  String get poDateEtHeure => 'Date et heure';
+
+  @override
+  String get poJourDuDepart => 'Jour du départ';
+
+  @override
+  String get poDepartPublie => 'Départ publié : il est en vente.';
+
+  @override
+  String get poApresPublication =>
+      'Votre départ est mis en vente dès sa publication. Les voyageurs le trouvent dans « Trouver une place ».';
+
+  @override
+  String poDepartPonctuelLe(String date, String time) {
+    return 'Départ ponctuel le $date à $time';
+  }
 }
