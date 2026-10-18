@@ -480,6 +480,7 @@ export class RescueService {
         data: { status: TripStatus.CANCELLED, cancelledAt: now, cancellationReason: 'Aucun chauffeur de remplacement disponible', cancellationFeeCents: 0 },
       });
       if (updated.count === 0) continue;
+      if (t.type === 'parcel') await this.prisma.parcelBooking.updateMany({ where: { tripId: t.id, status: 'pending' }, data: { status: 'cancelled' } });
       await this.payments.refundForCancellation(t.id, 0);
       const credit = Math.round(((t.totalPriceCents ?? 0) * FAILED_RESCUE_CREDIT_PERCENT) / 100);
       if (t.passengerId && credit > 0) {

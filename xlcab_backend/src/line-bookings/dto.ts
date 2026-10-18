@@ -1,5 +1,6 @@
 import { Transform } from 'class-transformer';
-import { IsEmail, IsIn, IsInt, IsOptional, IsString, IsUUID, Max, MaxLength, Min, MinLength, ArrayMaxSize, ArrayUnique, IsArray } from 'class-validator';
+import { Equals, IsBoolean, IsEmail, IsIn, IsInt, IsNumber, IsOptional, IsString, IsUUID, Matches, Max, MaxLength, Min, MinLength, ArrayMaxSize, ArrayUnique, IsArray } from 'class-validator';
+import { PARCEL_MAX_WEIGHT_KG } from '../parcels/parcels.constants';
 
 const trim = ({ value }: { value: unknown }) => (typeof value === 'string' ? value.trim() : value);
 
@@ -53,6 +54,66 @@ export class BookLineDto {
   @IsOptional()
   @IsUUID('4', { message: 'Arrêt invalide' })
   alightStopId?: string;
+}
+
+/** Colis confié à un départ de ligne : remis au chauffeur au point de montée. */
+export class LineParcelDto {
+  @IsUUID('4', { message: 'Départ invalide' })
+  departureId!: string;
+
+  /** Arrêt où l'expéditeur remet le colis (absent = départ de la ligne). */
+  @IsOptional()
+  @IsUUID('4', { message: 'Arrêt invalide' })
+  boardStopId?: string;
+
+  /** Arrêt où le destinataire le récupère (absent = arrivée de la ligne). */
+  @IsOptional()
+  @IsUUID('4', { message: 'Arrêt invalide' })
+  alightStopId?: string;
+
+  @Transform(trim)
+  @IsString()
+  @MinLength(3, { message: 'Décrivez le contenu du colis' })
+  @MaxLength(200)
+  description!: string;
+
+  @IsOptional()
+  @IsBoolean()
+  isFragile?: boolean;
+
+  @IsNumber({ maxDecimalPlaces: 1 })
+  @Min(0.1)
+  @Max(PARCEL_MAX_WEIGHT_KG, { message: `Poids maximal : ${PARCEL_MAX_WEIGHT_KG} kg` })
+  weightKg!: number;
+
+  @IsInt()
+  @Min(1)
+  @Max(300)
+  lengthCm!: number;
+
+  @IsInt()
+  @Min(1)
+  @Max(300)
+  widthCm!: number;
+
+  @IsInt()
+  @Min(1)
+  @Max(300)
+  heightCm!: number;
+
+  @Transform(trim)
+  @IsString()
+  @MinLength(2)
+  @MaxLength(80)
+  recipientName!: string;
+
+  @Transform(({ value }) => (typeof value === 'string' ? value.replace(/[\s.-]/g, '') : value))
+  @Matches(/^(\+\d{8,15}|0\d{9})$/, { message: 'Numéro du destinataire invalide' })
+  recipientPhone!: string;
+
+  /** L'expéditeur certifie l'absence d'objets interdits (matières dangereuses, animaux, valeurs…). */
+  @Equals(true, { message: 'Confirmez que le colis ne contient aucun objet interdit' })
+  prohibitedItemsDeclined!: boolean;
 }
 
 export class QrCheckInDto {

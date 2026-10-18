@@ -130,3 +130,93 @@ class ParcelChecklist extends StatelessWidget {
         _ => Icons.inventory_2_outlined,
       };
 }
+
+/// Code à 4 chiffres donné par le destinataire.
+class DeliveryCodeDialog extends StatefulWidget {
+  const DeliveryCodeDialog({super.key});
+
+  @override
+  State<DeliveryCodeDialog> createState() => DeliveryCodeDialogState();
+}
+
+class DeliveryCodeDialogState extends State<DeliveryCodeDialog> {
+  final _code = TextEditingController();
+
+  @override
+  void dispose() {
+    _code.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final valid = RegExp(r'^\d{4}$').hasMatch(_code.text);
+    return AlertDialog(
+      title: Text(l10n.remiseDuColis),
+      content: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Text(l10n.demandezAuDestinataireSonCode),
+        const SizedBox(height: AppSpacing.md),
+        TextField(
+          controller: _code,
+          keyboardType: TextInputType.number,
+          maxLength: 4,
+          decoration: InputDecoration(labelText: l10n.codeDeRemise),
+          onChanged: (_) => setState(() {}),
+        ),
+      ]),
+      actions: [
+        TextButton(onPressed: () => Navigator.of(context).pop(), child: Text(l10n.retour)),
+        FilledButton(
+          onPressed: valid ? () => Navigator.of(context).pop(_code.text) : null,
+          child: Text(l10n.photographierEtValider),
+        ),
+      ],
+    );
+  }
+}
+
+/// Motif d'un problème sur un colis (expéditeur absent, destinataire injoignable…).
+class ParcelProblemDialog extends StatefulWidget {
+  const ParcelProblemDialog({super.key, required this.task});
+
+  final ParcelTask task;
+
+  @override
+  State<ParcelProblemDialog> createState() => ParcelProblemDialogState();
+}
+
+class ParcelProblemDialogState extends State<ParcelProblemDialog> {
+  String? _reason;
+
+  List<String> get _reasons => widget.task.toPickUp
+      ? [
+          if (widget.task.onReturnLeg) l10n.jeNeRentrePasPar,
+          l10n.expediteurAbsent,
+          l10n.colisNonConformePoidsTaille,
+        ]
+      : [l10n.destinataireAbsentOuInjoignable, l10n.codeDeRemiseRefuse, l10n.colisEndommage];
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text(l10n.signalerUnProbleme),
+      content: Column(mainAxisSize: MainAxisSize.min, children: [
+        for (final r in _reasons)
+          ListTile(
+            contentPadding: EdgeInsets.zero,
+            selected: _reason == r,
+            leading: Icon(_reason == r ? Icons.check_circle : Icons.circle_outlined),
+            title: Text(r),
+            onTap: () => setState(() => _reason = r),
+          ),
+      ]),
+      actions: [
+        TextButton(onPressed: () => Navigator.of(context).pop(), child: Text(l10n.retour)),
+        FilledButton(
+          onPressed: _reason == null ? null : () => Navigator.of(context).pop(_reason),
+          child: Text(l10n.signaler),
+        ),
+      ],
+    );
+  }
+}

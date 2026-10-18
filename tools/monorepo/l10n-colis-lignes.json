@@ -1,0 +1,12 @@
+{
+  "lcColis": { "fr": "Colis", "en": "Parcels" },
+  "lcColisAide": { "fr": "Facultatif : des colis remis par leurs expéditeurs au point de départ ou à un arrêt, livrés à l’arrivée avec le code du destinataire.", "en": "Optional: parcels handed over by their senders at departure or at a stop, delivered on arrival with the recipient’s code." },
+  "lcColisParDepart": { "fr": "Colis acceptés par départ (0 = aucun)", "en": "Parcels accepted per departure (0 = none)" },
+  "lcVingtAuPlus": { "fr": "20 au plus", "en": "20 at most" },
+  "lcPrixParColis": { "fr": "Prix par colis (TTC)", "en": "Price per parcel (incl. VAT)" },
+  "lcLigneReguliere": { "fr": "Ligne régulière · {operator}", "en": "Regular line · {operator}", "p": { "operator": "String" } },
+  "lcRemiseAuChauffeur": { "fr": "Remise au chauffeur : {place}, {time}", "en": "Hand over to the driver: {place}, {time}", "p": { "place": "String", "time": "String" } },
+  "lcRetraitA": { "fr": "Livré à : {place}", "en": "Delivered at: {place}", "p": { "place": "String" } },
+  "lcEnvoyerSurCeDepart": { "fr": "Envoyer · {price}", "en": "Send · {price}", "p": { "price": "String" } },
+  "lcLigne": { "fr": "Ligne régulière : remis au chauffeur au point de rendez-vous", "en": "Regular line: handed to the driver at the meeting point" }
+}

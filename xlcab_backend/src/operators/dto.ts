@@ -83,6 +83,20 @@ export class OperatorProfileDto {
 
 /** Champs modifiables d'une ligne (le trajet, lui, ne change pas). */
 export class UpdateLineDto {
+  /** Colis acceptés par départ (vente à la place ; 0 = aucun), remis au point de rencontre. */
+  @IsOptional()
+  @IsInt()
+  @Min(0, { message: 'Nombre de colis invalide' })
+  @Max(20, { message: 'Nombre de colis invalide' })
+  parcelSlots?: number;
+
+  /** Prix TTC par colis, en centimes. */
+  @IsOptional()
+  @IsInt()
+  @Min(100, { message: 'Prix du colis invalide' })
+  @Max(100_000, { message: 'Prix du colis invalide' })
+  parcelPriceCents?: number | null;
+
   @IsOptional()
   @IsUUID('4', { message: 'Véhicule invalide' })
   vehicleId?: string;
@@ -189,6 +203,20 @@ export class StopsDto {
 
 /** Trajet, véhicule, capacité et prix : communs à une ligne régulière et à un départ ponctuel. */
 export class DepartureOfferDto {
+  /** Colis acceptés par départ (vente à la place ; 0 = aucun), remis au point de rencontre. */
+  @IsOptional()
+  @IsInt()
+  @Min(0, { message: 'Nombre de colis invalide' })
+  @Max(20, { message: 'Nombre de colis invalide' })
+  parcelSlots?: number;
+
+  /** Prix TTC par colis, en centimes. */
+  @IsOptional()
+  @IsInt()
+  @Min(100, { message: 'Prix du colis invalide' })
+  @Max(100_000, { message: 'Prix du colis invalide' })
+  parcelPriceCents?: number;
+
   /** Arrêts intermédiaires (vente à la place), dans le sens aller. */
   @IsOptional()
   @IsArray()
@@ -388,6 +416,12 @@ export class LineSearchDto {
   @IsOptional()
   @Matches(HHMM, { message: 'Heure invalide (HH:MM)' })
   time?: string;
+
+  /** Recherche d'un départ pour un COLIS (emplacements colis, prix du colis) plutôt que pour des places. */
+  @IsOptional()
+  @Transform(({ value }) => value === true || value === 'true' || value === '1')
+  @IsBoolean()
+  parcels?: boolean;
 
   /** Écart accepté autour de l'heure souhaitée, en minutes. */
   @IsOptional()

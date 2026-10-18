@@ -174,6 +174,7 @@ export class LinesService {
     checkSchedule({ ...dto, returnTime: dto.returnTime ?? null, endDate: dto.endDate ?? null });
     checkThreshold(dto.pricingMode, dto.seats, dto.minPassengers ?? null);
     checkStops(dto.stops ?? [], { ...dto, durationMin: dto.durationMin ?? null, jurisdiction: vehicle.jurisdiction }, await this.catalogue(dto.stops));
+    checkParcels(dto.pricingMode, dto.parcelSlots ?? 0, dto.parcelPriceCents ?? null);
 
     // Les départs ponctuels ont leur propre plafond.
     const open = await this.prisma.recurringLine.count({ where: { operatorId: userId, kind: 'recurring', status: { in: ['active', 'paused'] } } });
@@ -205,6 +206,8 @@ export class LinesService {
         priceCents: dto.priceCents,
         durationMin: dto.durationMin ?? null,
         minPassengers: dto.minPassengers ?? null,
+        parcelSlots: dto.parcelSlots ?? 0,
+        parcelPriceCents: dto.parcelSlots ? dto.parcelPriceCents ?? null : null,
         conditions: dto.conditions || null,
         status: 'active',
       },
@@ -230,6 +233,7 @@ export class LinesService {
     checkSchedule({ startDate: dto.date, endDate: dto.date, departureTime: dto.departureTime, returnTime: null });
     checkThreshold(dto.pricingMode, dto.seats, dto.minPassengers ?? null);
     checkStops(dto.stops ?? [], { ...dto, durationMin: dto.durationMin ?? null, jurisdiction: vehicle.jurisdiction }, await this.catalogue(dto.stops));
+    checkParcels(dto.pricingMode, dto.parcelSlots ?? 0, dto.parcelPriceCents ?? null);
 
     const today = localDateOf(now, timezone);
     if (dto.date > addDays(today, LINE_HORIZON_DAYS)) {
@@ -280,6 +284,8 @@ export class LinesService {
         priceCents: dto.priceCents,
         durationMin: dto.durationMin ?? null,
         minPassengers: dto.minPassengers ?? null,
+        parcelSlots: dto.parcelSlots ?? 0,
+        parcelPriceCents: dto.parcelSlots ? dto.parcelPriceCents ?? null : null,
         conditions: dto.conditions || null,
         status: 'active',
       },
@@ -313,6 +319,9 @@ export class LinesService {
     // Passage au prix « par véhicule » : le seuil n'a plus de sens, il est retiré.
     if (next.pricingMode === 'per_vehicle' && dto.minPassengers === undefined) next.minPassengers = null;
     checkThreshold(next.pricingMode, next.seats, next.minPassengers ?? null);
+    if (next.pricingMode === 'per_vehicle' && dto.parcelSlots === undefined) next.parcelSlots = 0;
+    checkParcels(next.pricingMode, next.parcelSlots ?? 0, next.parcelPriceCents ?? null);
+    if (next.parcelSlots !== line.parcelSlots) dto.parcelSlots = next.parcelSlots;
     if (dto.priceCents !== undefined || dto.pricingMode !== undefined || dto.durationMin !== undefined) {
       const current = (await this.stopsByLine([lineId])).get(lineId) ?? [];
       const inputs = current.map((x) => ({ meetingPointId: x.stop.meetingPointId, offsetMin: x.stop.offsetMin, fareFromOriginCents: x.stop.fareFromOriginCents }));
@@ -536,6 +545,33 @@ export class LinesService {
     return { departureId: d.id, seats: d.pricingMode === 'per_vehicle' ? d.seatsTotal : seats, priceCents: priceFor(d, seats) };
   }
 
+  /**
+   * Retient un emplacement colis sur un départ (même règles de vente qu'une
+   * place) ; écriture conditionnelle : jamais plus de colis que prévu.
+   */
+  async reserveParcelSlot(departureId: string, now = new Date()) {
+    const d = await this.prisma.lineDeparture.findUnique({ where: { id: departureId } });
+    const line = d && (await this.prisma.recurringLine.findUnique({ where: { id: d.lineId } }));
+    const deadline = new Date(now.getTime() + LINE_BOOKING_LEAD_MIN * 60_000);
+    if (!d || !line || line.status !== 'active' || d.status !== 'open' || new Date(d.departureAt) <= deadline || !(await this.sellable(d, line, now))) {
+      throw new ConflictException('Ce départ n’est plus disponible');
+    }
+    if (!line.parcelSlots || !line.parcelPriceCents) throw new ConflictException('Ce départ ne prend pas de colis');
+    const { count } = await this.prisma.lineDeparture.updateMany({
+      where: { id: d.id, status: 'open', parcelsBooked: { lt: line.parcelSlots } },
+      data: { parcelsBooked: { increment: 1 } },
+    });
+    if (count === 0) throw new ConflictException('Plus de place pour un colis sur ce départ');
+    return { departure: d, line, priceCents: line.parcelPriceCents };
+  }
+
+  /** Rend l'emplacement d'un colis annulé. */
+  async releaseParcelSlot(departureId: string) {
+    const d = await this.prisma.lineDeparture.findUnique({ where: { id: departureId } });
+    if (!d) return;
+    await this.prisma.lineDeparture.update({ where: { id: departureId }, data: { parcelsBooked: Math.max(0, (d.parcelsBooked ?? 0) - 1) } });
+  }
+
   /** Rend des places (annulation d'une réservation) et libère ses sièges numérotés. */
   async releaseSeats(departureId: string, seats: number, tripId?: string) {
     if (tripId) await this.prisma.lineSeat.deleteMany({ where: { departureId, tripId } });
@@ -697,8 +733,13 @@ export class LinesService {
       if (!line || !operator || !driver || !user || !vehicle) continue;
       // Vente à la place : seulement si la licence est (toujours) vérifiée.
       if (d.pricingMode === 'per_seat' && !operator.perSeatAllowed) continue;
-      if (!bookable(d, q.seats)) continue;
-      if ((q.luggage ?? 0) > line.luggage) continue;
+      if (q.parcels) {
+        // Colis : un emplacement libre et un prix fixé par l'opérateur.
+        if (!line.parcelSlots || !line.parcelPriceCents || (d.parcelsBooked ?? 0) >= line.parcelSlots) continue;
+      } else {
+        if (!bookable(d, q.seats)) continue;
+        if ((q.luggage ?? 0) > line.luggage) continue;
+      }
       if (!(await this.sellable(d, line, now))) continue;
 
       // Montée et descente : le couple de points (départ, arrêts, arrivée) le plus
@@ -722,8 +763,10 @@ export class LinesService {
       const fullTrip = best.i === 0 && best.j === route.length - 1;
       const boardAt = new Date(new Date(d.departureAt).getTime() + board.offsetMin * 60_000);
       // Vente à la place : prix du tronçon ; véhicule privatisé : prix du véhicule.
-      const unit = d.pricingMode === 'per_seat' && !fullTrip ? segmentFare(route, best.i, best.j) : d.priceCents;
-      const total = d.pricingMode === 'per_seat' ? unit * q.seats : d.priceCents;
+      const unit = q.parcels
+        ? line.parcelPriceCents!
+        : d.pricingMode === 'per_seat' && !fullTrip ? segmentFare(route, best.i, best.j) : d.priceCents;
+      const total = q.parcels ? unit : d.pricingMode === 'per_seat' ? unit * q.seats : d.priceCents;
 
       const time = localTimeOf(boardAt, line.timezone);
       const diffMin = q.time ? minutesOf(time) - minutesOf(q.time) : 0;
@@ -755,6 +798,8 @@ export class LinesService {
         totalPriceCents: total,
         seatsLeft: d.pricingMode === 'per_vehicle' ? d.seatsTotal : seatsLeft,
         luggage: line.luggage,
+        // Emplacements colis encore libres (recherche « colis »).
+        parcelSlotsLeft: Math.max(0, (line.parcelSlots ?? 0) - (d.parcelsBooked ?? 0)),
         conditions: line.conditions,
         // Profil public : jamais de téléphone, d'e-mail ni de plaque avant réservation.
         operator: {
@@ -923,6 +968,13 @@ export class LinesService {
   }
 }
 
+/** Colis sur une ligne : vente à la place seulement, avec un prix par colis. */
+function checkParcels(pricingMode: string, slots: number, priceCents: number | null) {
+  if (!slots) return;
+  if (pricingMode !== 'per_seat') throw new BadRequestException('Les colis ne s’acceptent que sur une ligne vendue à la place');
+  if (!priceCents) throw new BadRequestException('Indiquez le prix d’un colis');
+}
+
 /** Seuil de départ : vente à la place seulement, entre 1 et le nombre de places. */
 function checkThreshold(pricingMode: string, seats: number, minPassengers: number | null) {
   if (minPassengers === null) return;
@@ -985,6 +1037,8 @@ const lineView = (l: Line) => ({
   priceCents: l.priceCents,
   durationMin: l.durationMin,
   minPassengers: l.minPassengers ?? null,
+  parcelSlots: l.parcelSlots ?? 0,
+  parcelPriceCents: l.parcelPriceCents ?? null,
   conditions: l.conditions,
   status: l.status,
 });
@@ -1003,4 +1057,5 @@ const departureView = (d: Departure) => ({
   minPassengers: d.minPassengers ?? null,
   guaranteed: Boolean(d.guaranteedAt),
   thresholdMissed: Boolean(d.thresholdMissedAt),
+  parcelsBooked: d.parcelsBooked ?? 0,
 });

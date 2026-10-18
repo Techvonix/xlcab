@@ -310,6 +310,7 @@ class FakeMarketService extends MarketService {
     required String date,
     required int seats,
     int luggage = 0,
+    bool parcels = false,
   }) async {
     _act('searchLines:$date:$seats');
     return lineResults;

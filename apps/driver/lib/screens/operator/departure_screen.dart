@@ -12,6 +12,10 @@ import 'package:xlcab_core/utils/formatters.dart';
 import 'package:xlcab_ui/widgets/primary_button.dart';
 import 'package:xlcab_ui/widgets/async_widgets.dart';
 import 'package:xlcab_core/l10n/l10n.dart';
+import 'package:xlcab_core/providers/clock_provider.dart';
+import 'package:xlcab_core/services/document_picker.dart';
+import 'package:xlcab_core/services/parcel_service.dart';
+import '../driver/widgets/parcel_checklist.dart';
 
 /// Un départ de ligne que j'assure : liste d'embarquement, « Je suis en
 /// route », scan des QR, démarrage et fin pour tous les passagers, ou
@@ -51,6 +55,30 @@ class _DepartureScreenState extends ConsumerState<DepartureScreen> {
     await _do(() async => name = await _service.checkIn(widget.departureId, code.trim()));
     if (mounted && name != null) showToast(context, l10n.opPassagerEmbarque(name!));
   }
+
+  ParcelActions _parcelActions() => ParcelActions(
+        onCall: (phone) => ref.read(driverLauncherProvider).call(phone),
+        onScan: (p) async {
+          final code = await ref.read(qrScannerProvider).scan(context);
+          if (code == null || !mounted) return;
+          await _do(() => ref.read(parcelServiceProvider).pickup(p.id, code.trim()), success: l10n.colisABord);
+        },
+        onDeliver: (p) async {
+          final code = await showDialog<String>(context: context, builder: (_) => const DeliveryCodeDialog());
+          if (code == null || !mounted) return;
+          // Photo obligatoire : seconde preuve de remise en cas de litige.
+          final photo = await ref.read(documentPickerProvider).pick(DocumentSource.camera);
+          if (photo == null) {
+            if (mounted) showToast(context, l10n.photoDuColisRemisObligatoire);
+            return;
+          }
+          await _do(() => ref.read(parcelServiceProvider).deliver(p.id, code, photo), success: l10n.colisRemisMerci);
+        },
+        onFail: (p) async {
+          final reason = await showDialog<String>(context: context, builder: (_) => ParcelProblemDialog(task: p));
+          if (reason != null) await _do(() => ref.read(parcelServiceProvider).fail(p.id, reason), success: l10n.problemeSignaleALEquipe);
+        },
+      );
 
   Future<void> _start(Manifest m) async {
     final missing = m.passengers.where((p) => !p.checkedIn).length;
@@ -162,6 +190,17 @@ class _DepartureScreenState extends ConsumerState<DepartureScreen> {
 
               SectionTitle(l10n.opListeDEmbarquement),
               for (final p in m.passengers) _PassengerTile(passenger: p, manifest: m),
+              if (m.parcels.isNotEmpty) ...[
+                const SizedBox(height: AppSpacing.md),
+                ParcelChecklist(
+                  parcels: m.parcels,
+                  actions: _parcelActions(),
+                  // Enlèvement dans l'heure du départ (le serveur le vérifie) ; remise une fois parti.
+                  canPickUp: !m.started && m.departureAt.difference(ref.read(clockProvider)()).inMinutes <= 60,
+                  canDeliver: m.started,
+                  busy: _busy,
+                ),
+              ],
               const SizedBox(height: AppSpacing.md),
               if (!m.started) ...[
                 OutlinedButton.icon(onPressed: _busy ? null : _scan, icon: const Icon(Icons.qr_code_scanner), label: Text(l10n.opScannerUnQr)),

@@ -3931,4 +3931,44 @@ class AppLocalizationsEn extends AppLocalizations {
   String stPointDeRencontre(String name) {
     return 'Meeting point: $name';
   }
+
+  @override
+  String get lcColis => 'Parcels';
+
+  @override
+  String get lcColisAide =>
+      'Optional: parcels handed over by their senders at departure or at a stop, delivered on arrival with the recipient’s code.';
+
+  @override
+  String get lcColisParDepart => 'Parcels accepted per departure (0 = none)';
+
+  @override
+  String get lcVingtAuPlus => '20 at most';
+
+  @override
+  String get lcPrixParColis => 'Price per parcel (incl. VAT)';
+
+  @override
+  String lcLigneReguliere(String operator) {
+    return 'Regular line · $operator';
+  }
+
+  @override
+  String lcRemiseAuChauffeur(String place, String time) {
+    return 'Hand over to the driver: $place, $time';
+  }
+
+  @override
+  String lcRetraitA(String place) {
+    return 'Delivered at: $place';
+  }
+
+  @override
+  String lcEnvoyerSurCeDepart(String price) {
+    return 'Send · $price';
+  }
+
+  @override
+  String get lcLigne =>
+      'Regular line: handed to the driver at the meeting point';
 }

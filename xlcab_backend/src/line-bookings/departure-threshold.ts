@@ -86,6 +86,7 @@ export class DepartureThresholdService {
       });
       if (updated.count === 0) continue;
       cancelled++;
+      if (t.type === 'parcel') await this.prisma.parcelBooking.updateMany({ where: { tripId: t.id, status: 'pending' }, data: { status: 'cancelled' } });
       const booking = await this.prisma.passengerBooking.findUnique({ where: { tripId: t.id }, select: { seats: true } });
       await this.lines.releaseSeats(d.id, booking?.seats ?? 0, t.id);
       // Payée : remboursement intégral. Paiement encore en cours : s'il aboutit,

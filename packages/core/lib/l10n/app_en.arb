@@ -1104,5 +1104,15 @@
   "stMonteA": "boards at {place}",
   "stDescendA": "gets off at {place}",
   "stTroncon": "Part of the route: you only pay for your section.",
-  "stPointDeRencontre": "Meeting point: {name}"
+  "stPointDeRencontre": "Meeting point: {name}",
+  "lcColis": "Parcels",
+  "lcColisAide": "Optional: parcels handed over by their senders at departure or at a stop, delivered on arrival with the recipient’s code.",
+  "lcColisParDepart": "Parcels accepted per departure (0 = none)",
+  "lcVingtAuPlus": "20 at most",
+  "lcPrixParColis": "Price per parcel (incl. VAT)",
+  "lcLigneReguliere": "Regular line · {operator}",
+  "lcRemiseAuChauffeur": "Hand over to the driver: {place}, {time}",
+  "lcRetraitA": "Delivered at: {place}",
+  "lcEnvoyerSurCeDepart": "Send · {price}",
+  "lcLigne": "Regular line: handed to the driver at the meeting point"
 }

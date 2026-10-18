@@ -565,6 +565,21 @@ export const MESSAGES_EN: Record<string, string> = {
   'Réservation annulée': 'Booking cancelled',
   'Ce départ n’est plus disponible : vous êtes remboursé intégralement.': 'This departure is no longer available: you are refunded in full.',
 
+  // Colis sur les lignes (2026-10-18)
+  'Colis trop grand : 120 × 80 × 80 cm au maximum': 'Parcel too large: 120 × 80 × 80 cm maximum',
+  'Vous assurez ce départ : vous ne pouvez pas y confier de colis': 'You operate this departure: you cannot send a parcel on it',
+  'Nombre de colis invalide': 'Invalid number of parcels',
+  'Prix du colis invalide': 'Invalid parcel price',
+  'Ce départ ne prend pas de colis': 'This departure does not take parcels',
+  'Plus de place pour un colis sur ce départ': 'No more room for a parcel on this departure',
+  'Les colis ne s’acceptent que sur une ligne vendue à la place': 'Parcels are only accepted on lines sold per seat',
+  'Indiquez le prix d’un colis': 'Enter the price of a parcel',
+  'Colis confirmé': 'Parcel confirmed',
+  'Votre colis voyage sur la ligne. Présentez le QR au chauffeur au point de rendez-vous.':
+    'Your parcel travels on the line. Show the QR code to the driver at the meeting point.',
+  'Nouveau colis': 'New parcel',
+  'Un colis vous sera remis au départ.': 'A parcel will be handed to you at departure.',
+
   // Points de rencontre et arrêts (2026-10-16)
   'Ville invalide': 'Invalid city',
   'Ville limitée à 80 caractères': 'City limited to 80 characters',

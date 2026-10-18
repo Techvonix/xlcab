@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/market.dart';
+import '../models/parcel.dart';
 import '../models/payment.dart';
 import '../models/place.dart';
 import 'api_service.dart';
@@ -106,9 +107,12 @@ class MarketService {
     required String date,
     required int seats,
     int luggage = 0,
+    bool parcels = false,
   }) =>
       guardOperatorCall(() async {
         final res = await _dio.get<List<dynamic>>('/api/v1/lines/search', queryParameters: {
+          // Recherche « colis » : départs qui ont encore un emplacement, au prix du colis.
+          if (parcels) 'parcels': 'true',
           'fromLat': from.lat,
           'fromLng': from.lng,
           'toLat': to.lat,
@@ -146,6 +150,25 @@ class MarketService {
           if (alightStopId != null) 'alightStopId': alightStopId,
         });
         return LineBooking.fromJson(res.data);
+      });
+
+  /// Confie un colis à un départ de ligne : remis au chauffeur au point de montée.
+  Future<LineParcelBooking> bookLineParcel(LineSearchResult departure, ParcelRequest parcel) => guardOperatorCall(() async {
+        final res = await _dio.post<Map<String, dynamic>>('/api/v1/lines/bookings/parcel', data: {
+          'departureId': departure.departureId,
+          if (departure.board?.stopId != null) 'boardStopId': departure.board!.stopId,
+          if (departure.alight?.stopId != null) 'alightStopId': departure.alight!.stopId,
+          'description': parcel.description.trim(),
+          'isFragile': parcel.isFragile,
+          'weightKg': parcel.weightKg,
+          'lengthCm': parcel.lengthCm,
+          'widthCm': parcel.widthCm,
+          'heightCm': parcel.heightCm,
+          'recipientName': parcel.recipientName.trim(),
+          'recipientPhone': parcel.recipientPhone,
+          'prohibitedItemsDeclined': true,
+        });
+        return LineParcelBooking.fromJson(res.data);
       });
 
   /// Sièges déjà pris sur un départ (choix du siège à la réservation).

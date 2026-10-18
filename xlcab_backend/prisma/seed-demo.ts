@@ -250,6 +250,8 @@ async function main() {
     durationMin: 270, minPassengers: 4, conditions: '1 valise et 1 bagage cabine par personne',
     // Arrêt à Clermont-Ferrand : Lyon → Clermont 18 €, Clermont → Limoges 12 €.
     stops: [{ meetingPointId: clermontPoint.id, offsetMin: 150, fareFromOriginCents: 1800 }],
+    // Colis (CLARIFICATION_MODELE.md, D9) : 3 par départ, 15 € l'un, remis au point de rendez-vous.
+    parcelSlots: 3, parcelPriceCents: 1500,
   });
   for (const id of [djamel.id, chris.id, sami.id]) await lines.confirm(id, { until: addDays(tomorrow, 6) });
 

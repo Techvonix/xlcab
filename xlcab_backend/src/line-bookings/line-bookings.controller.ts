@@ -2,7 +2,7 @@ import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, ParseIntPip
 import { AuditService } from '../audit/audit.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { Roles, RolesGuard } from '../auth/guards/roles.guard';
-import { BookLineDto, InviteBackupDto, JustifyDto, QrCheckInDto, ReasonDto, VehicleChoiceDto } from './dto';
+import { BookLineDto, LineParcelDto, InviteBackupDto, JustifyDto, QrCheckInDto, ReasonDto, VehicleChoiceDto } from './dto';
 import { LineBookingsService } from './line-bookings.service';
 import { RescueService } from './rescue.service';
 
@@ -18,6 +18,13 @@ export class LineBookingsController {
   @HttpCode(HttpStatus.CREATED)
   book(@Req() req: any, @Body() dto: BookLineDto) {
     return this.bookings.book(req.user.sub, dto);
+  }
+
+  /** Colis confié à un départ de ligne (CLARIFICATION_MODELE.md, D9). */
+  @Post('parcel')
+  @HttpCode(HttpStatus.CREATED)
+  bookParcel(@Req() req: any, @Body() dto: LineParcelDto) {
+    return this.bookings.bookParcel(req.user.sub, dto);
   }
 
   /** Sièges déjà pris sur un départ (numéros seulement). */

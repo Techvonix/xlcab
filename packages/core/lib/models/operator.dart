@@ -1,5 +1,6 @@
 import 'departure_guarantee.dart';
 import 'meeting_point.dart';
+import 'parcel.dart';
 import 'place.dart';
 
 // Espace opérateur (bourse de transport, étapes 1 et 2) : profil, lignes
@@ -158,6 +159,8 @@ class RecurringLine {
     this.minPassengers,
     this.oneOff = false,
     this.stops = const [],
+    this.parcelSlots = 0,
+    this.parcelPriceCents,
   });
 
   final String id;
@@ -186,6 +189,9 @@ class RecurringLine {
   final bool oneOff;
   /// Arrêts intermédiaires (points de rencontre), dans le sens aller.
   final List<LineStopView> stops;
+  /// Colis acceptés par départ (0 = aucun) et prix TTC par colis.
+  final int parcelSlots;
+  final int? parcelPriceCents;
 
   static RecurringLine? fromJson(Object? json) {
     if (json is! Map || json['id'] is! String) return null;
@@ -218,6 +224,8 @@ class RecurringLine {
       minPassengers: _int(m['minPassengers']),
       oneOff: m['kind'] == 'one_off',
       stops: m['stops'] is List ? (m['stops'] as List).map(LineStopView.fromJson).whereType<LineStopView>().toList() : const [],
+      parcelSlots: _int(m['parcelSlots']) ?? 0,
+      parcelPriceCents: _int(m['parcelPriceCents']),
     );
   }
 }
@@ -240,9 +248,14 @@ class LineDraft {
     this.conditions,
     this.minPassengers,
     this.stops = const [],
+    this.parcelSlots = 0,
+    this.parcelPriceCents,
   });
 
   final String vehicleId;
+  /// Colis acceptés par départ (0 = aucun) et prix TTC par colis.
+  final int parcelSlots;
+  final int? parcelPriceCents;
   final Place origin;
   final Place destination;
   final String departureTime;
@@ -280,6 +293,8 @@ class LineDraft {
         if (conditions != null && conditions!.isNotEmpty) 'conditions': conditions,
         if (perSeat && minPassengers != null) 'minPassengers': minPassengers,
         if (perSeat && stops.isNotEmpty) 'stops': stops.map((s) => s.toJson()).toList(),
+        if (perSeat && parcelSlots > 0) 'parcelSlots': parcelSlots,
+        if (perSeat && parcelSlots > 0 && parcelPriceCents != null) 'parcelPriceCents': parcelPriceCents,
       };
 
   /// Départ ponctuel (POST /operators/me/departures) : un seul jour, sans retour ni jours de la semaine.
@@ -518,10 +533,13 @@ class Manifest {
     required this.seatsBooked,
     required this.passengers,
     this.guarantee,
+    this.parcels = const [],
   });
 
   /// Seuil de départ garanti (null : serveur plus ancien).
   final DepartureGuarantee? guarantee;
+  /// Colis confiés au départ (enlèvement par QR, remise avec code et photo).
+  final List<ParcelTask> parcels;
   final String departureId;
   final DateTime departureAt;
   final String origin;
@@ -544,6 +562,7 @@ class Manifest {
       ready: m['ready'] == true,
       seatsBooked: _int(m['seatsBooked']) ?? 0,
       guarantee: DepartureGuarantee.fromJson(m['guarantee']),
+      parcels: m['parcels'] is List ? (m['parcels'] as List).map(ParcelTask.fromJson).whereType<ParcelTask>().toList() : const [],
       passengers: m['passengers'] is List
           ? (m['passengers'] as List)
               .whereType<Map>()

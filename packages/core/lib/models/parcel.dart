@@ -79,6 +79,9 @@ enum ParcelMode {
   /// ou retour d'un chauffeur qui rentrerait à vide).
   grafted('grafted'),
 
+  /// Confié à un départ de ligne régulière, remis au point de rendez-vous.
+  line('line'),
+
   /// Navette dédiée au colis.
   dedicated('dedicated');
 
@@ -263,7 +266,7 @@ class ParcelDetail {
       id: json['id'] as String,
       tripId: json['tripId'] as String,
       status: ParcelStatus.fromApi(json['status']),
-      mode: json['mode'] == 'dedicated' ? ParcelMode.dedicated : ParcelMode.grafted,
+      mode: switch (json['mode']) { 'dedicated' => ParcelMode.dedicated, 'line' => ParcelMode.line, _ => ParcelMode.grafted },
       onReturnLeg: json['onReturnLeg'] == true,
       pickupAddress: pickup is Map ? str(pickup['address']) ?? '' : '',
       deliveryAddress: delivery is Map ? str(delivery['address']) ?? '' : '',

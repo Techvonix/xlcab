@@ -539,7 +539,12 @@ export class PaymentsService {
       if (trip?.status === TripStatus.CANCELLED) await this.refundForCancellation(tripId, 0);
       return;
     }
-    if (userId) await this.notifications.notify(userId, 'line.booked', 'Réservation confirmée', 'Votre place sur la ligne est réservée.', { tripId });
+    const isParcel = (await this.prisma.trip.findUnique({ where: { id: tripId }, select: { type: true } }))?.type === 'parcel';
+    if (userId) {
+      await (isParcel
+        ? this.notifications.notify(userId, 'line.parcel_booked', 'Colis confirmé', 'Votre colis voyage sur la ligne. Présentez le QR au chauffeur au point de rendez-vous.', { tripId })
+        : this.notifications.notify(userId, 'line.booked', 'Réservation confirmée', 'Votre place sur la ligne est réservée.', { tripId }));
+    }
     if (driverId) {
       await this.notifications.notify(driverId, 'line.new_booking', 'Nouvelle réservation', 'Un passager a réservé sur votre ligne.', { departureId });
     }
@@ -549,6 +554,11 @@ export class PaymentsService {
 
   /** Rend à la vente les places (et sièges numérotés) d'une réservation de ligne abandonnée. */
   private async releaseLineSeats(tripId: string, departureId: string) {
+    const trip = await this.prisma.trip.findUnique({ where: { id: tripId }, select: { type: true } });
+    if (trip?.type === 'parcel') {
+      await this.prisma.parcelBooking.updateMany({ where: { tripId, status: 'pending' }, data: { status: 'cancelled' } });
+      return this.lines?.releaseParcelSlot(departureId);
+    }
     const booking = await this.prisma.passengerBooking.findUnique({ where: { tripId }, select: { seats: true } });
     await this.lines?.releaseSeats(departureId, booking?.seats ?? 0, tripId);
   }

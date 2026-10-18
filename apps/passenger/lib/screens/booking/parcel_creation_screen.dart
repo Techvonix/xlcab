@@ -19,6 +19,10 @@ import 'package:xlcab_ui/screens/address_search_screen.dart';
 
 export 'package:xlcab_ui/screens/address_search_screen.dart' show addressPickerProvider;
 import 'package:xlcab_core/l10n/l10n.dart';
+import 'package:xlcab_core/models/market.dart';
+import 'package:xlcab_core/services/market_service.dart';
+import 'package:xlcab_core/services/trip_service.dart';
+import 'package:xlcab_ui/widgets/async_widgets.dart' show apiDate;
 
 /// Choix de la date puis de l'heure d'enlèvement (sélecteurs natifs ;
 /// injectable pour les tests).
@@ -70,6 +74,9 @@ class _ParcelCreationScreenState extends ConsumerState<ParcelCreationScreen> {
 
   ParcelQuote? _quote;
   ParcelMode? _mode;
+  /// Départs de lignes régulières qui prennent encore un colis sur ce trajet, ce jour-là.
+  List<LineSearchResult> _lines = const [];
+  LineSearchResult? _line;
   ParcelBooking? _booking;
   bool _loading = false;
   String? _error;
@@ -86,11 +93,13 @@ class _ParcelCreationScreenState extends ConsumerState<ParcelCreationScreen> {
 
   /// Toute modification invalide le devis (le prix dépend du formulaire).
   void _changed() {
-    if (_quote != null || _booking != null) {
+    if (_quote != null || _booking != null || _lines.isNotEmpty) {
       setState(() {
         _quote = null;
         _mode = null;
         _booking = null;
+        _lines = const [];
+        _line = null;
       });
     }
   }
@@ -135,11 +144,20 @@ class _ParcelCreationScreenState extends ConsumerState<ParcelCreationScreen> {
     setState(() => _loading = true);
     try {
       final quote = await ref.read(parcelServiceProvider).quote(_request()!);
+      // Lignes régulières du jour : le colis voyage avec un chauffeur qui fait déjà ce trajet.
+      var lines = const <LineSearchResult>[];
+      try {
+        lines = await ref.read(marketServiceProvider).searchLines(from: _pickup!, to: _delivery!, date: apiDate(_when!), seats: 1, parcels: true);
+      } on ApiException {
+        // Recherche indisponible : les deux autres options restent proposées.
+      }
       setState(() {
         _quote = quote;
-        // Option la moins chère proposée par défaut.
-        _mode = quote.grafted.available ? ParcelMode.grafted : quote.dedicated.available ? ParcelMode.dedicated : null;
-        if (_mode == null) _error = quote.dedicated.reason ?? l10n.aucuneOptionDisponiblePourCe;
+        _lines = lines;
+        // Option la moins chère proposée par défaut : une ligne régulière, sinon la navette partagée.
+        _line = lines.isEmpty ? null : (List.of(lines)..sort((a, b) => a.totalPriceCents.compareTo(b.totalPriceCents))).first;
+        _mode = _line != null ? null : quote.grafted.available ? ParcelMode.grafted : quote.dedicated.available ? ParcelMode.dedicated : null;
+        if (_mode == null && _line == null) _error = quote.dedicated.reason ?? l10n.aucuneOptionDisponiblePourCe;
       });
     } on ApiException catch (e) {
       setState(() => _error = e.message);
@@ -148,7 +166,41 @@ class _ParcelCreationScreenState extends ConsumerState<ParcelCreationScreen> {
     }
   }
 
+  /// Colis confié à un départ de ligne : paiement si le paiement en ligne est activé, puis suivi.
+  Future<void> _sendOnLine(LineSearchResult line) async {
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
+    try {
+      final booking = await ref.read(marketServiceProvider).bookLineParcel(line, _request()!);
+      if (booking.payment != null) {
+        final presenter = ref.read(paymentSheetPresenterProvider);
+        final result = presenter.isAvailable
+            ? await presenter.present(booking.payment!)
+            : PaymentSheetResult(PaymentSheetOutcome.failed, l10n.paiementMomentanementIndisponibleReessayezPlus);
+        if (result.outcome != PaymentSheetOutcome.completed) {
+          // Abandon : la réservation est annulée tout de suite, l'emplacement rendu.
+          try {
+            await ref.read(tripServiceProvider).cancel(booking.tripId, 'Paiement non finalisé');
+          } on ApiException {
+            // Sans paiement, la réservation tombe d'elle-même au bout de 30 minutes.
+          }
+          setState(() => _error = result.outcome == PaymentSheetOutcome.canceled ? l10n.paiementAnnuleVotreEnvoiN : (result.message ?? l10n.paiementRefuse));
+          return;
+        }
+        await ref.read(paymentServiceProvider).confirm(booking.tripId);
+      }
+      if (mounted) context.go(AppRoutes.parcelTrackingFor(booking.parcelId));
+    } on ApiException catch (e) {
+      setState(() => _error = e.message);
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
   Future<void> _pay() async {
+    if (_line != null) return _sendOnLine(_line!);
     final mode = _mode;
     if (mode == null) return;
     final presenter = ref.read(paymentSheetPresenterProvider);
@@ -332,6 +384,17 @@ class _ParcelCreationScreenState extends ConsumerState<ParcelCreationScreen> {
             ),
             if (_quote != null) ...[
               section(l10n.commentVoyageVotreColis),
+              for (final line in _lines) ...[
+                _LineOptionCard(
+                  line: line,
+                  selected: identical(_line, line),
+                  onTap: () => setState(() {
+                    _line = line;
+                    _mode = null;
+                  }),
+                ),
+                const SizedBox(height: AppSpacing.sm),
+              ],
               _OptionCard(
                 title: _quote!.grafted.onReturnLeg ? l10n.navettePartageeTrajetRetour : l10n.navettePartagee,
                 description: _quote!.grafted.onReturnLeg
@@ -339,7 +402,10 @@ class _ParcelCreationScreenState extends ConsumerState<ParcelCreationScreen> {
                     : l10n.votreColisVoyageAvecUne,
                 option: _quote!.grafted,
                 selected: _mode == ParcelMode.grafted,
-                onTap: () => setState(() => _mode = ParcelMode.grafted),
+                onTap: () => setState(() {
+                  _mode = ParcelMode.grafted;
+                  _line = null;
+                }),
               ),
               const SizedBox(height: AppSpacing.sm),
               _OptionCard(
@@ -347,7 +413,10 @@ class _ParcelCreationScreenState extends ConsumerState<ParcelCreationScreen> {
                 description: l10n.uneNavettePartPourVotre,
                 option: _quote!.dedicated,
                 selected: _mode == ParcelMode.dedicated,
-                onTap: () => setState(() => _mode = ParcelMode.dedicated),
+                onTap: () => setState(() {
+                  _mode = ParcelMode.dedicated;
+                  _line = null;
+                }),
               ),
               const SizedBox(height: AppSpacing.sm),
               Text(
@@ -370,8 +439,12 @@ class _ParcelCreationScreenState extends ConsumerState<ParcelCreationScreen> {
             else
               PrimaryButton(
                 icon: Icons.lock_outline,
-                label: _mode == null ? l10n.aucuneOptionDisponible : l10n.payer(formatPrice(_selectedPrice()!, locale: locale)),
-                onPressed: _loading || _mode == null ? null : _pay,
+                label: _mode == null && _line == null
+                    ? l10n.aucuneOptionDisponible
+                    : _line != null
+                        ? l10n.lcEnvoyerSurCeDepart(formatPrice(_selectedPrice()!, locale: locale))
+                        : l10n.payer(formatPrice(_selectedPrice()!, locale: locale)),
+                onPressed: _loading || (_mode == null && _line == null) ? null : _pay,
               ),
             const SizedBox(height: AppSpacing.md),
           ],
@@ -380,7 +453,52 @@ class _ParcelCreationScreenState extends ConsumerState<ParcelCreationScreen> {
     );
   }
 
-  int? _selectedPrice() => (_mode == ParcelMode.grafted ? _quote?.grafted : _quote?.dedicated)?.price?.totalCents;
+  int? _selectedPrice() => _line?.totalPriceCents ?? (_mode == ParcelMode.grafted ? _quote?.grafted : _quote?.dedicated)?.price?.totalCents;
+}
+
+/// Départ de ligne régulière qui prend le colis : chauffeur, heure et lieu de remise, prix.
+class _LineOptionCard extends StatelessWidget {
+  const _LineOptionCard({required this.line, required this.selected, required this.onTap});
+
+  final LineSearchResult line;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final locale = Localizations.localeOf(context).languageCode;
+    final muted = scheme.onSurface.withValues(alpha: 0.75);
+    return Semantics(
+      selected: selected,
+      button: true,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.all(AppSpacing.md),
+          decoration: BoxDecoration(
+            color: scheme.surface,
+            borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
+            border: Border.all(color: selected ? AppColors.primaryButton : scheme.outline.withValues(alpha: 0.4), width: selected ? 2 : 1),
+          ),
+          child: Row(children: [
+            ExcludeSemantics(child: Icon(selected ? Icons.radio_button_checked : Icons.radio_button_unchecked, color: selected ? AppColors.primaryButton : muted)),
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text(l10n.lcLigneReguliere(line.operatorName ?? ''), style: AppTypography.bodyBold.copyWith(color: scheme.onSurface)),
+                Text(l10n.lcRemiseAuChauffeur(line.origin, formatTripDate(line.departureAt, locale: locale)), style: AppTypography.caption.copyWith(color: muted)),
+                if (line.board?.transit != null) Text(line.board!.transit!, style: AppTypography.caption.copyWith(color: muted)),
+                Text(l10n.lcRetraitA(line.destination), style: AppTypography.caption.copyWith(color: muted)),
+              ]),
+            ),
+            Text(formatPrice(line.totalPriceCents, locale: locale), style: AppTypography.price.copyWith(color: scheme.onSurface, fontSize: 18)),
+          ]),
+        ),
+      ),
+    );
+  }
 }
 
 class _OptionCard extends StatelessWidget {

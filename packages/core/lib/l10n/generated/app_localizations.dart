@@ -6728,6 +6728,66 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Point de rencontre : {name}'**
   String stPointDeRencontre(String name);
+
+  /// No description provided for @lcColis.
+  ///
+  /// In fr, this message translates to:
+  /// **'Colis'**
+  String get lcColis;
+
+  /// No description provided for @lcColisAide.
+  ///
+  /// In fr, this message translates to:
+  /// **'Facultatif : des colis remis par leurs expéditeurs au point de départ ou à un arrêt, livrés à l’arrivée avec le code du destinataire.'**
+  String get lcColisAide;
+
+  /// No description provided for @lcColisParDepart.
+  ///
+  /// In fr, this message translates to:
+  /// **'Colis acceptés par départ (0 = aucun)'**
+  String get lcColisParDepart;
+
+  /// No description provided for @lcVingtAuPlus.
+  ///
+  /// In fr, this message translates to:
+  /// **'20 au plus'**
+  String get lcVingtAuPlus;
+
+  /// No description provided for @lcPrixParColis.
+  ///
+  /// In fr, this message translates to:
+  /// **'Prix par colis (TTC)'**
+  String get lcPrixParColis;
+
+  /// No description provided for @lcLigneReguliere.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ligne régulière · {operator}'**
+  String lcLigneReguliere(String operator);
+
+  /// No description provided for @lcRemiseAuChauffeur.
+  ///
+  /// In fr, this message translates to:
+  /// **'Remise au chauffeur : {place}, {time}'**
+  String lcRemiseAuChauffeur(String place, String time);
+
+  /// No description provided for @lcRetraitA.
+  ///
+  /// In fr, this message translates to:
+  /// **'Livré à : {place}'**
+  String lcRetraitA(String place);
+
+  /// No description provided for @lcEnvoyerSurCeDepart.
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoyer · {price}'**
+  String lcEnvoyerSurCeDepart(String price);
+
+  /// No description provided for @lcLigne.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ligne régulière : remis au chauffeur au point de rendez-vous'**
+  String get lcLigne;
 }
 
 class _AppLocalizationsDelegate

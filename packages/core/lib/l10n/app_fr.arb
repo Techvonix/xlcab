@@ -2304,5 +2304,46 @@
         "type": "String"
       }
     }
-  }
+  },
+  "lcColis": "Colis",
+  "lcColisAide": "Facultatif : des colis remis par leurs expéditeurs au point de départ ou à un arrêt, livrés à l’arrivée avec le code du destinataire.",
+  "lcColisParDepart": "Colis acceptés par départ (0 = aucun)",
+  "lcVingtAuPlus": "20 au plus",
+  "lcPrixParColis": "Prix par colis (TTC)",
+  "lcLigneReguliere": "Ligne régulière · {operator}",
+  "@lcLigneReguliere": {
+    "placeholders": {
+      "operator": {
+        "type": "String"
+      }
+    }
+  },
+  "lcRemiseAuChauffeur": "Remise au chauffeur : {place}, {time}",
+  "@lcRemiseAuChauffeur": {
+    "placeholders": {
+      "place": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "lcRetraitA": "Livré à : {place}",
+  "@lcRetraitA": {
+    "placeholders": {
+      "place": {
+        "type": "String"
+      }
+    }
+  },
+  "lcEnvoyerSurCeDepart": "Envoyer · {price}",
+  "@lcEnvoyerSurCeDepart": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "lcLigne": "Ligne régulière : remis au chauffeur au point de rendez-vous"
 }

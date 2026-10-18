@@ -10,7 +10,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { LineDeparture, RecurringLine } from '@prisma/client';
-import { randomUUID } from 'crypto';
+import { randomInt, randomUUID } from 'crypto';
 import { AuditService } from '../audit/audit.service';
 import { driverCommissionPercent } from '../driver-mode/driver-mode.service';
 import { TRACKING_LEAD_MIN, TripStatus } from '../matching/matching.constants';
@@ -22,7 +22,9 @@ import { PaymentsService } from '../payments/payments.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { RedisService } from '../redis/redis.service';
 import { AuditCtx, RequestUser, TripsService } from '../trips/trips.service';
-import { BookLineDto } from './dto';
+import { BookLineDto, LineParcelDto } from './dto';
+import { ParcelsService } from '../parcels/parcels.service';
+import { fitsDimensions } from '../parcels/parcels.constants';
 
 const BOOKINGS_MAX_PER_HOUR = 10;
 const ACTIVE = [TripStatus.ACCEPTED, TripStatus.STARTED] as string[];
@@ -53,6 +55,7 @@ export class LineBookingsService {
     private notifications: NotificationsService,
     private audit: AuditService,
     private payments: PaymentsService,
+    private parcels: ParcelsService,
   ) {}
 
   // ── Réservation (passager) ──────────────────────────────────────────
@@ -87,7 +90,7 @@ export class LineBookingsService {
     }
     const mine = await this.prisma.trip.count({
       // Une réservation en attente de paiement compte : elle retient déjà des places.
-      where: { lineDepartureId: departure.id, passengerId: userId, status: { in: [...ACTIVE, TripStatus.AWAITING_PAYMENT] } },
+      where: { lineDepartureId: departure.id, passengerId: userId, type: 'passenger', status: { in: [...ACTIVE, TripStatus.AWAITING_PAYMENT] } },
     });
     if (mine > 0) throw new ConflictException('Vous avez déjà une réservation sur ce départ');
 
@@ -202,6 +205,138 @@ export class LineBookingsService {
     }
   }
 
+  // ── Colis (CLARIFICATION_MODELE.md, D9) ─────────────────────────────
+
+  /**
+   * Colis confié à un départ de ligne : remis au chauffeur au point de montée
+   * (QR de l'expéditeur), récupéré à l'arrivée ou à un arrêt avec le code de
+   * remise et une photo — le circuit du module Colis, inchangé. Le colis a sa
+   * propre course (type parcel, source line) : paiement, facture, reversement
+   * à l'opérateur et annulation fonctionnent comme pour une place.
+   */
+  async bookParcel(userId: string, dto: LineParcelDto, now = new Date()) {
+    const online = linePaymentMode() === 'connect';
+    if (!online && process.env.NODE_ENV === 'production') {
+      throw new ServiceUnavailableException('Réservation sur les lignes régulières bientôt disponible');
+    }
+    if (online && !this.payments.available()) throw new ServiceUnavailableException('Paiement momentanément indisponible');
+    const key = `line:booking:rate:${userId}`;
+    const count = await this.redis.incr(key);
+    if (count === 1) await this.redis.expire(key, 3600);
+    if (count > BOOKINGS_MAX_PER_HOUR) throw new HttpException('Trop de réservations — réessayez plus tard', HttpStatus.TOO_MANY_REQUESTS);
+    if (!fitsDimensions([dto.lengthCm, dto.widthCm, dto.heightCm])) throw new BadRequestException('Colis trop grand : 120 × 80 × 80 cm au maximum');
+
+    const user = await this.prisma.user.findUnique({ where: { id: userId }, select: { deletedAt: true } });
+    if (!user || user.deletedAt) throw new UnauthorizedException('Compte introuvable ou désactivé');
+    const departure = await this.prisma.lineDeparture.findUnique({ where: { id: dto.departureId } });
+    const line = departure && (await this.prisma.recurringLine.findUnique({ where: { id: departure.lineId } }));
+    if (!departure || !line) throw new NotFoundException('Départ introuvable');
+    if (assignedDriver(departure, line) === userId || line.operatorId === userId) {
+      throw new ForbiddenException('Vous assurez ce départ : vous ne pouvez pas y confier de colis');
+    }
+    const route = await this.lines.routeOf(departure, line);
+    const from = pointIndex(route, dto.boardStopId, 'board');
+    const to = pointIndex(route, dto.alightStopId, 'alight');
+    if (from < 0 || to < 0 || from >= to) throw new BadRequestException('Arrêts invalides pour ce départ');
+    const board = route[from];
+    const alight = route[to];
+
+    // Emplacement retenu d'abord (écriture conditionnelle) : jamais plus de colis que prévu.
+    const held = await this.lines.reserveParcelSlot(departure.id, now);
+    try {
+      const config = await this.prisma.jurisdictionConfig.findUnique({ where: { code: line.jurisdiction } });
+      const total = held.priceCents;
+      // Transport de marchandises : TVA « colis » du pays (20 % en France).
+      const rate = Number(config?.vatParcelRate ?? 20);
+      const base = Math.round(total / (1 + rate / 100));
+      const commissionCents = Math.round((base * driverCommissionPercent()) / 100);
+      const vehicle = await this.prisma.vehicle.findUnique({ where: { id: assignedVehicle(departure, line) } });
+      const searching = departure.rescueStatus === 'searching';
+      const parcel = await this.prisma.$transaction(async (tx) => {
+        const trip = await tx.trip.create({
+          data: {
+            type: 'parcel',
+            status: online ? TripStatus.AWAITING_PAYMENT : TripStatus.ACCEPTED,
+            source: 'line',
+            lineDepartureId: departure.id,
+            passengerId: userId, // expéditeur
+            driverId: online || searching ? null : assignedDriver(departure, line),
+            vehicleId: online || searching ? null : assignedVehicle(departure, line),
+            acceptedAt: online ? null : now,
+            shuttleType: vehicle?.shuttleType ?? 'bleue',
+            originAddress: board.address,
+            originLat: board.lat,
+            originLng: board.lng,
+            destinationAddress: alight.address,
+            destinationLat: alight.lat,
+            destinationLng: alight.lng,
+            durationMin: line.durationMin ? alight.offsetMin - board.offsetMin : null,
+            scheduledAt: new Date(departure.departureAt.getTime() + board.offsetMin * 60_000),
+            totalPriceCents: total,
+            vatCents: total - base,
+            commissionCents,
+            jurisdiction: line.jurisdiction,
+            priceLines: { create: [{ regime: 'parcel', baseCents: base, ratePercent: rate, vatCents: total - base }] },
+          },
+          select: { id: true },
+        });
+        return tx.parcelBooking.create({
+          data: {
+            tripId: trip.id,
+            senderId: userId,
+            description: dto.description,
+            recipientName: dto.recipientName,
+            recipientPhone: dto.recipientPhone,
+            weightKg: dto.weightKg,
+            lengthCm: dto.lengthCm,
+            widthCm: dto.widthCm,
+            heightCm: dto.heightCm,
+            isFragile: dto.isFragile ?? false,
+            qrCode: randomUUID(),
+            deliveryCode: String(randomInt(0, 10_000)).padStart(4, '0'),
+          },
+          select: { id: true, tripId: true },
+        });
+      });
+
+      let payment;
+      if (online) {
+        try {
+          payment = await this.payments.paymentSheet(userId, parcel.tripId);
+        } catch (err) {
+          await this.prisma.trip.updateMany({
+            where: { id: parcel.tripId, status: TripStatus.AWAITING_PAYMENT },
+            data: { status: TripStatus.CANCELLED, cancelledAt: new Date(), cancellationReason: 'Paiement indisponible', cancellationFeeCents: 0 },
+          });
+          await this.prisma.parcelBooking.update({ where: { id: parcel.id }, data: { status: 'cancelled' } });
+          throw err;
+        }
+      } else {
+        await this.notifications.notify(userId, 'line.parcel_booked', 'Colis confirmé',
+          'Votre colis voyage sur la ligne. Présentez le QR au chauffeur au point de rendez-vous.', { parcelId: parcel.id });
+        if (!searching) {
+          await this.notifications.notify(assignedDriver(departure, line), 'line.new_parcel', 'Nouveau colis', 'Un colis vous sera remis au départ.', { departureId: departure.id });
+        }
+      }
+      await this.audit.log({ userId, action: 'line.parcel.book', entity: 'ParcelBooking', entityId: parcel.id, metadata: { departureId: departure.id, totalCents: total } });
+      return {
+        parcelId: parcel.id,
+        tripId: parcel.tripId,
+        status: online ? TripStatus.AWAITING_PAYMENT : TripStatus.ACCEPTED,
+        departureAt: new Date(departure.departureAt.getTime() + board.offsetMin * 60_000),
+        pickup: board.name,
+        delivery: alight.name,
+        totalPriceCents: total,
+        paymentMode: online ? 'connect' : 'deferred',
+        ...(payment ? { payment } : {}),
+        guarantee: await this.lines.guaranteeById(departure.id),
+      };
+    } catch (err) {
+      await this.lines.releaseParcelSlot(departure.id);
+      throw err;
+    }
+  }
+
   /**
    * Paiement en ligne : la réservation retient ses places et attend son
    * paiement (feuille Stripe renvoyée à l'app). Confirmée par
@@ -312,6 +447,7 @@ export class LineBookingsService {
         include: { passengerBooking: true },
       });
       const active = trips.filter((t) => ACTIVE.includes(t.status));
+      const parcelsOnDeparture = active.filter((t) => t.type === 'parcel').length;
       if (active.length === 0) continue; // départ terminé ou toutes les réservations annulées
       const outbound = d.direction === 'outbound';
       result.push({
@@ -321,7 +457,8 @@ export class LineBookingsService {
         origin: outbound ? line.originAddress : line.destinationAddress,
         destination: outbound ? line.destinationAddress : line.originAddress,
         passengers: active.reduce((n, t) => n + (t.passengerBooking?.seats ?? 0), 0),
-        bookings: active.length,
+        bookings: active.length - parcelsOnDeparture,
+        parcels: parcelsOnDeparture,
         started: active.some((t) => t.status === TripStatus.STARTED),
         ready: d.driverReadyAt !== null,
         rescued: d.rescueStatus === 'rescued',
@@ -334,11 +471,13 @@ export class LineBookingsService {
   /** Liste d'embarquement : prénom, places, présence ; téléphone à T−60 min seulement. */
   async manifest(userId: string, departureId: string, now = new Date()) {
     const { departure, line } = await this.ownDeparture(userId, departureId);
-    const trips = await this.prisma.trip.findMany({
+    const all = await this.prisma.trip.findMany({
       where: { lineDepartureId: departureId, status: { in: ACTIVE } },
       include: { passengerBooking: true },
       orderBy: { createdAt: 'asc' },
     });
+    const trips = all.filter((t) => t.type !== 'parcel');
+    const parcelTrips = all.filter((t) => t.type === 'parcel').map((t) => t.id);
     const showPhone = departure.departureAt.getTime() - now.getTime() <= TRACKING_LEAD_MIN * 60_000;
     const users = await this.prisma.user.findMany({
       where: { id: { in: trips.map((t) => t.passengerId!).filter(Boolean) } },
@@ -357,6 +496,8 @@ export class LineBookingsService {
       ready: departure.driverReadyAt !== null,
       seatsBooked: trips.reduce((n, t) => n + (t.passengerBooking?.seats ?? 0), 0),
       guarantee: await this.lines.guaranteeOf(departure, line),
+      // Colis du départ : même fiche que la checklist des missions (QR, code de remise, photo).
+      parcels: [...(await this.parcels.checklistFor(parcelTrips, showPhone ? new Set(parcelTrips) : new Set())).values()].flat(),
       passengers: trips.map((t) => {
         const u = users.find((x) => x.id === t.passengerId);
         return {
@@ -406,6 +547,9 @@ export class LineBookingsService {
   /** Démarre toutes les réservations du départ (mêmes contrôles qu'une course : dashcam, T−60 min). */
   async start(user: RequestUser, departureId: string, ctx: AuditCtx) {
     await this.ownDeparture(user.sub, departureId);
+    // Colis jamais remis au chauffeur : signalés à l'équipe, ils ne bloquent pas les passagers.
+    const pendingParcels = await this.prisma.trip.findMany({ where: { lineDepartureId: departureId, status: TripStatus.ACCEPTED, type: 'parcel' }, select: { id: true } });
+    for (const p of pendingParcels) await this.parcels.onLineDepartureStarted(p.id, user.sub);
     const trips = await this.prisma.trip.findMany({ where: { lineDepartureId: departureId, status: TripStatus.ACCEPTED }, select: { id: true } });
     if (trips.length === 0) throw new ConflictException('Aucune réservation à démarrer sur ce départ');
     for (const t of trips) await this.trips.start(user, t.id, undefined, ctx);

@@ -591,6 +591,30 @@ référence — les exigences de la Partie 8 priment.
   `market_screens_test.dart`. Démo : Porte Maillot, Porte de Saint-Cloud, Porte d'Orléans, Gare de Clermont-Ferrand
   (positions approximatives, consignes à préciser par l'équipe sur place) ; ligne de Sami avec arrêt à Clermont (+2 h 30,
   18 € depuis Lyon, donc Clermont → Limoges 12 €).
+- Colis sur les lignes (étape 4, 2026-10-18, migration `line_parcels`) : `RecurringLine.parcelSlots` (0..20, 0 = aucun) et
+  `parcelPriceCents` (TTC par colis, exigé si slots > 0 ; vente à la place seulement, sinon 400), `LineDeparture.parcelsBooked`.
+  `LinesService.reserveParcelSlot` (mêmes règles de vente qu'une place, écriture conditionnelle `parcelsBooked < slots`) /
+  `releaseParcelSlot`. Recherche `GET /lines/search?parcels=true` : départs avec un emplacement libre, prix = prix du colis,
+  `parcelSlotsLeft`. `POST /lines/bookings/parcel` (`LineParcelDto` : départ, arrêts facultatifs, contenu, poids, dimensions
+  120×80×80, destinataire, objets interdits) → `LineBookingsService.bookParcel` : course `type parcel`, `source line`,
+  `lineDepartureId`, chauffeur du départ, aux adresses des points de montée / descente, TVA COLIS du pays
+  (`vatParcelRate`), commission 10 % du HT, + `ParcelBooking` (QR, code de remise) ; paiement en ligne comme une place.
+  Ensuite le circuit du module Colis, INCHANGÉ (`/bookings/parcel/:id/pickup|deliver|fail`, `forCarrierDriver` = la course
+  colis elle-même) : enlèvement par QR dans l'heure du départ, `start` du départ → `ParcelsService.onLineDepartureStarted`
+  (colis jamais remis : échec + incident `parcel_failed` + course colis annulée SANS remboursement automatique, l'équipe
+  décide ; les passagers partent), en transit avec le départ, remise code + photo, fin du départ refusée avec un colis à
+  bord. Facture et reversement comme une place. Annulation par l'expéditeur → emplacement rendu ; seuil non atteint /
+  échec du secours / paiement abandonné → `ParcelBooking` annulé. Liste d'embarquement : `parcels` (fiches de
+  `checklistFor`), passagers SANS les courses colis ; `assignments.parcels`. Une place pour l'expéditeur reste possible
+  (contrôle « une réservation par départ » limité aux courses passager). Vue expéditeur : `mode: 'line'`.
+  Apps : chauffeur — champs « Colis acceptés par départ » / « Prix par colis » du formulaire (vente à la place),
+  `ParcelChecklist` dans `departure_screen` (scanner dans l'heure, remettre une fois parti), `DeliveryCodeDialog` /
+  `ParcelProblemDialog` désormais publics dans `parcel_checklist.dart` ; passager — écran 11 : après le devis, départs de
+  lignes du jour (`searchLines(parcels: true)`, `_LineOptionCard` : chauffeur, remise au point de rendez-vous, transports,
+  prix ; la moins chère présélectionnée), `MarketService.bookLineParcel` → `LineParcelBooking`, `ParcelMode.line`
+  (« Ligne régulière » dans le suivi). Clés ARB `lc*`. Tests : groupe « colis sur les lignes » de
+  `departure-threshold.integration.spec.ts` (649 tests serveur verts), `parcel_screens_test.dart`, `operator_screens_test.dart`.
+  Démo : ligne de Sami avec 3 colis par départ à 15 €.
 - Migrations : `init_xlcab` appliquée sur la base locale ; toute modification de
   `prisma/schema.prisma` demande désormais `npx prisma migrate dev --name <nom>`. Référentiel :
   `npx prisma db seed` (config FR uniquement).

@@ -24,12 +24,15 @@ import 'package:xlcab_driver/services/operator_service.dart';
 import 'package:xlcab_ui/theme/app_theme.dart';
 
 import '../support/fakes.dart';
+import 'package:xlcab_core/models/parcel.dart';
+import 'package:xlcab_core/services/parcel_service.dart';
 import '../support/operator_fakes.dart';
 
 // Espace opérateur (bourse de transport, étape 3) : lignes régulières,
 // départs, reprises, bourse, annulations. Serveur simulé.
 
 late FakeOperatorService operators;
+late FakeParcelService parcelsFake;
 late FakeMarketService market;
 late FakeQrScanner scanner;
 late FakeLauncher launcher;
@@ -59,6 +62,7 @@ Future<void> pump(WidgetTester tester, Widget screen, {double height = 4200}) as
   await tester.pumpWidget(ProviderScope(
     overrides: [
       operatorServiceProvider.overrideWithValue(operators),
+      parcelServiceProvider.overrideWithValue(parcelsFake),
       marketServiceProvider.overrideWithValue(market),
       qrScannerProvider.overrideWithValue(scanner),
       driverLauncherProvider.overrideWithValue(launcher),
@@ -83,10 +87,11 @@ Future<void> pump(WidgetTester tester, Widget screen, {double height = 4200}) as
   await tester.pumpAndSettle();
 }
 
-Manifest manifest({bool ready = false, bool checkedIn = false, bool started = false, DepartureGuarantee? guarantee, String? tomPickup}) => Manifest(
+Manifest manifest({bool ready = false, bool checkedIn = false, bool started = false, DepartureGuarantee? guarantee, String? tomPickup, List<ParcelTask> parcels = const [], DateTime? at}) => Manifest(
       departureId: 'd1',
+      parcels: parcels,
       guarantee: guarantee,
-      departureAt: DateTime(2026, 10, 12, 5),
+      departureAt: at ?? DateTime(2026, 10, 12, 5),
       origin: 'Porte Maillot, Paris',
       destination: 'Aéroport de Beauvais',
       ready: ready,
@@ -102,6 +107,7 @@ void main() {
 
   setUp(() {
     operators = FakeOperatorService();
+    parcelsFake = FakeParcelService();
     market = FakeMarketService();
     scanner = FakeQrScanner();
     launcher = FakeLauncher();
@@ -403,6 +409,24 @@ void main() {
       await pump(tester, const DepartureScreen(departureId: 'd1'));
       expect(find.textContaining('monte à Porte d’Orléans'), findsOneWidget);
       expect(find.textContaining('descend à'), findsNothing); // descend à l'arrivée de la ligne
+    });
+
+    testWidgets('colis du départ : à scanner dans l’heure qui précède, au point de rendez-vous', (tester) async {
+      const box = ParcelTask(
+        id: 'p1', status: ParcelStatus.pending, description: 'Carton de livres', weightKg: 8, isFragile: false, onReturnLeg: false,
+        pickup: Place(address: 'Porte Maillot', lat: 48.87, lng: 2.28), delivery: Place(address: 'Aéroport de Beauvais', lat: 49.45, lng: 2.11),
+        senderFirstName: 'Léa', senderPhone: null, recipientName: 'Sophie', recipientPhone: null,
+      );
+      operators.currentManifest = manifest(parcels: [box]);
+      await pump(tester, const DepartureScreen(departureId: 'd1'));
+      expect(find.textContaining('Carton de livres'), findsOneWidget);
+      expect(find.text('Scanner le colis'), findsNothing); // départ dans deux jours : trop tôt
+
+      operators.currentManifest = manifest(parcels: [box], at: today.add(const Duration(minutes: 30)));
+      await pump(tester, const DepartureScreen(departureId: 'd1'));
+      await tester.tap(find.text('Scanner le colis'));
+      await tester.pumpAndSettle();
+      expect(parcelsFake.calls.last, 'pickup:p1:$boardingQr');
     });
 
     testWidgets('seuil atteint : « Départ confirmé », plus de bouton', (tester) async {

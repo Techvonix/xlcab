@@ -256,7 +256,7 @@ export class ParcelsService {
     return {
       id: p.id,
       tripId: p.tripId,
-      mode: p.carrierTripId ? 'grafted' : 'dedicated',
+      mode: t.source === 'line' ? 'line' : p.carrierTripId ? 'grafted' : 'dedicated',
       onReturnLeg: p.onReturnLeg,
       status: t.status === TripStatus.AWAITING_PAYMENT ? 'awaiting_payment' : p.status,
       pickup: { address: t.originAddress, lat: t.originLat, lng: t.originLng },
@@ -491,6 +491,23 @@ export class ParcelsService {
       } else {
         await this.markFailed(p, 'Colis non remis au chauffeur avant le départ', driverId, 'driver');
       }
+    }
+  }
+
+  /**
+   * Départ de ligne qui démarre : un colis jamais remis au chauffeur est signalé
+   * à l'équipe (incident, remboursement éventuel décidé par elle) et sa course
+   * sort du départ, qui part avec ses passagers.
+   */
+  async onLineDepartureStarted(tripId: string, driverId: string) {
+    const p = await this.prisma.parcelBooking.findUnique({ where: { tripId }, include: { trip: true } });
+    if (!p) return;
+    if (p.status === ParcelStatus.PENDING) {
+      await this.markFailed(p, 'Colis non remis au chauffeur avant le départ', driverId, 'driver');
+      await this.prisma.trip.updateMany({
+        where: { id: tripId, status: TripStatus.ACCEPTED },
+        data: { status: TripStatus.CANCELLED, cancelledAt: new Date(), cancellationReason: 'Colis non remis au chauffeur avant le départ' },
+      });
     }
   }
 

@@ -16,6 +16,8 @@ import { RedisService } from '../redis/redis.service';
 import { FakeRedis } from '../testing/fake-redis';
 import { MeetingPointsModule } from '../meeting-points/meeting-points';
 import { memoryPrisma } from '../testing/memory-prisma';
+import { FakeStorage, JPEG } from '../testing/drivers-fakes';
+import { DocumentStorage } from '../drivers/document-storage';
 import { mfaProof } from '../testing/two-factor-proof';
 import { TrackingGateway } from '../tracking/tracking.gateway';
 import { DepartureThresholdService } from './departure-threshold';
@@ -121,6 +123,8 @@ describe('Seuil de départ garanti (intégration)', () => {
     })
       .overrideProvider(TrackingGateway)
       .useValue({ emitTripStatus: jest.fn(), emitToDriver: jest.fn() })
+      .overrideProvider(DocumentStorage)
+      .useValue(new FakeStorage())
       .compile();
     app = moduleRef.createNestApplication();
     app.useGlobalPipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }));
@@ -461,5 +465,122 @@ describe('Seuil de départ garanti (intégration)', () => {
     });
 
     const departure2 = (departureId: string) => db.lineDeparture.rows.find((d: any) => d.id === departureId);
+  });
+
+  // ── Étape 4 : colis sur les lignes ───────────────────────────────────
+
+  describe('colis sur les lignes', () => {
+    const inTwoDays = addDays(tomorrow, 1);
+    const publish = (extra: Record<string, unknown> = {}) =>
+      http().post('/api/v1/operators/me/departures').set('Authorization', as(SAMI, 'driver')).send({
+        vehicleId: VAN,
+        originAddress: 'Gare de Lyon Part-Dieu', originLat: LYON.lat, originLng: LYON.lng,
+        destinationAddress: 'Gare de Limoges-Bénédictins', destinationLat: LIMOGES.lat, destinationLng: LIMOGES.lng,
+        date: inTwoDays, departureTime: '09:30', seats: 7, luggage: 7, pricingMode: 'per_seat', priceCents: 3000, durationMin: 270,
+        parcelSlots: 2, parcelPriceCents: 1500,
+        ...extra,
+      });
+    const parcelBody = (departureId: string) => ({
+      departureId, description: 'Carton de livres', weightKg: 8, lengthCm: 40, widthCm: 30, heightCm: 30,
+      recipientName: 'Sophie Martin', recipientPhone: '0612345678', prohibitedItemsDeclined: true,
+    });
+    const sendParcel = (who: string, departureId: string) =>
+      http().post('/api/v1/lines/bookings/parcel').set('Authorization', as(who, 'passenger')).send(parcelBody(departureId));
+    const dep = (id: string) => db.lineDeparture.rows.find((d: any) => d.id === id);
+    const moveTo = (id: string, minutes: number) => {
+      const at = new Date(Date.now() + minutes * MIN);
+      dep(id).departureAt = at;
+      for (const t of tripsOf(id)) t.scheduledAt = at;
+    };
+
+    it('capacité et prix par colis fixés par l’opérateur ; refusés sans prix ou sur un véhicule privatisé', async () => {
+      expect((await publish({ parcelPriceCents: undefined })).status).toBe(400);
+      expect((await publish({ pricingMode: 'per_vehicle', priceCents: 39000 })).status).toBe(400);
+      const res = await publish();
+      expect(res.status).toBe(201);
+      expect(res.body).toMatchObject({ parcelSlots: 2, parcelPriceCents: 1500 });
+    });
+
+    it('l’expéditeur trouve le départ, réserve un emplacement : course colis au prix du colis, TVA marchandises, plus de place au 3e', async () => {
+      const departureId = (await publish()).body.departure.id;
+      const found = await http().get('/api/v1/lines/search').set('Authorization', as(LEA, 'passenger')).query({
+        fromLat: LYON.lat, fromLng: LYON.lng, toLat: LIMOGES.lat, toLng: LIMOGES.lng, date: inTwoDays, seats: 1, parcels: 'true',
+      });
+      expect(found.body.find((r: any) => r.departureId === departureId)).toMatchObject({ unitPriceCents: 1500, totalPriceCents: 1500, parcelSlotsLeft: 2 });
+
+      const booked = await sendParcel(LEA, departureId);
+      expect(booked.status).toBe(201);
+      expect(booked.body).toMatchObject({ status: 'accepted', totalPriceCents: 1500, pickup: 'Gare de Lyon Part-Dieu' });
+      const trip = db.trip.rows.find((t: any) => t.id === booked.body.tripId);
+      expect(trip).toMatchObject({ type: 'parcel', source: 'line', driverId: SAMI, lineDepartureId: departureId, vatCents: 250, commissionCents: 125 });
+      expect(dep(departureId).parcelsBooked).toBe(1);
+
+      expect((await sendParcel(THOMAS, departureId)).status).toBe(201);
+      expect((await sendParcel(NINA, departureId)).status).toBe(409); // 2 emplacements seulement
+
+      // L'expéditeur garde le droit de réserver une place pour lui-même.
+      expect((await http().post('/api/v1/lines/bookings').set('Authorization', as(LEA, 'passenger')).send({ departureId, seats: 1 })).status).toBe(201);
+
+      // Annulation par l'expéditeur : emplacement rendu, colis annulé.
+      const cancel = await http().post(`/api/v1/trips/${booked.body.tripId}/cancel`).set('Authorization', as(LEA, 'passenger')).send({ reason: 'Envoyé autrement' });
+      expect(cancel.status).toBe(200);
+      expect(dep(departureId).parcelsBooked).toBe(1);
+      expect(db.parcelBooking.rows.find((p: any) => p.id === booked.body.parcelId).status).toBe('cancelled');
+    });
+
+    it('au départ : colis remis par QR au point de rendez-vous, en route avec les passagers, remis avec le code et une photo', async () => {
+      const departureId = (await publish()).body.departure.id;
+      await http().post('/api/v1/lines/bookings').set('Authorization', as(THOMAS, 'passenger')).send({ departureId, seats: 1 });
+      const sent = await sendParcel(LEA, departureId);
+      const parcel = db.parcelBooking.rows.find((p: any) => p.id === sent.body.parcelId);
+
+      // Liste d'embarquement : le colis à part, jamais compté comme passager.
+      const manifest = await http().get(`/api/v1/operators/me/departures/${departureId}/manifest`).set('Authorization', as(SAMI, 'driver'));
+      expect(manifest.body.passengers).toHaveLength(1);
+      expect(manifest.body.parcels).toEqual([expect.objectContaining({ id: parcel.id, description: 'Carton de livres', status: 'pending' })]);
+
+      const pickup = () => http().post(`/api/v1/bookings/parcel/${parcel.id}/pickup`).set('Authorization', as(SAMI, 'driver')).send({ qrCode: parcel.qrCode });
+      expect((await pickup()).status).toBe(409); // trop tôt : dans l'heure qui précède le départ
+      moveTo(departureId, 40);
+      expect((await pickup()).body.status).toBe('picked_up');
+
+      const start = await http().post(`/api/v1/operators/me/departures/${departureId}/start`).set('Authorization', as(SAMI, 'driver'));
+      expect(start.status).toBe(200);
+      expect(parcel.status).toBe('in_transit');
+
+      // Pas de fin de départ avec un colis à bord.
+      expect((await http().post(`/api/v1/operators/me/departures/${departureId}/complete`).set('Authorization', as(SAMI, 'driver'))).status).toBe(409);
+      const delivered = await http().post(`/api/v1/bookings/parcel/${parcel.id}/deliver`).set('Authorization', as(SAMI, 'driver'))
+        .field('code', parcel.deliveryCode).attach('photo', JPEG, 'remise.jpg');
+      expect(delivered.body.status).toBe('delivered');
+      expect((await http().post(`/api/v1/operators/me/departures/${departureId}/complete`).set('Authorization', as(SAMI, 'driver'))).status).toBe(200);
+      expect(db.trip.rows.find((t: any) => t.id === sent.body.tripId).status).toBe('completed');
+
+      // Vu de l'expéditeur : mode « ligne », livré.
+      const view = await http().get(`/api/v1/bookings/parcel/${parcel.id}`).set('Authorization', as(LEA, 'passenger'));
+      expect(view.body).toMatchObject({ mode: 'line', status: 'delivered' });
+    });
+
+    it('colis jamais remis au chauffeur : signalé à l’équipe, le départ part avec ses passagers', async () => {
+      const departureId = (await publish()).body.departure.id;
+      await http().post('/api/v1/lines/bookings').set('Authorization', as(THOMAS, 'passenger')).send({ departureId, seats: 1 });
+      const sent = await sendParcel(LEA, departureId);
+      moveTo(departureId, 40);
+      const start = await http().post(`/api/v1/operators/me/departures/${departureId}/start`).set('Authorization', as(SAMI, 'driver'));
+      expect(start.status).toBe(200);
+      expect(start.body.started).toBe(1);
+      expect(db.parcelBooking.rows.find((p: any) => p.id === sent.body.parcelId).status).toBe('failed');
+      expect(db.trip.rows.find((t: any) => t.id === sent.body.tripId).status).toBe('cancelled');
+      expect(db.incident.rows).toEqual([expect.objectContaining({ type: 'parcel_failed' })]);
+    });
+
+    it('départ à seuil non confirmé : le colis est annulé et remboursé avec les places', async () => {
+      const departureId = (await publish({ minPassengers: 3 })).body.departure.id;
+      const sent = await sendParcel(LEA, departureId);
+      moveTo(departureId, 20 * 60);
+      expect((await threshold.tick()).cancelledBookings).toBe(1);
+      expect(db.parcelBooking.rows.find((p: any) => p.id === sent.body.parcelId).status).toBe('cancelled');
+      expect(db.trip.rows.find((t: any) => t.id === sent.body.tripId)).toMatchObject({ status: 'cancelled', cancellationFeeCents: 0 });
+    });
   });
 });

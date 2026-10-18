@@ -19,11 +19,16 @@ import 'package:xlcab_core/services/trip_service.dart';
 import 'package:xlcab_ui/theme/app_theme.dart';
 
 import '../support/fakes.dart';
+import '../support/operator_fakes.dart';
+import 'package:xlcab_core/models/market.dart';
+import 'package:xlcab_core/models/meeting_point.dart';
+import 'package:xlcab_core/services/market_service.dart';
 
 // Écrans 11 (création d'un envoi) et 12 (suivi). Serveur, Stripe, Google
 // Places et appareil photo remplacés par des doubles.
 
 late FakeParcelService parcels;
+late FakeMarketService market;
 late FakePaymentService payments;
 late FakePresenter presenter;
 late FakeTripService trips;
@@ -45,6 +50,7 @@ Future<void> pump(WidgetTester tester, {String initial = AppRoutes.parcelCreatio
   await tester.pumpWidget(ProviderScope(
     overrides: [
       parcelServiceProvider.overrideWithValue(parcels),
+      marketServiceProvider.overrideWithValue(market),
       paymentServiceProvider.overrideWithValue(payments),
       paymentSheetPresenterProvider.overrideWithValue(presenter),
       tripServiceProvider.overrideWithValue(trips),
@@ -100,6 +106,7 @@ void main() {
   setUpAll(() => initializeDateFormatting('fr'));
 
   setUp(() {
+    market = FakeMarketService();
     parcels = FakeParcelService();
     payments = FakePaymentService();
     presenter = FakePresenter();
@@ -123,7 +130,29 @@ void main() {
       expect(find.textContaining('Payer 155,83'), findsOneWidget);
     });
 
-    testWidgets('trajet retour d’une navette : expliqué au client', (tester) async {
+    testWidgets('ligne régulière qui prend des colis : proposée en premier, colis confié au départ', (tester) async {
+    market.lineResults = [
+      LineSearchResult(
+        departureId: 'd-lyon', departureAt: DateTime(2026, 10, 12, 8), localTime: '08:00',
+        origin: 'Porte d’Orléans', destination: 'Gare de Limoges', perSeat: true, unitPriceCents: 1500, totalPriceCents: 1500,
+        seatsLeft: 4, luggage: 7, operatorRatingCount: 0, operatorName: 'Sami Navettes',
+        board: const RoutePointView(stopId: 's1', name: 'Porte d’Orléans', address: 'Place du 25 Août 1944', transit: 'Métro 4'),
+      ),
+    ];
+    await pump(tester);
+    await fillForm(tester);
+    await tap(tester, find.text('Voir les options et le prix'));
+    expect(find.text('Ligne régulière · Sami Navettes'), findsOneWidget);
+    expect(find.text('Métro 4'), findsOneWidget);
+    expect(find.textContaining('Envoyer ·'), findsOneWidget); // présélectionnée : la moins chère
+
+    await tap(tester, find.textContaining('Envoyer ·'));
+    expect(market.calls, contains('bookLineParcel:d-lyon'));
+    expect(market.lastLineParcel?.recipientName, isNotEmpty);
+    expect(parcels.calls, isNot(contains(startsWith('book:'))));
+  });
+
+  testWidgets('trajet retour d’une navette : expliqué au client', (tester) async {
       parcels.quoteResult = const ParcelQuote(
         grafted: ParcelOption(available: true, onReturnLeg: true, price: ParcelPrice(priceCents: 800, vatCents: 160, totalCents: 960)),
         dedicated: dedicatedOption,

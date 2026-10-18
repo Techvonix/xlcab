@@ -3955,4 +3955,44 @@ class AppLocalizationsFr extends AppLocalizations {
   String stPointDeRencontre(String name) {
     return 'Point de rencontre : $name';
   }
+
+  @override
+  String get lcColis => 'Colis';
+
+  @override
+  String get lcColisAide =>
+      'Facultatif : des colis remis par leurs expéditeurs au point de départ ou à un arrêt, livrés à l’arrivée avec le code du destinataire.';
+
+  @override
+  String get lcColisParDepart => 'Colis acceptés par départ (0 = aucun)';
+
+  @override
+  String get lcVingtAuPlus => '20 au plus';
+
+  @override
+  String get lcPrixParColis => 'Prix par colis (TTC)';
+
+  @override
+  String lcLigneReguliere(String operator) {
+    return 'Ligne régulière · $operator';
+  }
+
+  @override
+  String lcRemiseAuChauffeur(String place, String time) {
+    return 'Remise au chauffeur : $place, $time';
+  }
+
+  @override
+  String lcRetraitA(String place) {
+    return 'Livré à : $place';
+  }
+
+  @override
+  String lcEnvoyerSurCeDepart(String price) {
+    return 'Envoyer · $price';
+  }
+
+  @override
+  String get lcLigne =>
+      'Ligne régulière : remis au chauffeur au point de rendez-vous';
 }

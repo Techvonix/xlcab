@@ -55,6 +55,24 @@ class LineBooking {
   }
 }
 
+/// Colis confié à un départ de ligne ; [payment] présent quand le paiement en ligne est activé.
+class LineParcelBooking {
+  const LineParcelBooking({required this.parcelId, required this.tripId, this.payment});
+
+  final String parcelId;
+  final String tripId;
+  final PaymentSheetParams? payment;
+
+  factory LineParcelBooking.fromJson(Object? data) {
+    if (data is! Map || data['parcelId'] is! String || data['tripId'] is! String) throw const FormatException('Réservation sans identifiant');
+    return LineParcelBooking(
+      parcelId: data['parcelId'] as String,
+      tripId: data['tripId'] as String,
+      payment: data['payment'] == null ? null : PaymentSheetParams.fromJson(data['payment']),
+    );
+  }
+}
+
 /// Choix d'une proposition de la bourse. [payment] est présent quand le
 /// paiement en ligne est activé : la carte doit être autorisée (empreinte,
 /// sans débit) pour que le choix soit transmis à l'opérateur.

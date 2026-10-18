@@ -3,6 +3,7 @@ import { InvoicesModule } from '../invoices/invoices.module';
 import { MatchingModule } from '../matching/matching.module';
 import { OperatorsModule } from '../operators/operators.module';
 import { PaymentsModule } from '../payments/payments.module';
+import { ParcelsModule } from '../parcels/parcels.module';
 import { TripsModule } from '../trips/trips.module';
 import { TwoFactorModule } from '../two-factor/two-factor.module';
 import { AdminLineProtocolController } from './admin-line-protocol.controller';
@@ -20,7 +21,7 @@ import { DepartureThresholdService } from './departure-threshold';
   // remboursement quand aucun secours n'est trouvé.
   // TwoFactorModule : 2FA des routes admin du protocole.
   // InvoicesModule : facture du solde d'une pénalité non recouvrée.
-  imports: [OperatorsModule, TripsModule, MatchingModule, PaymentsModule, TwoFactorModule, InvoicesModule],
+  imports: [OperatorsModule, TripsModule, MatchingModule, PaymentsModule, TwoFactorModule, InvoicesModule, ParcelsModule],
   controllers: [LineBookingsController, LineOperationsController, AdminLineProtocolController],
   providers: [LineBookingsService, RescueService, DepartureThresholdService],
   exports: [LineBookingsService, RescueService, DepartureThresholdService],

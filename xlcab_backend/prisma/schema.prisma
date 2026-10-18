@@ -625,6 +625,10 @@ model RecurringLine {
   // recurring = ligne régulière ; one_off = départ ponctuel (« je pars demain,
   // il me reste 3 places ») : un seul jour, confirmé dès sa publication.
   kind               String    @default("recurring")
+  // Colis acceptés par départ (0 = aucun) et prix TTC par colis, fixés par
+  // l'opérateur (CLARIFICATION_MODELE.md, D9). Remis au point de rencontre.
+  parcelSlots        Int       @default(0)
+  parcelPriceCents   Int?
   conditions         String?
   status             String    @default("active") // active|paused|closed
   createdAt          DateTime  @default(now())
@@ -671,6 +675,8 @@ model LineDeparture {
   minPassengers     Int?
   guaranteedAt      DateTime?
   thresholdMissedAt DateTime?
+  // Colis réservés sur ce départ (≤ parcelSlots de la ligne).
+  parcelsBooked     Int       @default(0)
 
   // Chauffeur et véhicule qui assurent ce départ (null = titulaire de la
   // ligne) ; changent quand un secours reprend le départ.

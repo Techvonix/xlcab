@@ -215,13 +215,13 @@ export function memoryPrisma() {
     })),
     recurringLine: new Table(() => ({
       pickupRadiusKm: 5, returnTime: null, timezone: 'Europe/Paris', jurisdiction: 'FR', endDate: null, durationMin: null,
-      conditions: null, minPassengers: null, kind: 'recurring', status: 'active', closedAt: null, createdAt: new Date(), updatedAt: new Date(),
+      conditions: null, minPassengers: null, kind: 'recurring', parcelSlots: 0, parcelPriceCents: null, status: 'active', closedAt: null, createdAt: new Date(), updatedAt: new Date(),
     })),
     lineException: new Table(() => ({ seats: null, reason: null })),
     lineDeparture: new Table(() => ({
       direction: 'outbound', seatsBooked: 0, status: 'to_confirm', confirmedAt: null, createdAt: new Date(),
       driverId: null, vehicleId: null, driverReadyAt: null, rescueStatus: 'none', rescueStage: null,
-      minPassengers: null, guaranteedAt: null, thresholdMissedAt: null,
+      minPassengers: null, guaranteedAt: null, thresholdMissedAt: null, parcelsBooked: 0,
     })),
     lineBackup: new Table(() => ({ status: 'invited', vehicleId: null, respondedAt: null, createdAt: new Date() })),
     rescueOffer: new Table(() => ({ status: 'pending', vehicleId: null, respondedAt: null, createdAt: new Date() })),

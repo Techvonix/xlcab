@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:xlcab_core/models/market.dart';
+import 'package:xlcab_core/models/parcel.dart';
 import 'package:xlcab_core/models/payment.dart';
 import 'package:xlcab_core/models/operator.dart';
 import 'package:xlcab_core/models/place.dart';
@@ -128,6 +129,7 @@ class FakeMarketService extends MarketService {
     required String date,
     required int seats,
     int luggage = 0,
+    bool parcels = false,
   }) async {
     _act('searchLines:$date:$seats');
     return lineResults;
@@ -152,6 +154,15 @@ class FakeMarketService extends MarketService {
 
   /// Sièges demandés à la dernière réservation (null = attribution automatique).
   List<int>? bookedSeatNumbers;
+  @override
+  Future<LineParcelBooking> bookLineParcel(LineSearchResult departure, ParcelRequest parcel) async {
+    _act('bookLineParcel:${departure.departureId}');
+    lastLineParcel = parcel;
+    return const LineParcelBooking(parcelId: 'parcel-line-1', tripId: 'trip-parcel-line');
+  }
+
+  ParcelRequest? lastLineParcel;
+
   /// Arrêts de montée / descente demandés à la dernière réservation.
   (String?, String?)? bookedStops;
   SeatMap seats = const SeatMap(seatsTotal: 8, taken: {2, 5}, choosable: true);

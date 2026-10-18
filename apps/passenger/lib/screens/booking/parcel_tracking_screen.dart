@@ -70,6 +70,7 @@ class _Body extends ConsumerWidget {
 
     final how = switch ((p.mode, p.onReturnLeg)) {
       (ParcelMode.dedicated, _) => l10n.navetteDediee,
+      (ParcelMode.line, _) => l10n.lcLigne,
       (_, true) => l10n.navettePartageeAuRetourD,
       _ => l10n.navettePartageeAvecDesPassagers,
     };

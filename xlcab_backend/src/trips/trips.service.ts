@@ -298,7 +298,9 @@ export class TripsService {
     else await this.parcels.onCarrierCancelled(tripId);
 
     // Place sur un départ de ligne : rendue à la vente.
-    if (trip.lineDepartureId) {
+    if (trip.lineDepartureId && trip.type === 'parcel') {
+      await this.lines.releaseParcelSlot(trip.lineDepartureId);
+    } else if (trip.lineDepartureId) {
       const booking = await this.prisma.passengerBooking.findUnique({ where: { tripId }, select: { seats: true } });
       await this.lines.releaseSeats(trip.lineDepartureId, booking?.seats ?? 0, tripId);
     }

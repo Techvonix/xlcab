@@ -38,6 +38,8 @@ class _LineFormScreenState extends ConsumerState<LineFormScreen> {
   final _duration = TextEditingController();
   final _conditions = TextEditingController();
   final _minPassengers = TextEditingController();
+  final _parcelSlots = TextEditingController();
+  final _parcelPrice = TextEditingController();
 
   Place? _origin;
   Place? _destination;
@@ -56,7 +58,7 @@ class _LineFormScreenState extends ConsumerState<LineFormScreen> {
 
   @override
   void dispose() {
-    for (final c in [_seats, _luggage, _price, _duration, _conditions, _minPassengers]) {
+    for (final c in [_seats, _luggage, _price, _duration, _conditions, _minPassengers, _parcelSlots, _parcelPrice]) {
       c.dispose();
     }
     super.dispose();
@@ -128,6 +130,8 @@ class _LineFormScreenState extends ConsumerState<LineFormScreen> {
       conditions: _conditions.text.trim(),
       minPassengers: _perSeat && _threshold ? int.tryParse(_minPassengers.text) : null,
       stops: _perSeat ? _stops : const [],
+      parcelSlots: _perSeat ? int.tryParse(_parcelSlots.text) ?? 0 : 0,
+      parcelPriceCents: _perSeat && (int.tryParse(_parcelSlots.text) ?? 0) > 0 ? _cents(_parcelPrice.text) : null,
     );
     setState(() => _busy = true);
     try {
@@ -317,6 +321,29 @@ class _LineFormScreenState extends ConsumerState<LineFormScreen> {
                   decoration: InputDecoration(labelText: l10n.opDureeEstimeeMinutes),
                 ),
                 if (_perSeat) ...[
+                  SectionTitle(l10n.lcColis),
+                  Text(l10n.lcColisAide, style: AppTypography.caption),
+                  const SizedBox(height: AppSpacing.sm),
+                  TextFormField(
+                    controller: _parcelSlots,
+                    keyboardType: TextInputType.number,
+                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                    decoration: InputDecoration(labelText: l10n.lcColisParDepart),
+                    onChanged: (_) => setState(() {}),
+                    validator: (v) => (int.tryParse(v ?? '') ?? 0) > 20 ? l10n.lcVingtAuPlus : null,
+                  ),
+                  if ((int.tryParse(_parcelSlots.text) ?? 0) > 0) ...[
+                    const SizedBox(height: AppSpacing.sm),
+                    TextFormField(
+                      controller: _parcelPrice,
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      decoration: InputDecoration(labelText: l10n.lcPrixParColis, suffixText: '€'),
+                      validator: (v) {
+                        final c = _cents(v ?? '');
+                        return c == null || c < 100 ? l10n.opPrixInvalide : null;
+                      },
+                    ),
+                  ],
                   SectionTitle(l10n.stArrets),
                   StopsEditor(stops: _stops, onChanged: (stops) => setState(() => _stops = stops)),
                 ],
