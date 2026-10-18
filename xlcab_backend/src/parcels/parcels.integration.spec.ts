@@ -151,13 +151,19 @@ describe('Colis (intégration)', () => {
 
   describe('devis', () => {
     it('itinéraire incalculable : navette dédiée indisponible, devis rendu quand même', async () => {
-    (app.get(RoutingService).drivingRoute as jest.Mock).mockRejectedValueOnce(new ServiceUnavailableException('Calcul d’itinéraire momentanément indisponible'));
-    const res = await http().post('/api/v1/bookings/parcel/quote').set('Authorization', sender()).send(body());
-    expect(res.status).toBe(200);
-    expect(res.body.dedicated).toMatchObject({ available: false });
-  });
+      (app.get(RoutingService).drivingRoute as jest.Mock).mockRejectedValueOnce(new ServiceUnavailableException('Calcul d’itinéraire momentanément indisponible'));
+      const res = await http().post('/api/v1/bookings/parcel/quote').set('Authorization', sender()).send(body());
+      expect(res.status).toBe(200);
+      expect(res.body.dedicated).toMatchObject({ available: false });
+    });
 
-  it('navette partagée (forfait 8 € HT + TVA 20 %) et navette dédiée (tarif km)', async () => {
+    it('place de ligne ou de bourse : jamais porteuse d’un colis greffé (les colis y ont leurs emplacements)', async () => {
+      seedCarrier(3 * HOUR, { source: 'line' });
+      const res = await http().post('/api/v1/bookings/parcel/quote').set('Authorization', sender()).send(body());
+      expect(res.body.grafted).toMatchObject({ available: false });
+    });
+
+    it('navette partagée (forfait 8 € HT + TVA 20 %) et navette dédiée (tarif km)', async () => {
       seedCarrier();
       const res = await http().post('/api/v1/bookings/parcel/quote').set('Authorization', sender()).send(body());
 

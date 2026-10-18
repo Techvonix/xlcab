@@ -683,13 +683,15 @@ export class ParcelsService {
       },
       select: {
         id: true, shuttleType: true, scheduledAt: true, durationMin: true, driverId: true,
-        originLat: true, originLng: true, destinationLat: true, destinationLng: true,
+        originLat: true, originLng: true, destinationLat: true, destinationLng: true, source: true,
       },
       orderBy: { scheduledAt: 'asc' },
       take: 200,
     });
 
     for (const c of candidates) {
+      // Places de ligne ou de bourse : les colis y passent par les emplacements fixés par l'opérateur.
+      if (c.source === 'line' || c.source === 'market') continue;
       const departure = returnDepartureOf(c.scheduledAt, c.durationMin);
       if (!departure || departure < from || departure > to) continue;
       // Sens inverse : enlèvement près de l'arrivée, livraison près du départ.
@@ -720,13 +722,15 @@ export class ParcelsService {
       },
       select: {
         id: true, shuttleType: true, scheduledAt: true, durationMin: true, driverId: true,
-        originLat: true, originLng: true, destinationLat: true, destinationLng: true,
+        originLat: true, originLng: true, destinationLat: true, destinationLng: true, source: true,
       },
       orderBy: { scheduledAt: 'asc' },
       take: 200,
     });
 
     for (const c of candidates) {
+      // Places de ligne ou de bourse : les colis y passent par les emplacements fixés par l'opérateur.
+      if (c.source === 'line' || c.source === 'market') continue;
       if (haversineKm(dto.pickup, { lat: c.originLat, lng: c.originLng }) > GRAFT_MAX_DETOUR_KM) continue;
       if (haversineKm(dto.delivery, { lat: c.destinationLat, lng: c.destinationLng }) > GRAFT_MAX_DETOUR_KM) continue;
       // Coffre partagé avec les bagages des passagers : capacité de l'aller.
