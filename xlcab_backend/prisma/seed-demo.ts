@@ -314,6 +314,14 @@ async function main() {
     ],
   });
 
+  // Favoris de Sami : sans clé Google Places, il compose son départ ponctuel (vidéo) à partir d'eux.
+  await prisma.savedAddress.createMany({
+    data: [
+      { userId: sami.id, label: 'Gare de Lyon-Part-Dieu', address: LYON.address, lat: LYON.lat, lng: LYON.lng },
+      { userId: sami.id, label: 'Gare de Limoges', address: LIMOGES.address, lat: LIMOGES.lat, lng: LIMOGES.lng },
+    ],
+  });
+
   // Espace sécurité de Léa : un contact de confiance (numéro fictif) et le partage proposé à chaque trajet.
   await prisma.trustedContact.create({ data: { userId: lea.id, name: 'Maman', phone: '0600000099' } });
   await prisma.userPreference.create({ data: { userId: lea.id, autoShareTrips: true } });

@@ -615,6 +615,16 @@ référence — les exigences de la Partie 8 priment.
   (« Ligne régulière » dans le suivi). Clés ARB `lc*`. Tests : groupe « colis sur les lignes » de
   `departure-threshold.integration.spec.ts` (649 tests serveur verts), `parcel_screens_test.dart`, `operator_screens_test.dart`.
   Démo : ligne de Sami avec 3 colis par départ à 15 €.
+- Vidéos EXPLICATIVES (2026-10-18, français seulement, demandées après les étapes 1 à 4) :
+  `demo/videos/xlcab-explicatif-passager-fr.mp4` (165 s : Léa cherche Lyon → Clermont le 20 oct., tronçon 18 €, siège 4,
+  « Départ confirmé » ; puis colis Lyon → Limoges confié à la ligne de Sami, QR et code de remise) et
+  `xlcab-explicatif-chauffeur-fr.mp4` (165 s : Sami voit « Encore 1 passager », publie un départ ponctuel le 25 oct. avec
+  seuil 4, colis 3 × 15 €, arrêt Clermont +2 h 30 / 18 € ; puis départ confirmé, Léa « descend à Clermont », colis à
+  bord, onglet Revenus). Script `scratchpad/demo/takes2.sh d1|p1|p2|d2` (ordre de tournage d1 → p1 → p2 → d2 ; seed
+  relancé juste avant, puis reconnexion de Léa = compte 1 et Sami = compte 9 HORS enregistrement ; mode Avion) ;
+  coordonnées du calendrier valables pour octobre 2026 tournées le 18. Favoris de démo ajoutés : Clermont pour Léa,
+  Lyon et Limoges pour Sami (sans clé Google, pas d'autre saisie d'adresse). Si l'enregistrement s'arrête pendant un
+  chargement réseau, enregistrer un court complément et le raccorder (`-f concat -c copy`).
 - Migrations : `init_xlcab` appliquée sur la base locale ; toute modification de
   `prisma/schema.prisma` demande désormais `npx prisma migrate dev --name <nom>`. Référentiel :
   `npx prisma db seed` (config FR uniquement).
