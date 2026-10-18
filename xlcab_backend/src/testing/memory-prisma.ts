@@ -207,6 +207,7 @@ export function memoryPrisma() {
     lineSeat: new Table(() => ({ createdAt: new Date() })),
     meetingPoint: new Table(() => ({ instructions: null, transit: null, jurisdiction: 'FR', active: true, createdAt: new Date(), updatedAt: new Date() })),
     lineStop: new Table(),
+    dashcamCharterAcceptance: new Table(() => ({ acceptedAt: new Date() })),
     tripShare: new Table(() => ({ createdAt: new Date(), revokedAt: null })),
     tripRating: new Table(() => ({ comment: null, tags: [], createdAt: new Date() })),
     operatorProfile: new Table(() => ({
@@ -271,6 +272,17 @@ export function memoryPrisma() {
     { trip: (parcel) => db.trip.rows.find((t: Row) => t.id === parcel.tripId) ?? null },
   );
   db.$transaction = async (fn: (tx: Row) => Promise<unknown>) => fn(db);
+  // Charte caméra embarquée : présumée acceptée par les chauffeurs des tests (qui ne
+  // portent pas sur elle). Les tests de la charte posent presumeDashcamCharter = false.
+  db.presumeDashcamCharter = true;
+  const charterFindFirst = db.dashcamCharterAcceptance.findFirst;
+  db.dashcamCharterAcceptance.findFirst = async (args: Row) => {
+    const found = await charterFindFirst(args);
+    if (found || !db.presumeDashcamCharter) return found;
+    const userId = args?.where?.userId;
+    if (!db.driverProfile.rows.some((r: Row) => r.id === userId)) return null;
+    return { id: 'charte-presumee', userId, version: args.where.version, acceptedAt: new Date(0) };
+  };
   db.jurisdictionConfig.rows.push({
     code: 'FR', minTripKm: 60, vatPassengerRate: 0, vatParcelRate: 20, currency: 'EUR', requiresVtcCard: true, lineThresholdDeadlineHours: 24,
   });

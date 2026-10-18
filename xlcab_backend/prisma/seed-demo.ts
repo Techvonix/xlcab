@@ -3,6 +3,7 @@ import { recomputeDriverRating } from '../src/feedback/driver-rating';
 import { addDays, localDateOf } from '../src/common/local-time';
 import { DEFAULT_OPERATOR_TERMS_VERSION } from '../src/operators/line-schedule';
 import { LinesService } from '../src/operators/lines.service';
+import { dashcamCharterVersion } from '../src/dashcam/dashcam';
 import * as bcrypt from 'bcrypt';
 import { randomBytes, randomUUID } from 'crypto';
 import { writeFileSync } from 'fs';
@@ -57,6 +58,7 @@ async function main() {
     await prisma.transportRequest.deleteMany({ where: { id: { in: oldRequests } } });
     await prisma.rescueOffer.deleteMany({ where: { OR: [{ departureId: { in: oldDepartures } }, { driverId: { in: oldIds } }] } });
     await prisma.driverPenalty.deleteMany({ where: { driverId: { in: oldIds } } });
+    await prisma.dashcamCharterAcceptance.deleteMany({ where: { userId: { in: oldIds } } });
     await prisma.driverCancellation.deleteMany({ where: { driverId: { in: oldIds } } });
     await prisma.driverBonus.deleteMany({ where: { driverId: { in: oldIds } } });
     await prisma.passengerCredit.deleteMany({ where: { userId: { in: oldIds } } });
@@ -312,6 +314,11 @@ async function main() {
       { userId: lea.id, label: 'Gare de Limoges', address: LIMOGES.address, lat: LIMOGES.lat, lng: LIMOGES.lng },
       { userId: lea.id, label: 'Gare de Clermont-Ferrand', address: 'Gare de Clermont-Ferrand, Clermont-Ferrand', lat: 45.7786, lng: 3.1003 },
     ],
+  });
+
+  // Charte caméra embarquée acceptée par les chauffeurs de démo (sinon ni en ligne ni démarrage).
+  await prisma.dashcamCharterAcceptance.createMany({
+    data: [nadia.id, djamel.id, chris.id, sami.id].map((userId) => ({ userId, version: dashcamCharterVersion() })),
   });
 
   // Favoris de Sami : sans clé Google Places, il compose son départ ponctuel (vidéo) à partir d'eux.

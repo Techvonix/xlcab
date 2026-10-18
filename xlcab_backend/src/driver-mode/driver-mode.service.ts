@@ -1,4 +1,5 @@
 import { ConflictException, ForbiddenException, Injectable } from '@nestjs/common';
+import { assertDashcamCharter } from '../dashcam/dashcam';
 import { PrismaService } from '../prisma/prisma.service';
 import { TrackingService } from '../tracking/tracking.service';
 import { DispatchService } from '../matching/dispatch.service';
@@ -96,6 +97,8 @@ export class DriverModeService {
     if (!usable.some((v) => v.dashcamActive)) {
       throw new ForbiddenException('Dashcam inactive : obligatoire pour recevoir des missions');
     }
+    // Charte caméra embarquée (CHARTE_CAMERA_EMBARQUEE.md) acceptée dans sa version en vigueur.
+    await assertDashcamCharter(this.prisma, user.sub);
 
     await this.prisma.driverProfile.update({ where: { id: user.sub }, data: { isOnline: true } });
     // Les missions n'arrivent qu'une fois les positions reçues (WebSocket,

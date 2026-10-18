@@ -5,6 +5,7 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
+import { assertDashcamCharter } from '../dashcam/dashcam';
 import { PrismaService } from '../prisma/prisma.service';
 import { RedisService } from '../redis/redis.service';
 import { AuditService } from '../audit/audit.service';
@@ -177,6 +178,8 @@ export class TripsService {
     if (!vehicle?.dashcamActive) {
       throw new ConflictException('Dashcam inactive : démarrage impossible (obligatoire pour toute course)');
     }
+    // Charte caméra embarquée (CHARTE_CAMERA_EMBARQUEE.md) acceptée dans sa version en vigueur.
+    await assertDashcamCharter(this.prisma, user.sub);
 
     // Scan du QR code du passager (écran 15) : preuve de prise en charge.
     if (qrCode !== undefined) {

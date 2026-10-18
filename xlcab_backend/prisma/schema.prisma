@@ -288,8 +288,15 @@ model Incident {
   resolvedAt     DateTime?
   notes          String?
   createdAt      DateTime  @default(now())
+  // Caméra embarquée (CHARTE_CAMERA_EMBARQUEE.md) : l'équipe demande au chauffeur de
+  // conserver l'enregistrement du trajet ; il confirme l'avoir conservé.
+  footageRequestedAt    DateTime?
+  footageRequestedBy    String?
+  footageDriverId       String?
+  footageAcknowledgedAt DateTime?
 
   @@index([status, createdAt])
+  @@index([footageDriverId])
 }
 
 // Partie 4.
@@ -957,4 +964,15 @@ model LineStop {
 
   @@unique([lineId, position])
   @@index([lineId])
+}
+
+// Charte caméra embarquée acceptée par un chauffeur, par version (une nouvelle
+// version doit être acceptée de nouveau avant de passer en ligne).
+model DashcamCharterAcceptance {
+  id         String   @id @default(uuid())
+  userId     String
+  version    String
+  acceptedAt DateTime @default(now())
+
+  @@unique([userId, version])
 }

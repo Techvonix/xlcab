@@ -565,6 +565,16 @@ export const MESSAGES_EN: Record<string, string> = {
   'Réservation annulée': 'Booking cancelled',
   'Ce départ n’est plus disponible : vous êtes remboursé intégralement.': 'This departure is no longer available: you are refunded in full.',
 
+  // Caméra embarquée (2026-10-18)
+  'Acceptez la charte caméra embarquée avant de recevoir ou de démarrer un trajet':
+    'Accept the dashcam charter before receiving or starting a trip',
+  'Motif limité à 300 caractères': 'Reason limited to 300 characters',
+  'La charte caméra embarquée a changé : relisez-la avant de l’accepter': 'The dashcam charter has changed: read it again before accepting it',
+  'Aucun chauffeur sur ce trajet : pas d’enregistrement à demander': 'No driver on this trip: no recording to request',
+  'Conservez l’enregistrement': 'Keep the recording',
+  'Un incident a été signalé sur l’un de vos trajets : conservez l’enregistrement de votre caméra. L’équipe XLCAB vous indiquera comment le remettre.':
+    'An incident was reported on one of your trips: keep your camera’s recording. The XLCAB team will tell you how to hand it over.',
+
   // Colis sur les lignes (2026-10-18)
   'Colis trop grand : 120 × 80 × 80 cm au maximum': 'Parcel too large: 120 × 80 × 80 cm maximum',
   'Vous assurez ce départ : vous ne pouvez pas y confier de colis': 'You operate this departure: you cannot send a parcel on it',
