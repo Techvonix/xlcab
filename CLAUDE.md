@@ -625,6 +625,26 @@ référence — les exigences de la Partie 8 priment.
   coordonnées du calendrier valables pour octobre 2026 tournées le 18. Favoris de démo ajoutés : Clermont pour Léa,
   Lyon et Limoges pour Sami (sans clé Google, pas d'autre saisie d'adresse). Si l'enregistrement s'arrête pendant un
   chargement réseau, enregistrer un court complément et le raccorder (`-f concat -c copy`).
+- Caméra embarquée, niveau 2 (étape 5, 2026-10-18, migration `dashcam_charter`) : charte `CHARTE_CAMERA_EMBARQUEE.md`
+  (version `2026-10-18`, À FAIRE VALIDER par le juriste : boucle 72 h, sans son, habitacle, AIPD, responsable du
+  traitement…). L'appli ne filme rien : l'enregistrement reste dans la caméra du véhicule. `src/dashcam/dashcam.ts` :
+  `DashcamCharterAcceptance` (userId + version, unique) ; `assertDashcamCharter` (403 `DASHCAM_CHARTER_REQUIRED`)
+  appelé par `DriverModeService.setOnline` (après la dashcam active) et `TripsService.start` (donc aussi le départ
+  d'une ligne) ; version `DASHCAM_CHARTER_VERSION` (nouvelle version = réaccepter). Routes chauffeur
+  `GET|POST /drivers/me/dashcam-charter` (version exacte, sinon 400 ; AuditLog `dashcam.charter.accept`),
+  `GET /drivers/me/footage-requests` (30 j, trajet seulement, JAMAIS le motif ni l'émetteur),
+  `POST /drivers/me/footage-requests/:incidentId/acknowledge` (autre chauffeur = 404) ; admin 2FA
+  `POST /admin/incidents/:id/footage-request` (une seule par incident, 409 sans chauffeur ; notification
+  `dashcam.footage_request`). `Incident.footageRequestedAt/By`, `footageDriverId`, `footageAcknowledgedAt`. Remise des
+  extraits : pas encore (attend le stockage S3 sécurisé et l'avis juridique). Tests : `dashcam.integration.spec.ts` ;
+  dans `memory-prisma`, la charte est PRÉSUMÉE acceptée pour tout `driverProfile` (`db.presumeDashcamCharter`, mis à
+  false par les tests de la charte). Seed : charte acceptée pour Nadia, Djamel, Chris, Sami. Apps : chauffeur —
+  `services/dashcam_service.dart` (`dashcamCharterProvider`, `footageRequestsProvider`), `screens/driver/
+  dashcam_charter_screen.dart` (`DashcamCharterScreen`, route `AppRoutes.dashcamCharter` = /driver/dashcam, tuile du
+  Profil ; `DashcamNotices` en tête du mode chauffeur : charte à accepter, « Conservez l'enregistrement » + « C'est
+  noté »), test `dashcam_screens_test.dart`, `FakeDashcamService` (charte acceptée par défaut) ; passager — ligne
+  « Véhicule équipé d'une caméra embarquée » + explication sur l'écran 8 (`_DashcamNotice`). Clés ARB `dc*` / `pc*`.
+  Admin : état et bouton « Demander au chauffeur de conserver l'enregistrement » dans la page Incidents (clés `dc*`).
 - Migrations : `init_xlcab` appliquée sur la base locale ; toute modification de
   `prisma/schema.prisma` demande désormais `npx prisma migrate dev --name <nom>`. Référentiel :
   `npx prisma db seed` (config FR uniquement).

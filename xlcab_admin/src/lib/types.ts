@@ -93,6 +93,9 @@ export interface Incident {
   notes: string | null;
   createdAt: string;
   reporter: { firstName: string | null; lastName: string | null; email: string; phone: string | null } | null;
+  /** Caméra embarquée : conservation de l'enregistrement demandée au chauffeur, puis confirmée. */
+  footageRequestedAt?: string | null;
+  footageAcknowledgedAt?: string | null;
 }
 
 export interface AuditLog {

@@ -19,6 +19,7 @@ import 'screens/shell/departure_tab.dart';
 import 'screens/shell/driver_profile_tab.dart';
 import 'screens/shell/driver_shell.dart';
 import 'screens/shell/earnings_tab.dart';
+import 'screens/driver/dashcam_charter_screen.dart';
 
 export 'package:xlcab_core/routes.dart';
 
@@ -90,6 +91,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(path: AppRoutes.driverMarket, builder: (context, state) => const MarketFeedScreen()),
       GoRoute(path: AppRoutes.driverCancellations, builder: (context, state) => const CancellationsScreen()),
       GoRoute(path: AppRoutes.driverPayouts, builder: (context, state) => const PayoutsScreen()),
+      GoRoute(path: AppRoutes.dashcamCharter, builder: (context, state) => const DashcamCharterScreen()),
     ],
   );
 });

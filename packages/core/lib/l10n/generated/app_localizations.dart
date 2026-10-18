@@ -6788,6 +6788,204 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Ligne régulière : remis au chauffeur au point de rendez-vous'**
   String get lcLigne;
+
+  /// No description provided for @dcTitre.
+  ///
+  /// In fr, this message translates to:
+  /// **'Charte caméra embarquée'**
+  String get dcTitre;
+
+  /// No description provided for @dcChargement.
+  ///
+  /// In fr, this message translates to:
+  /// **'Chargement de la charte'**
+  String get dcChargement;
+
+  /// No description provided for @dcIntro.
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre véhicule est équipé d’une caméra embarquée. Cette charte fixe ce qu’elle filme, quand les images sont utilisées et vos engagements. Vous devez l’accepter pour recevoir des trajets.'**
+  String get dcIntro;
+
+  /// No description provided for @dcPourquoiTitre.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pourquoi'**
+  String get dcPourquoiTitre;
+
+  /// No description provided for @dcPourquoi1.
+  ///
+  /// In fr, this message translates to:
+  /// **'Uniquement pour la sécurité des personnes et des biens : établir les faits en cas d’accident, d’agression, de SOS ou de litige grave.'**
+  String get dcPourquoi1;
+
+  /// No description provided for @dcPourquoi2.
+  ///
+  /// In fr, this message translates to:
+  /// **'Jamais pour surveiller votre travail, vous noter, ni pour un usage commercial.'**
+  String get dcPourquoi2;
+
+  /// No description provided for @dcCommentTitre.
+  ///
+  /// In fr, this message translates to:
+  /// **'Comment'**
+  String get dcCommentTitre;
+
+  /// No description provided for @dcComment1.
+  ///
+  /// In fr, this message translates to:
+  /// **'L’enregistrement reste dans la caméra du véhicule : l’appli XLCAB ne filme rien et ne reçoit aucune image.'**
+  String get dcComment1;
+
+  /// No description provided for @dcComment2.
+  ///
+  /// In fr, this message translates to:
+  /// **'Enregistrement en boucle, effacé automatiquement au bout de 72 heures au plus.'**
+  String get dcComment2;
+
+  /// No description provided for @dcComment3.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sans le son. Un autocollant informe les passagers dès l’entrée du véhicule.'**
+  String get dcComment3;
+
+  /// No description provided for @dcQuandTitre.
+  ///
+  /// In fr, this message translates to:
+  /// **'Quand les images sont extraites'**
+  String get dcQuandTitre;
+
+  /// No description provided for @dcQuand1.
+  ///
+  /// In fr, this message translates to:
+  /// **'Après un SOS ou un incident signalé : l’équipe XLCAB vous demande, dans l’appli, de conserver l’enregistrement du trajet concerné.'**
+  String get dcQuand1;
+
+  /// No description provided for @dcQuand2.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sur réquisition des forces de l’ordre ou de la justice. Seule la séquence utile est remise, par le canal sécurisé indiqué par l’équipe.'**
+  String get dcQuand2;
+
+  /// No description provided for @dcEngagementsTitre.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vos engagements'**
+  String get dcEngagementsTitre;
+
+  /// No description provided for @dcEngagement1.
+  ///
+  /// In fr, this message translates to:
+  /// **'Garder la caméra active, réglée en boucle de 72 h, sans le son.'**
+  String get dcEngagement1;
+
+  /// No description provided for @dcEngagement2.
+  ///
+  /// In fr, this message translates to:
+  /// **'Apposer l’autocollant d’information fourni par XLCAB.'**
+  String get dcEngagement2;
+
+  /// No description provided for @dcEngagement3.
+  ///
+  /// In fr, this message translates to:
+  /// **'Conserver l’enregistrement demandé après un incident et le remettre par le canal sécurisé indiqué.'**
+  String get dcEngagement3;
+
+  /// No description provided for @dcEngagement4.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ne jamais consulter, copier ni diffuser les images en dehors de ces cas ; signaler toute panne, perte ou vol.'**
+  String get dcEngagement4;
+
+  /// No description provided for @dcJAccepte.
+  ///
+  /// In fr, this message translates to:
+  /// **'J’accepte la charte'**
+  String get dcJAccepte;
+
+  /// No description provided for @dcAcceptee.
+  ///
+  /// In fr, this message translates to:
+  /// **'Charte acceptée.'**
+  String get dcAcceptee;
+
+  /// No description provided for @dcDejaAcceptee.
+  ///
+  /// In fr, this message translates to:
+  /// **'Charte acceptée'**
+  String get dcDejaAcceptee;
+
+  /// No description provided for @dcAccepteeLe.
+  ///
+  /// In fr, this message translates to:
+  /// **'Charte acceptée le {date}'**
+  String dcAccepteeLe(String date);
+
+  /// No description provided for @dcVersion.
+  ///
+  /// In fr, this message translates to:
+  /// **'Version {version}'**
+  String dcVersion(String version);
+
+  /// No description provided for @dcAAccepter.
+  ///
+  /// In fr, this message translates to:
+  /// **'Acceptez la charte caméra embarquée pour passer en ligne et démarrer vos trajets.'**
+  String get dcAAccepter;
+
+  /// No description provided for @dcLireLaCharte.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lire la charte'**
+  String get dcLireLaCharte;
+
+  /// No description provided for @dcConserverTitre.
+  ///
+  /// In fr, this message translates to:
+  /// **'Conservez l’enregistrement'**
+  String get dcConserverTitre;
+
+  /// No description provided for @dcConserverTexte.
+  ///
+  /// In fr, this message translates to:
+  /// **'Un incident a été signalé sur votre trajet du {date} ({route}). Ne laissez pas la caméra l’effacer : l’équipe XLCAB vous indiquera comment le remettre.'**
+  String dcConserverTexte(String date, String route);
+
+  /// No description provided for @dcCestNote.
+  ///
+  /// In fr, this message translates to:
+  /// **'C’est noté, je l’ai conservé'**
+  String get dcCestNote;
+
+  /// No description provided for @dcMerciConserve.
+  ///
+  /// In fr, this message translates to:
+  /// **'Merci : l’équipe est prévenue.'**
+  String get dcMerciConserve;
+
+  /// No description provided for @pcTitre.
+  ///
+  /// In fr, this message translates to:
+  /// **'Caméra embarquée'**
+  String get pcTitre;
+
+  /// No description provided for @pcLigne.
+  ///
+  /// In fr, this message translates to:
+  /// **'Véhicule équipé d’une caméra embarquée (sécurité)'**
+  String get pcLigne;
+
+  /// No description provided for @pcExplication.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pour la sécurité de tous, le véhicule est équipé d’une caméra. L’enregistrement reste dans la caméra, sans le son, et s’efface automatiquement au bout de 72 heures au plus. Il n’est consulté qu’en cas de SOS, d’incident signalé ou de réquisition judiciaire. Détails et droits : politique de confidentialité.'**
+  String get pcExplication;
+
+  /// No description provided for @pcCompris.
+  ///
+  /// In fr, this message translates to:
+  /// **'Compris'**
+  String get pcCompris;
 }
 
 class _AppLocalizationsDelegate

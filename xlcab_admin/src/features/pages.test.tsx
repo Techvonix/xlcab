@@ -11,7 +11,7 @@ vi.mock('@/lib/api', async (importOriginal) => {
     api: {
       analytics: vi.fn(), pendingDrivers: vi.fn(), documentFile: vi.fn(), reviewDocument: vi.fn(),
       approveDriver: vi.fn(), rejectDriver: vi.fn(), users: vi.fn(), trips: vi.fn(), incidents: vi.fn(),
-      acknowledgeIncident: vi.fn(), resolveIncident: vi.fn(), auditLogs: vi.fn(), jurisdictions: vi.fn(), updateJurisdiction: vi.fn(),
+      acknowledgeIncident: vi.fn(), resolveIncident: vi.fn(), requestFootage: vi.fn(), auditLogs: vi.fn(), jurisdictions: vi.fn(), updateJurisdiction: vi.fn(),
       tariffs: vi.fn(), createTariff: vi.fn(), cancelTariff: vi.fn(), invoices: vi.fn(), invoicePdf: vi.fn(),
       ratings: vi.fn(), ratedDrivers: vi.fn(), removeRating: vi.fn(),
     },
@@ -178,6 +178,20 @@ describe('Incidents SOS', () => {
     await userEvent.click(close);
     await waitFor(() => expect(m.resolveIncident).toHaveBeenCalledWith('inc-1', 'Passagère rappelée, tout va bien.'));
     expect(await axe(container)).toHaveNoViolations();
+  });
+
+  it('caméra embarquée : conservation de l’enregistrement demandée au chauffeur, puis état affiché', async () => {
+    m.incidents.mockResolvedValueOnce({ items: [incident], total: 1, page: 1, pageSize: 25 });
+    m.requestFootage.mockResolvedValue({ incidentId: 'inc-1' });
+    renderWithProviders(<IncidentsPage />);
+    expect(await screen.findByText('Non demandé')).toBeInTheDocument();
+    m.incidents.mockResolvedValue({
+      items: [{ ...incident, footageRequestedAt: '2026-10-18T09:00:00.000Z', footageAcknowledgedAt: null }], total: 1, page: 1, pageSize: 25,
+    });
+    await userEvent.click(screen.getByRole('button', { name: 'Demander au chauffeur de conserver l’enregistrement' }));
+    await waitFor(() => expect(m.requestFootage).toHaveBeenCalledWith('inc-1'));
+    expect(await screen.findByText(/Conservation demandée le/)).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Demander au chauffeur de conserver l’enregistrement' })).not.toBeInTheDocument();
   });
 
   it('signalement d’un chauffeur : libellé dédié, sans position (non géolocalisé)', async () => {

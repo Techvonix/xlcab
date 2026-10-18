@@ -126,6 +126,8 @@ class _Body extends ConsumerWidget {
         // Montée à un point de rencontre : où attendre, transports à proximité.
         if (trip.meetingPoint != null && !cancelled && !completed)
           Padding(padding: const EdgeInsets.only(top: AppSpacing.sm), child: MeetingPointLine(point: trip.meetingPoint!, detailed: true)),
+        // Caméra embarquée (CHARTE_CAMERA_EMBARQUEE.md) : information des passagers.
+        if (!cancelled && !completed) const _DashcamNotice(),
         // Place sur une ligne à seuil : départ confirmé, ou en attente d'autres passagers.
         if (trip.isLine && !cancelled && !completed && trip.lineGuarantee?.minPassengers != null)
           GuaranteeLine(guarantee: trip.lineGuarantee!, showRefund: true),
@@ -295,6 +297,38 @@ class _Recap extends StatelessWidget {
             line(Icons.event_seat_outlined, l10n.sgNumeros(trip.seatNumbers.length, trip.seatNumbers.join(', '))),
           if (trip.totalCents != null) line(Icons.receipt_long_outlined, l10n.montant(formatPrice(trip.totalCents!, locale: locale))),
         ],
+      ),
+    );
+  }
+}
+
+/// Information des passagers : véhicule équipé d'une caméra embarquée (sécurité).
+class _DashcamNotice extends StatelessWidget {
+  const _DashcamNotice();
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Padding(
+      padding: const EdgeInsets.only(top: AppSpacing.sm),
+      child: InkWell(
+        onTap: () => showDialog<void>(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text(l10n.pcTitre),
+            content: Text(l10n.pcExplication),
+            actions: [TextButton(onPressed: () => Navigator.of(context).pop(), child: Text(l10n.pcCompris))],
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
+          child: Row(children: [
+            ExcludeSemantics(child: Icon(Icons.videocam_outlined, size: 18, color: scheme.onSurface.withValues(alpha: 0.75))),
+            const SizedBox(width: AppSpacing.sm),
+            Expanded(child: Text(l10n.pcLigne, style: AppTypography.caption.copyWith(color: scheme.onSurface))),
+            ExcludeSemantics(child: Icon(Icons.info_outline, size: 18, color: scheme.onSurface.withValues(alpha: 0.75))),
+          ]),
+        ),
       ),
     );
   }

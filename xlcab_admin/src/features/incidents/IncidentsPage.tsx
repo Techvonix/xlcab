@@ -74,6 +74,7 @@ function IncidentCard({ incident }: { incident: Incident }) {
     queryClient.invalidateQueries({ queryKey: ['analytics'] });
   };
   const ack = useMutation({ mutationFn: () => api.acknowledgeIncident(incident.id), onSuccess: refresh, onError: (e) => setError(e.message) });
+  const footage = useMutation({ mutationFn: () => api.requestFootage(incident.id), onSuccess: refresh, onError: (e) => setError(e.message) });
   const resolve = useMutation({ mutationFn: () => api.resolveIncident(incident.id, notes.trim()), onSuccess: refresh, onError: (e) => setError(e.message) });
   const r = incident.reporter;
 
@@ -107,6 +108,16 @@ function IncidentCard({ incident }: { incident: Incident }) {
           )}
           <div className="flex justify-between gap-4"><dt>{t('course')}</dt><dd className="text-sm">{incident.tripId}</dd></div>
           {incident.notes && <div className="flex justify-between gap-4"><dt>{t('notes')}</dt><dd>{incident.notes}</dd></div>}
+          <div className="flex justify-between gap-4">
+            <dt>{t('dcEnregistrement')}</dt>
+            <dd>
+              {incident.footageAcknowledgedAt
+                ? t('dcConserveLe', { date: formatDateTime(incident.footageAcknowledgedAt) })
+                : incident.footageRequestedAt
+                  ? t('dcDemandeLe', { date: formatDateTime(incident.footageRequestedAt) })
+                  : t('dcNonDemande')}
+            </dd>
+          </div>
         </dl>
         {error && <Alert>{error}</Alert>}
         {incident.status !== 'resolved' && (
@@ -114,6 +125,11 @@ function IncidentCard({ incident }: { incident: Incident }) {
             {incident.status === 'open' && (
               <Button onClick={() => ack.mutate()} disabled={ack.isPending}>
                 {t('prendreEnCharge')}
+              </Button>
+            )}
+            {!incident.footageRequestedAt && (
+              <Button variant="outline" onClick={() => footage.mutate()} disabled={footage.isPending}>
+                {t('dcDemanderEnregistrement')}
               </Button>
             )}
             <label htmlFor={notesId} className="font-semibold">

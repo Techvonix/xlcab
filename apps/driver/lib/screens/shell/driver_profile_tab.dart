@@ -65,6 +65,7 @@ class DriverProfileTab extends ConsumerWidget {
           const SizedBox(height: AppSpacing.sm),
           tile(Icons.badge_outlined, l10n.drvMesDocuments, () => context.push(AppRoutes.driverOnboarding)),
           tile(Icons.business_outlined, l10n.opProfilOperateur, () => context.push(AppRoutes.operatorProfile)),
+          tile(Icons.videocam_outlined, l10n.dcTitre, () => context.push(AppRoutes.dashcamCharter)),
           section(l10n.preferences),
           const ThemeSelector(),
           const SizedBox(height: AppSpacing.md),

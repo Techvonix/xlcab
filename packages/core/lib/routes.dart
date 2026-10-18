@@ -41,6 +41,8 @@ class AppRoutes {
   static const driverMarket = '/driver/market';
   static const driverCancellations = '/driver/cancellations';
   static const driverPayouts = '/driver/payouts';
+  /// Charte caméra embarquée (CHARTE_CAMERA_EMBARQUEE.md).
+  static const dashcamCharter = '/driver/dashcam';
   // Bourse de transport côté client : lignes régulières et demandes de devis.
   static const market = '/market';
   static const lineSearch = '/market/lines';

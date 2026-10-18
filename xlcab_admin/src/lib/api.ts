@@ -210,6 +210,7 @@ export const api = {
   /** Reversements aux opérateurs ; sans statut : ceux qui ne sont pas encore partis. */
   payouts: (status?: string) => apiJson<AdminPayout[]>(`/api/v1/admin/payouts${qs({ status })}`),
   bonuses: () => apiJson<AdminBonus[]>('/api/v1/admin/payouts/bonuses'),
+  requestFootage: (id: string) => apiJson<{ incidentId: string }>(`/api/v1/admin/incidents/${encodeURIComponent(id)}/footage-request`, { method: 'POST', body: {} }),
   meetingPoints: () => apiJson<MeetingPoint[]>('/api/v1/admin/meeting-points'),
   createMeetingPoint: (body: NewMeetingPoint) => apiJson<MeetingPoint>('/api/v1/admin/meeting-points', { method: 'POST', body }),
   updateMeetingPoint: (id: string, body: { instructions?: string | null; transit?: string | null; active?: boolean }) =>

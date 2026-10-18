@@ -440,4 +440,9 @@ export const en: Record<MessageKey, string> = {
   mpModifierLesConsignes: "Edit instructions",
   mpRetirer: "Remove from the catalogue",
   mpRemettre: "Put back in the catalogue",
+  dcEnregistrement: "Dashcam recording",
+  dcNonDemande: "Not requested",
+  dcDemandeLe: "Retention requested on {date}, awaiting the driver",
+  dcConserveLe: "Kept by the driver (confirmed on {date})",
+  dcDemanderEnregistrement: "Ask the driver to keep the recording",
 };

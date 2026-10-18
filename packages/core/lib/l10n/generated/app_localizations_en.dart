@@ -3971,4 +3971,123 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get lcLigne =>
       'Regular line: handed to the driver at the meeting point';
+
+  @override
+  String get dcTitre => 'Dashcam charter';
+
+  @override
+  String get dcChargement => 'Loading the charter';
+
+  @override
+  String get dcIntro =>
+      'Your vehicle has a dashcam. This charter sets what it records, when images are used and your commitments. You must accept it to receive trips.';
+
+  @override
+  String get dcPourquoiTitre => 'Why';
+
+  @override
+  String get dcPourquoi1 =>
+      'Only for the safety of people and property: establish the facts after an accident, assault, SOS or serious dispute.';
+
+  @override
+  String get dcPourquoi2 =>
+      'Never to monitor your work, rate you, or for any commercial use.';
+
+  @override
+  String get dcCommentTitre => 'How';
+
+  @override
+  String get dcComment1 =>
+      'The recording stays in the vehicle camera: the XLCAB app records nothing and receives no images.';
+
+  @override
+  String get dcComment2 =>
+      'Loop recording, automatically erased after 72 hours at most.';
+
+  @override
+  String get dcComment3 =>
+      'No sound. A sticker informs passengers as soon as they enter the vehicle.';
+
+  @override
+  String get dcQuandTitre => 'When images are extracted';
+
+  @override
+  String get dcQuand1 =>
+      'After an SOS or a reported incident: the XLCAB team asks you, in the app, to keep the recording of the trip concerned.';
+
+  @override
+  String get dcQuand2 =>
+      'On request from the police or the courts. Only the relevant sequence is handed over, through the secure channel given by the team.';
+
+  @override
+  String get dcEngagementsTitre => 'Your commitments';
+
+  @override
+  String get dcEngagement1 =>
+      'Keep the camera active, set to a 72-hour loop, without sound.';
+
+  @override
+  String get dcEngagement2 =>
+      'Put up the information sticker provided by XLCAB.';
+
+  @override
+  String get dcEngagement3 =>
+      'Keep the recording requested after an incident and hand it over through the secure channel given.';
+
+  @override
+  String get dcEngagement4 =>
+      'Never view, copy or share the images outside these cases; report any failure, loss or theft.';
+
+  @override
+  String get dcJAccepte => 'I accept the charter';
+
+  @override
+  String get dcAcceptee => 'Charter accepted.';
+
+  @override
+  String get dcDejaAcceptee => 'Charter accepted';
+
+  @override
+  String dcAccepteeLe(String date) {
+    return 'Charter accepted on $date';
+  }
+
+  @override
+  String dcVersion(String version) {
+    return 'Version $version';
+  }
+
+  @override
+  String get dcAAccepter =>
+      'Accept the dashcam charter to go online and start your trips.';
+
+  @override
+  String get dcLireLaCharte => 'Read the charter';
+
+  @override
+  String get dcConserverTitre => 'Keep the recording';
+
+  @override
+  String dcConserverTexte(String date, String route) {
+    return 'An incident was reported on your trip of $date ($route). Do not let the camera erase it: the XLCAB team will tell you how to hand it over.';
+  }
+
+  @override
+  String get dcCestNote => 'Noted, I have kept it';
+
+  @override
+  String get dcMerciConserve => 'Thank you: the team has been informed.';
+
+  @override
+  String get pcTitre => 'Dashcam';
+
+  @override
+  String get pcLigne => 'Vehicle equipped with a dashcam (safety)';
+
+  @override
+  String get pcExplication =>
+      'For everyone’s safety, the vehicle has a camera. The recording stays in the camera, without sound, and is erased automatically after 72 hours at most. It is only viewed after an SOS, a reported incident or a court request. Details and rights: privacy policy.';
+
+  @override
+  String get pcCompris => 'Got it';
 }

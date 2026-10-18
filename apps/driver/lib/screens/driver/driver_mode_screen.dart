@@ -15,6 +15,8 @@ import 'widgets/offer_card.dart';
 import 'widgets/parcel_checklist.dart';
 import '../operator/operator_section.dart';
 import 'package:xlcab_core/l10n/l10n.dart';
+import 'dashcam_charter_screen.dart';
+import '../../services/dashcam_service.dart';
 
 final _uuid = RegExp(r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$', caseSensitive: false);
 
@@ -208,6 +210,8 @@ class _DriverModeScreenState extends ConsumerState<DriverModeScreen> with Widget
             RefreshIndicator(
               onRefresh: () async {
                 refreshOperatorSection(ref);
+                ref.invalidate(dashcamCharterProvider);
+                ref.invalidate(footageRequestsProvider);
                 await _controller.refresh();
               },
               child: ListView(
@@ -255,6 +259,8 @@ class _DriverModeScreenState extends ConsumerState<DriverModeScreen> with Widget
         )
       else
         _OnlineCard(state: state, onChanged: _controller.setOnline),
+      // Caméra embarquée : charte à accepter, enregistrements à conserver après un incident.
+      if (state.approved) const DashcamNotices(),
       if (state.approved) const OperatorSection(),
       if (current != null) ...[
         section(current.isReturnStep ? l10n.retour : current.status == TripStatus.started ? l10n.enCourse : l10n.mission),

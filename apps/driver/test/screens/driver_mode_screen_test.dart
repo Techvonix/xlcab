@@ -13,6 +13,7 @@ import 'package:xlcab_driver/services/driver_channel.dart';
 import 'package:xlcab_core/services/document_picker.dart';
 import 'package:xlcab_driver/services/driver_device.dart';
 import 'package:xlcab_driver/services/operator_service.dart';
+import 'package:xlcab_driver/services/dashcam_service.dart';
 import 'package:xlcab_core/models/parcel.dart';
 import 'package:xlcab_ui/theme/app_theme.dart';
 
@@ -52,6 +53,7 @@ Future<void> pump(WidgetTester tester) async {
       driverLauncherProvider.overrideWithValue(launcher),
       // Section opérateur du mode chauffeur : aucun appel réseau réel.
       operatorServiceProvider.overrideWithValue(operators),
+      dashcamServiceProvider.overrideWithValue(FakeDashcamService()),
     ],
     child: MaterialApp(
       theme: AppTheme.light,

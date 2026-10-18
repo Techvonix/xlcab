@@ -439,6 +439,11 @@ export const fr = {
   mpModifierLesConsignes: "Modifier les consignes",
   mpRetirer: "Retirer du catalogue",
   mpRemettre: "Remettre au catalogue",
+  dcEnregistrement: "Enregistrement de la caméra",
+  dcNonDemande: "Non demandé",
+  dcDemandeLe: "Conservation demandée le {date}, en attente du chauffeur",
+  dcConserveLe: "Conservé par le chauffeur (confirmé le {date})",
+  dcDemanderEnregistrement: "Demander au chauffeur de conserver l’enregistrement",
 };
 
 export type MessageKey = keyof typeof fr;

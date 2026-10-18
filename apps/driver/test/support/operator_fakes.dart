@@ -8,6 +8,7 @@ import 'package:xlcab_core/models/place.dart';
 import 'package:xlcab_core/services/api_service.dart';
 import 'package:xlcab_core/services/market_service.dart';
 import 'package:xlcab_driver/services/operator_service.dart';
+import 'package:xlcab_driver/services/dashcam_service.dart';
 
 // Doubles de l'espace opérateur (lignes, départs, réserves, bourse) pour
 // les tests widget : état en mémoire, appels enregistrés.
@@ -350,4 +351,29 @@ class FakeMarketService extends MarketService {
     _act('sendMessage:$body');
     thread = [...thread, OfferMessage(id: 'm${thread.length}', mine: true, body: body, createdAt: DateTime(2026, 10, 10, 9))];
   }
+}
+
+/// Caméra embarquée : charte acceptée par défaut, aucune demande de conservation.
+class FakeDashcamService extends DashcamService {
+  FakeDashcamService() : super(Dio());
+
+  DashcamCharter charterResult = const DashcamCharter(version: '2026-10-18', accepted: true);
+  List<FootageRequest> requests = [];
+  final List<String> calls = [];
+
+  @override
+  Future<DashcamCharter> charter() async => charterResult;
+
+  @override
+  Future<DashcamCharter> accept(String version) async {
+    calls.add('accept:$version');
+    charterResult = DashcamCharter(version: version, accepted: true, acceptedAt: DateTime(2026, 10, 18, 9));
+    return charterResult;
+  }
+
+  @override
+  Future<List<FootageRequest>> footageRequests() async => requests;
+
+  @override
+  Future<void> acknowledge(String incidentId) async => calls.add('acknowledge:$incidentId');
 }

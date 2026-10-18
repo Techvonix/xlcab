@@ -3995,4 +3995,123 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get lcLigne =>
       'Ligne régulière : remis au chauffeur au point de rendez-vous';
+
+  @override
+  String get dcTitre => 'Charte caméra embarquée';
+
+  @override
+  String get dcChargement => 'Chargement de la charte';
+
+  @override
+  String get dcIntro =>
+      'Votre véhicule est équipé d’une caméra embarquée. Cette charte fixe ce qu’elle filme, quand les images sont utilisées et vos engagements. Vous devez l’accepter pour recevoir des trajets.';
+
+  @override
+  String get dcPourquoiTitre => 'Pourquoi';
+
+  @override
+  String get dcPourquoi1 =>
+      'Uniquement pour la sécurité des personnes et des biens : établir les faits en cas d’accident, d’agression, de SOS ou de litige grave.';
+
+  @override
+  String get dcPourquoi2 =>
+      'Jamais pour surveiller votre travail, vous noter, ni pour un usage commercial.';
+
+  @override
+  String get dcCommentTitre => 'Comment';
+
+  @override
+  String get dcComment1 =>
+      'L’enregistrement reste dans la caméra du véhicule : l’appli XLCAB ne filme rien et ne reçoit aucune image.';
+
+  @override
+  String get dcComment2 =>
+      'Enregistrement en boucle, effacé automatiquement au bout de 72 heures au plus.';
+
+  @override
+  String get dcComment3 =>
+      'Sans le son. Un autocollant informe les passagers dès l’entrée du véhicule.';
+
+  @override
+  String get dcQuandTitre => 'Quand les images sont extraites';
+
+  @override
+  String get dcQuand1 =>
+      'Après un SOS ou un incident signalé : l’équipe XLCAB vous demande, dans l’appli, de conserver l’enregistrement du trajet concerné.';
+
+  @override
+  String get dcQuand2 =>
+      'Sur réquisition des forces de l’ordre ou de la justice. Seule la séquence utile est remise, par le canal sécurisé indiqué par l’équipe.';
+
+  @override
+  String get dcEngagementsTitre => 'Vos engagements';
+
+  @override
+  String get dcEngagement1 =>
+      'Garder la caméra active, réglée en boucle de 72 h, sans le son.';
+
+  @override
+  String get dcEngagement2 =>
+      'Apposer l’autocollant d’information fourni par XLCAB.';
+
+  @override
+  String get dcEngagement3 =>
+      'Conserver l’enregistrement demandé après un incident et le remettre par le canal sécurisé indiqué.';
+
+  @override
+  String get dcEngagement4 =>
+      'Ne jamais consulter, copier ni diffuser les images en dehors de ces cas ; signaler toute panne, perte ou vol.';
+
+  @override
+  String get dcJAccepte => 'J’accepte la charte';
+
+  @override
+  String get dcAcceptee => 'Charte acceptée.';
+
+  @override
+  String get dcDejaAcceptee => 'Charte acceptée';
+
+  @override
+  String dcAccepteeLe(String date) {
+    return 'Charte acceptée le $date';
+  }
+
+  @override
+  String dcVersion(String version) {
+    return 'Version $version';
+  }
+
+  @override
+  String get dcAAccepter =>
+      'Acceptez la charte caméra embarquée pour passer en ligne et démarrer vos trajets.';
+
+  @override
+  String get dcLireLaCharte => 'Lire la charte';
+
+  @override
+  String get dcConserverTitre => 'Conservez l’enregistrement';
+
+  @override
+  String dcConserverTexte(String date, String route) {
+    return 'Un incident a été signalé sur votre trajet du $date ($route). Ne laissez pas la caméra l’effacer : l’équipe XLCAB vous indiquera comment le remettre.';
+  }
+
+  @override
+  String get dcCestNote => 'C’est noté, je l’ai conservé';
+
+  @override
+  String get dcMerciConserve => 'Merci : l’équipe est prévenue.';
+
+  @override
+  String get pcTitre => 'Caméra embarquée';
+
+  @override
+  String get pcLigne => 'Véhicule équipé d’une caméra embarquée (sécurité)';
+
+  @override
+  String get pcExplication =>
+      'Pour la sécurité de tous, le véhicule est équipé d’une caméra. L’enregistrement reste dans la caméra, sans le son, et s’efface automatiquement au bout de 72 heures au plus. Il n’est consulté qu’en cas de SOS, d’incident signalé ou de réquisition judiciaire. Détails et droits : politique de confidentialité.';
+
+  @override
+  String get pcCompris => 'Compris';
 }
