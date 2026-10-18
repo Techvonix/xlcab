@@ -1,4 +1,4 @@
-import { Global, INestApplication, Module, ValidationPipe } from '@nestjs/common';
+import { Global, INestApplication, Module, ServiceUnavailableException, ValidationPipe } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { Test } from '@nestjs/testing';
@@ -150,7 +150,14 @@ describe('Colis (intégration)', () => {
   afterEach(() => app.close());
 
   describe('devis', () => {
-    it('navette partagée (forfait 8 € HT + TVA 20 %) et navette dédiée (tarif km)', async () => {
+    it('itinéraire incalculable : navette dédiée indisponible, devis rendu quand même', async () => {
+    (app.get(RoutingService).drivingRoute as jest.Mock).mockRejectedValueOnce(new ServiceUnavailableException('Calcul d’itinéraire momentanément indisponible'));
+    const res = await http().post('/api/v1/bookings/parcel/quote').set('Authorization', sender()).send(body());
+    expect(res.status).toBe(200);
+    expect(res.body.dedicated).toMatchObject({ available: false });
+  });
+
+  it('navette partagée (forfait 8 € HT + TVA 20 %) et navette dédiée (tarif km)', async () => {
       seedCarrier();
       const res = await http().post('/api/v1/bookings/parcel/quote').set('Authorization', sender()).send(body());
 

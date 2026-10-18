@@ -310,6 +310,7 @@ async function main() {
       { userId: lea.id, label: 'Gare de Rouen', address: ROUEN.address, lat: ROUEN.lat, lng: ROUEN.lng },
       { userId: lea.id, label: 'Gare de Lyon-Part-Dieu', address: LYON.address, lat: LYON.lat, lng: LYON.lng },
       { userId: lea.id, label: 'Gare de Limoges', address: LIMOGES.address, lat: LIMOGES.lat, lng: LIMOGES.lng },
+      { userId: lea.id, label: 'Gare de Clermont-Ferrand', address: 'Gare de Clermont-Ferrand, Clermont-Ferrand', lat: 45.7786, lng: 3.1003 },
     ],
   });
 

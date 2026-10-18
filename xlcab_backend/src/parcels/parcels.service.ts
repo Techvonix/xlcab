@@ -6,6 +6,7 @@ import {
   Injectable,
   Logger,
   NotFoundException,
+  ServiceUnavailableException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { randomInt, randomUUID, timingSafeEqual } from 'crypto';
@@ -133,7 +134,9 @@ export class ParcelsService {
       const d = await this.dedicatedQuote(dto, jurisdiction);
       dedicated = { available: true, departureAt: new Date(dto.scheduledAt), ...d };
     } catch (err) {
-      if (!(err instanceof BadRequestException)) throw err;
+      // Itinéraire incalculable (Google indisponible) : seule la navette dédiée est
+      // indisponible ; la navette partagée et les lignes régulières restent proposées.
+      if (!(err instanceof BadRequestException || err instanceof ServiceUnavailableException)) throw err;
       dedicated = { available: false, reason: err.message };
     }
     return { grafted, dedicated };
