@@ -2402,5 +2402,13 @@
   "pcTitre": "Caméra embarquée",
   "pcLigne": "Véhicule équipé d’une caméra embarquée (sécurité)",
   "pcExplication": "Pour la sécurité de tous, le véhicule est équipé d’une caméra. L’enregistrement reste dans la caméra, sans le son, et s’efface automatiquement au bout de 72 heures au plus. Il n’est consulté qu’en cas de SOS, d’incident signalé ou de réquisition judiciaire. Détails et droits : politique de confidentialité.",
-  "pcCompris": "Compris"
+  "pcCompris": "Compris",
+  "opEnRouteOuvertA": "« Je suis en route » s’ouvrira 3 h avant le départ, le {date}.",
+  "@opEnRouteOuvertA": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  }
 }

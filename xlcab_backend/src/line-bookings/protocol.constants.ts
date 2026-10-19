@@ -36,6 +36,8 @@ export const RESCUE_RESPONSE_URGENT_MIN = 5;
 export const RESCUE_URGENT_WITHIN_MIN = 180;
 
 /** Contrôles avant le départ (minutes avant l'heure de départ). */
+/** « Je suis en route » accepté à partir de T−3 h (l'appli n'affiche le bouton qu'à partir de là). */
+export const READY_WINDOW_MIN = 180;
 export const READY_REMINDER_MIN = 75;
 export const READY_DEADLINE_MIN = 60;
 export const POSITION_CHECK_MIN = 45;

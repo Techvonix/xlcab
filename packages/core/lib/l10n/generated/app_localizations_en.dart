@@ -4090,4 +4090,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get pcCompris => 'Got it';
+
+  @override
+  String opEnRouteOuvertA(String date) {
+    return '“I’m on my way” opens 3 hours before departure, on $date.';
+  }
 }

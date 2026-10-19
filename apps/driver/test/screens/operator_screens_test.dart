@@ -315,8 +315,15 @@ void main() {
   });
 
   group('départ', () {
+    testWidgets('plus de 3 h avant le départ : pas de « Je suis en route », seulement son heure d’ouverture', (tester) async {
+      operators.currentManifest = manifest(); // départ dans 2 jours
+      await pump(tester, const DepartureScreen(departureId: 'd1'));
+      expect(find.text('Je suis en route'), findsNothing);
+      expect(find.textContaining('« Je suis en route » s’ouvrira 3 h avant le départ'), findsOneWidget);
+    });
+
     testWidgets('liste d’embarquement, « Je suis en route », scan d’un QR', (tester) async {
-      operators.currentManifest = manifest();
+      operators.currentManifest = manifest(at: today.add(const Duration(hours: 2)));
       await pump(tester, const DepartureScreen(departureId: 'd1'));
 
       expect(find.text('5 passagers · 2 réservations'), findsOneWidget);

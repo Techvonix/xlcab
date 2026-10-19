@@ -64,4 +64,16 @@ void main() {
     expect(json['minPassengers'], 2);
     expect(json.containsKey('daysOfWeek') || json.containsKey('startDate') || json.containsKey('returnTime'), isFalse);
   });
+
+  test('« Je suis en route » : seulement à partir de l’heure d’ouverture donnée par le serveur', () {
+    final m = Manifest.fromJson({
+      'departureId': 'd1', 'departureAt': '2026-10-20T08:00:00.000Z', 'readyOpensAt': '2026-10-20T05:00:00.000Z', 'ready': false,
+    });
+    expect(m.canConfirmReady(DateTime.utc(2026, 10, 20, 4, 59)), isFalse);
+    expect(m.canConfirmReady(DateTime.utc(2026, 10, 20, 5)), isTrue);
+    // Serveur plus ancien (sans readyOpensAt) : T−3 h par défaut.
+    final old = Manifest.fromJson({'departureId': 'd1', 'departureAt': '2026-10-20T08:00:00.000Z'});
+    expect(old.canConfirmReady(DateTime.utc(2026, 10, 20, 4)), isFalse);
+    expect(old.canConfirmReady(DateTime.utc(2026, 10, 20, 6)), isTrue);
+  });
 }

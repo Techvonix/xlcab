@@ -165,7 +165,7 @@ class _DepartureScreenState extends ConsumerState<DepartureScreen> {
                     Expanded(child: Text(l10n.gtConfirme, style: AppTypography.bodyBold)),
                   ]),
                 ),
-              if (!m.ready && !m.started)
+              if (m.canConfirmReady(ref.read(clockProvider)()))
                 OpCard(
                   highlight: true,
                   child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
@@ -175,6 +175,19 @@ class _DepartureScreenState extends ConsumerState<DepartureScreen> {
                       icon: Icons.directions_car,
                       label: l10n.opJeSuisEnRoute,
                       onPressed: _busy ? null : () => _do(() => _service.ready(widget.departureId), success: l10n.opBonneRoute),
+                    ),
+                  ]),
+                )
+              else if (!m.ready && !m.started)
+                // Avant T−3 h : pas de bouton (le serveur le refuserait), seulement l'heure d'ouverture.
+                Padding(
+                  padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                  child: Row(children: [
+                    const ExcludeSemantics(child: Icon(Icons.schedule)),
+                    const SizedBox(width: AppSpacing.sm),
+                    Expanded(
+                      child: Text(l10n.opEnRouteOuvertA(
+                          formatTripDate(m.readyOpensAt ?? m.departureAt.subtract(const Duration(hours: 3)), locale: locale))),
                     ),
                   ]),
                 )

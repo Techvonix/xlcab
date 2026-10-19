@@ -23,6 +23,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { RedisService } from '../redis/redis.service';
 import { AuditCtx, RequestUser, TripsService } from '../trips/trips.service';
 import { BookLineDto, LineParcelDto } from './dto';
+import { READY_WINDOW_MIN } from './protocol.constants';
 import { ParcelsService } from '../parcels/parcels.service';
 import { fitsDimensions } from '../parcels/parcels.constants';
 
@@ -494,6 +495,8 @@ export class LineBookingsService {
       origin: outbound ? line.originAddress : line.destinationAddress,
       destination: outbound ? line.destinationAddress : line.originAddress,
       ready: departure.driverReadyAt !== null,
+      // Ouverture de « Je suis en route » : l'appli masque le bouton avant.
+      readyOpensAt: new Date(departure.departureAt.getTime() - READY_WINDOW_MIN * 60_000),
       seatsBooked: trips.reduce((n, t) => n + (t.passengerBooking?.seats ?? 0), 0),
       guarantee: await this.lines.guaranteeOf(departure, line),
       // Colis du départ : même fiche que la checklist des missions (QR, code de remise, photo).
@@ -522,7 +525,7 @@ export class LineBookingsService {
   /** « Je suis en route » : évite le déclenchement du secours à T−60 min. */
   async ready(userId: string, departureId: string, now = new Date()) {
     const { departure } = await this.ownDeparture(userId, departureId);
-    if (departure.departureAt.getTime() - now.getTime() > 3 * 3600_000) {
+    if (departure.departureAt.getTime() - now.getTime() > READY_WINDOW_MIN * 60_000) {
       throw new ConflictException('Trop tôt : confirmez votre départ dans les 3 heures qui précèdent');
     }
     await this.prisma.lineDeparture.update({ where: { id: departureId }, data: { driverReadyAt: now } });

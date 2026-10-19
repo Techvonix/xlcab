@@ -4114,4 +4114,9 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get pcCompris => 'Compris';
+
+  @override
+  String opEnRouteOuvertA(String date) {
+    return '« Je suis en route » s’ouvrira 3 h avant le départ, le $date.';
+  }
 }

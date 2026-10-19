@@ -6986,6 +6986,12 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Compris'**
   String get pcCompris;
+
+  /// No description provided for @opEnRouteOuvertA.
+  ///
+  /// In fr, this message translates to:
+  /// **'« Je suis en route » s’ouvrira 3 h avant le départ, le {date}.'**
+  String opEnRouteOuvertA(String date);
 }
 
 class _AppLocalizationsDelegate

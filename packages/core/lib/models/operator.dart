@@ -534,7 +534,15 @@ class Manifest {
     required this.passengers,
     this.guarantee,
     this.parcels = const [],
+    this.readyOpensAt,
   });
+
+  /// « Je suis en route » possible à partir de cette heure (T−3 h, refusé avant par le serveur).
+  final DateTime? readyOpensAt;
+
+  /// Bouton « Je suis en route » à montrer : fenêtre ouverte, départ ni confirmé ni parti.
+  bool canConfirmReady(DateTime now) =>
+      !ready && !started && !now.isBefore(readyOpensAt ?? departureAt.subtract(const Duration(hours: 3)));
 
   /// Seuil de départ garanti (null : serveur plus ancien).
   final DepartureGuarantee? guarantee;
@@ -560,6 +568,7 @@ class Manifest {
       origin: _str(m['origin']) ?? '',
       destination: _str(m['destination']) ?? '',
       ready: m['ready'] == true,
+      readyOpensAt: _date(m['readyOpensAt']),
       seatsBooked: _int(m['seatsBooked']) ?? 0,
       guarantee: DepartureGuarantee.fromJson(m['guarantee']),
       parcels: m['parcels'] is List ? (m['parcels'] as List).map(ParcelTask.fromJson).whereType<ParcelTask>().toList() : const [],

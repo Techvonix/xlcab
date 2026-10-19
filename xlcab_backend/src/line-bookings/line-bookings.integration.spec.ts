@@ -272,6 +272,9 @@ describe('Réservations sur ligne et protocole d’annulation (intégration)', (
       await book(PAX2, 2);
       const far = await http().get(`/api/v1/operators/me/departures/${departure().id}/manifest`).set('Authorization', driver(DJAMEL));
       expect(far.body).toMatchObject({ seatsBooked: 5, ready: false });
+      // « Je suis en route » ouvert à T−3 h : l'appli masque le bouton avant (le serveur le refuse).
+      expect(new Date(departure().departureAt).getTime() - new Date(far.body.readyOpensAt).getTime()).toBe(3 * 3600_000);
+      expect((await http().post(`/api/v1/operators/me/departures/${departure().id}/ready`).set('Authorization', driver(DJAMEL))).status).toBe(409);
       expect(far.body.passengers.map((p: any) => [p.firstName, p.seats, p.phone])).toEqual([['Léa', 3, null], ['Tom', 2, null]]);
       expect((await http().get(`/api/v1/operators/me/departures/${departure().id}/manifest`).set('Authorization', driver(KARIM))).status).toBe(404);
 
