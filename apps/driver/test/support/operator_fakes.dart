@@ -341,7 +341,13 @@ class FakeMarketService extends MarketService {
   SeatMap seats = const SeatMap(seatsTotal: 8, taken: {2, 5}, choosable: true);
 
   @override
-  Future<SeatMap> seatMap(String departureId) async => seats;
+  Future<SeatMap> seatMap(String departureId, {String? boardStopId, String? alightStopId}) async {
+    seatMapCalls.add((departureId, boardStopId, alightStopId));
+    return seats;
+  }
+
+  /// Plans demandés : (départ, montée, descente).
+  final List<(String, String?, String?)> seatMapCalls = [];
 
   @override
   Future<List<OfferMessage>> messages(String offerId) async => thread;

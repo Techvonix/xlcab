@@ -1,8 +1,8 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, ParseIntPipe, ParseUUIDPipe, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, ParseIntPipe, ParseUUIDPipe, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { AuditService } from '../audit/audit.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { Roles, RolesGuard } from '../auth/guards/roles.guard';
-import { BookLineDto, LineParcelDto, InviteBackupDto, JustifyDto, QrCheckInDto, ReasonDto, VehicleChoiceDto } from './dto';
+import { BookLineDto, LineParcelDto, InviteBackupDto, JustifyDto, QrCheckInDto, ReasonDto, SeatMapQueryDto, VehicleChoiceDto } from './dto';
 import { LineBookingsService } from './line-bookings.service';
 import { RescueService } from './rescue.service';
 
@@ -27,10 +27,10 @@ export class LineBookingsController {
     return this.bookings.bookParcel(req.user.sub, dto);
   }
 
-  /** Sièges déjà pris sur un départ (numéros seulement). */
+  /** Sièges déjà pris sur le trajet du passager (numéros seulement). */
   @Get('seats/:departureId')
-  seatMap(@Param('departureId', ParseUUIDPipe) departureId: string) {
-    return this.bookings.seatMap(departureId);
+  seatMap(@Param('departureId', ParseUUIDPipe) departureId: string, @Query() q: SeatMapQueryDto) {
+    return this.bookings.seatMap(departureId, q.boardStopId, q.alightStopId);
   }
 }
 

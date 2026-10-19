@@ -922,9 +922,17 @@ model LineSeat {
   departureId String
   seatNumber  Int
   tripId      String
+  // Revente en cours de trajet (src/operators/seat-legs.ts) : le siège n'est occupé que
+  // du point fromIndex au point toIndex du départ (départ, arrêts, arrivée) ; toIndex
+  // null = jusqu'à l'arrivée (ventes antérieures). Le même siège peut donc être vendu
+  // plusieurs fois sur des tronçons qui ne se chevauchent pas : plus de contrainte
+  // d'unicité, les ventes d'un départ sont sérialisées par un verrou sur sa ligne
+  // (LinesService.sellSegmentSeats).
+  fromIndex   Int      @default(0)
+  toIndex     Int?
   createdAt   DateTime @default(now())
 
-  @@unique([departureId, seatNumber])
+  @@index([departureId, seatNumber])
   @@index([tripId])
 }
 

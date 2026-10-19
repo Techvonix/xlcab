@@ -204,7 +204,7 @@ export function memoryPrisma() {
     savedAddress: new Table(() => ({ createdAt: new Date() })),
     userPreference: new Table(() => ({ notifyPush: true, notifyEmail: true, notifySms: false, marketing: false, autoShareTrips: false, preferWomanDriver: false, updatedAt: new Date() })),
     trustedContact: new Table(() => ({ createdAt: new Date() })),
-    lineSeat: new Table(() => ({ createdAt: new Date() })),
+    lineSeat: new Table(() => ({ fromIndex: 0, toIndex: null, createdAt: new Date() })),
     meetingPoint: new Table(() => ({ instructions: null, transit: null, jurisdiction: 'FR', active: true, createdAt: new Date(), updatedAt: new Date() })),
     lineStop: new Table(),
     dashcamCharterAcceptance: new Table(() => ({ acceptedAt: new Date() })),

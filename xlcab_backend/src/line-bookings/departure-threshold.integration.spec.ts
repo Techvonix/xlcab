@@ -464,6 +464,73 @@ describe('Seuil de départ garanti (intégration)', () => {
       expect(mine.body.find((l: any) => l.id === res.body.id).stops).toHaveLength(1);
     });
 
+    it('revente en cours de trajet : les places quittées à Clermont se revendent jusqu’à Limoges, sans survente', async () => {
+      const res = await publish({ seats: 2 });
+      const departureId = res.body.departure.id;
+      const stopId = db.lineStop.rows.find((x: any) => x.lineId === res.body.id).id;
+      const book = (pax: string, body: Record<string, unknown>) =>
+        http().post('/api/v1/lines/bookings').set('Authorization', as(pax, 'passenger')).send({ departureId, ...body });
+      const seatsTaken = async (query: Record<string, string> = {}) =>
+        (await http().get(`/api/v1/lines/bookings/seats/${departureId}`).set('Authorization', as(NINA, 'passenger')).query(query)).body.taken;
+
+      // Léa prend les 2 places jusqu'à Clermont.
+      const lea = await book(LEA, { seats: 2, alightStopId: stopId });
+      expect(lea.status).toBe(201);
+      expect(lea.body.seatNumbers).toEqual([1, 2]);
+      expect(departure2(departureId).seatsBooked).toBe(2);
+
+      // Plus rien de Lyon à Limoges, mais les 2 places sont à vendre de Clermont à Limoges.
+      expect((await searchFrom(LYON, LIMOGES)).body.find((r: any) => r.departureId === departureId)).toBeUndefined();
+      const after = (await searchFrom(CLERMONT, LIMOGES, 2)).body.find((r: any) => r.departureId === departureId);
+      expect(after).toMatchObject({ seatsLeft: 2, unitPriceCents: 1200 });
+      expect(await seatsTaken()).toEqual([1, 2]);
+      expect(await seatsTaken({ boardStopId: stopId })).toEqual([]); // libres à partir de Clermont
+
+      // Nina reprend les mêmes sièges à Clermont ; à bord, jamais plus de 2 passagers.
+      const nina = await book(NINA, { seats: 2, boardStopId: stopId, seatNumbers: [2, 1] });
+      expect(nina.status).toBe(201);
+      expect(nina.body.seatNumbers).toEqual([1, 2]);
+      expect(departure2(departureId).seatsBooked).toBe(2);
+      expect(db.lineSeat.rows.filter((s: any) => s.departureId === departureId && s.seatNumber === 1)).toHaveLength(2);
+
+      // Plus de place nulle part : ni avant Clermont, ni après.
+      expect((await book(THOMAS, { seats: 1, alightStopId: stopId })).status).toBe(409);
+      expect((await book(THOMAS, { seats: 1, boardStopId: stopId })).status).toBe(409);
+      expect(tripsOf(departureId).filter((t: any) => t.passengerId === THOMAS)).toHaveLength(0);
+
+      // La liste d'embarquement : Léa descend à Clermont, Nina y monte, sur les mêmes sièges.
+      const manifest = await http().get(`/api/v1/operators/me/departures/${departureId}/manifest`).set('Authorization', as(SAMI, 'driver'));
+      expect(manifest.body.passengers).toEqual(expect.arrayContaining([
+        expect.objectContaining({ seatNumbers: [1, 2], dropoff: 'Gare routière, Clermont-Ferrand' }),
+        expect.objectContaining({ seatNumbers: [1, 2], pickup: 'Gare routière, Clermont-Ferrand' }),
+      ]));
+
+      // Nina annule : ses places reviennent à la vente sur son seul tronçon.
+      const cancel = await http().post(`/api/v1/trips/${nina.body.tripId}/cancel`).set('Authorization', as(NINA, 'passenger')).send({ reason: 'Changement de programme' });
+      expect(cancel.status).toBe(200);
+      expect(await seatsTaken({ boardStopId: stopId })).toEqual([]);
+      expect(await seatsTaken()).toEqual([1, 2]);
+      expect(departure2(departureId).seatsBooked).toBe(2);
+      expect((await book(THOMAS, { seats: 1, boardStopId: stopId })).body.seatNumbers).toEqual([1]);
+    });
+
+    it('seuil de départ : chaque voyageur compte, même sur un tronçon (décision du 2026-10-19)', async () => {
+      const res = await publish({ seats: 3, minPassengers: 3 });
+      const departureId = res.body.departure.id;
+      const stopId = db.lineStop.rows.find((x: any) => x.lineId === res.body.id).id;
+      const book = (pax: string, body: Record<string, unknown>) =>
+        http().post('/api/v1/lines/bookings').set('Authorization', as(pax, 'passenger')).send({ departureId, ...body });
+
+      expect((await book(LEA, { seats: 2, alightStopId: stopId })).status).toBe(201);
+      const pending = (await searchFrom(CLERMONT, LIMOGES)).body.find((r: any) => r.departureId === departureId);
+      expect(pending.guarantee).toMatchObject({ guaranteed: false, missingPassengers: 1 });
+
+      // 3e voyageur, de Clermont à Limoges : jamais plus de 2 à bord, mais 3 voyageurs → départ confirmé.
+      expect((await book(NINA, { seats: 1, boardStopId: stopId })).status).toBe(201);
+      expect(departure2(departureId).seatsBooked).toBe(2);
+      expect(departure2(departureId).guaranteedAt).toEqual(expect.any(Date));
+    });
+
     const departure2 = (departureId: string) => db.lineDeparture.rows.find((d: any) => d.id === departureId);
   });
 

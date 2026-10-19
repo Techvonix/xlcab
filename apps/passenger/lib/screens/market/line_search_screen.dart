@@ -293,7 +293,7 @@ class _BookLineSheetState extends ConsumerState<BookLineSheet> {
       router.push(AppRoutes.confirmationFor(tripId));
     } on ApiException catch (e) {
       // Siège pris entre-temps : le plan est rechargé pour montrer les sièges restants.
-      ref.invalidate(seatMapProvider(widget.result.departureId));
+      ref.invalidate(seatMapProvider((departureId: widget.result.departureId, boardStopId: widget.result.board?.stopId, alightStopId: widget.result.alight?.stopId)));
       if (mounted) {
         setState(() {
           _error = e.message;
@@ -325,7 +325,7 @@ class _BookLineSheetState extends ConsumerState<BookLineSheet> {
     } on ApiException {
       // Sans paiement, la réservation tombe d'elle-même au bout de 30 minutes.
     }
-    ref.invalidate(seatMapProvider(widget.result.departureId));
+    ref.invalidate(seatMapProvider((departureId: widget.result.departureId, boardStopId: widget.result.board?.stopId, alightStopId: widget.result.alight?.stopId)));
     if (mounted) {
       setState(() {
         _error = result.outcome == PaymentSheetOutcome.canceled ? l10n.mkcPaiementAbandonne : (result.message ?? l10n.paiementRefuse);
@@ -358,6 +358,8 @@ class _BookLineSheetState extends ConsumerState<BookLineSheet> {
           if (r.perSeat)
             SeatPicker(
               departureId: r.departureId,
+              boardStopId: r.board?.stopId,
+              alightStopId: r.alight?.stopId,
               count: _seats,
               selected: _picked,
               onChanged: (seats) => setState(() => _picked = seats),

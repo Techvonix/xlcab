@@ -171,9 +171,16 @@ class MarketService {
         return LineParcelBooking.fromJson(res.data);
       });
 
-  /// Sièges déjà pris sur un départ (choix du siège à la réservation).
-  Future<SeatMap> seatMap(String departureId) => guardOperatorCall(() async {
-        final res = await _dio.get<Map<String, dynamic>>('/api/v1/lines/bookings/seats/${Uri.encodeComponent(departureId)}');
+  /// Sièges déjà pris sur le trajet du passager (choix du siège à la réservation) :
+  /// une place quittée avant la montée, ou prise après la descente, est libre.
+  Future<SeatMap> seatMap(String departureId, {String? boardStopId, String? alightStopId}) => guardOperatorCall(() async {
+        final res = await _dio.get<Map<String, dynamic>>(
+          '/api/v1/lines/bookings/seats/${Uri.encodeComponent(departureId)}',
+          queryParameters: {
+            if (boardStopId != null) 'boardStopId': boardStopId,
+            if (alightStopId != null) 'alightStopId': alightStopId,
+          },
+        );
         return SeatMap.fromJson(res.data);
       });
 

@@ -5,6 +5,7 @@ import { TIMEZONES, addDays, isoWeekday, localDateOf, localTimeOf, minutesOf, zo
 import { NotificationsService } from '../notifications/notifications.service';
 import { haversineKm } from '../parcels/parcels.constants';
 import { RoutePoint, StopInput, checkStops, pointView, routePoints, segmentFare } from './line-stops';
+import { SeatSpan, freeOnSegment, legCount, peakLoad, pickSeats } from './seat-legs';
 import { PayoutAccountsService } from '../payouts/payout-accounts';
 import { PrismaService } from '../prisma/prisma.service';
 import {
@@ -524,13 +525,9 @@ export class LinesService {
   async reserveSeats(departureId: string, seats: number, now = new Date()) {
     const d = await this.prisma.lineDeparture.findUnique({ where: { id: departureId } });
     const line = d && (await this.prisma.recurringLine.findUnique({ where: { id: d.lineId } }));
-    const deadline = new Date(now.getTime() + LINE_BOOKING_LEAD_MIN * 60_000);
-    if (!d || !line || line.status !== 'active' || d.status !== 'open' || new Date(d.departureAt) <= deadline) {
-      throw new ConflictException('Ce départ n’est plus disponible');
-    }
+    if (!d || !line) throw new ConflictException('Ce départ n’est plus disponible');
+    await this.assertOnSale(d, line, now);
     if (!bookable(d, seats)) throw new ConflictException('Plus assez de places sur ce départ');
-    // Seuil non atteint à l'échéance : le départ va être annulé, il ne se vend plus.
-    if (!(await this.sellable(d, line, now))) throw new ConflictException('Ce départ n’est plus disponible');
     const { count } =
       d.pricingMode === 'per_vehicle'
         ? await this.prisma.lineDeparture.updateMany({
@@ -572,11 +569,85 @@ export class LinesService {
     await this.prisma.lineDeparture.update({ where: { id: departureId }, data: { parcelsBooked: Math.max(0, (d.parcelsBooked ?? 0) - 1) } });
   }
 
-  /** Rend des places (annulation d'une réservation) et libère ses sièges numérotés. */
+  /** Départ en vente : ligne active, départ confirmé, pas trop tard, seuil pas manqué. */
+  async assertOnSale(d: Departure, line: Line, now = new Date()) {
+    const deadline = new Date(now.getTime() + LINE_BOOKING_LEAD_MIN * 60_000);
+    if (line.status !== 'active' || d.status !== 'open' || new Date(d.departureAt) <= deadline) {
+      throw new ConflictException('Ce départ n’est plus disponible');
+    }
+    // Seuil non atteint à l'échéance : le départ va être annulé, il ne se vend plus.
+    if (!(await this.sellable(d, line, now))) throw new ConflictException('Ce départ n’est plus disponible');
+  }
+
+  /**
+   * Vente à la place sur un tronçon (seat-legs.ts) : choisit les sièges libres de
+   * `from` à `to` (ou vérifie ceux demandés), AVANT toute écriture, dans la
+   * transaction de la réservation. La première écriture verrouille la ligne du départ :
+   * deux ventes simultanées sur le même départ passent l'une après l'autre, la
+   * seconde voit les sièges de la première. Les sièges sont enregistrés ensuite par
+   * `recordSeats` (une fois la course créée), qui met à jour la charge du départ.
+   */
+  async pickSegmentSeats(tx: any, departureId: string, seats: number, from: number, to: number, routeLength: number, wanted?: number[]) {
+    const { count } = await tx.lineDeparture.updateMany({ where: { id: departureId, status: 'open' }, data: { seatsBooked: { increment: 0 } } });
+    if (count === 0) throw new ConflictException('Ce départ n’est plus disponible');
+    const d = await tx.lineDeparture.findUnique({ where: { id: departureId } });
+    const spans: SeatSpan[] = await tx.lineSeat.findMany({ where: { departureId }, select: { seatNumber: true, fromIndex: true, toIndex: true } });
+    const legs = legCount(routeLength);
+    const picked = pickSeats(spans, sellableSeats(d, spans, legs), seats, from, to, legs, wanted);
+    if (picked === 'taken') throw new ConflictException('Ce siège vient d’être pris : choisissez-en un autre');
+    if (picked === 'full') throw new ConflictException('Plus assez de places sur ce départ');
+    return { numbers: picked, spans, unseated: unseated(d, spans, legs) };
+  }
+
+  /** Enregistre les sièges vendus d'une course et la nouvelle charge du départ (le plus de passagers à bord en même temps). */
+  async recordSeats(
+    tx: any,
+    departureId: string,
+    tripId: string,
+    picked: { numbers: number[]; spans: SeatSpan[]; unseated: number },
+    from: number,
+    to: number,
+    routeLength: number,
+  ) {
+    // Trajet jusqu'à l'arrivée : toIndex null, comme les ventes d'avant la revente.
+    const toIndex = to >= routeLength - 1 ? null : to;
+    for (const seatNumber of picked.numbers) await tx.lineSeat.create({ data: { departureId, seatNumber, tripId, fromIndex: from, toIndex } });
+    const spans = [...picked.spans, ...picked.numbers.map((seatNumber) => ({ seatNumber, fromIndex: from, toIndex }))];
+    await tx.lineDeparture.update({ where: { id: departureId }, data: { seatsBooked: picked.unseated + peakLoad(spans, legCount(routeLength)) } });
+  }
+
+  /** Sièges vendus des départs donnés (recherche : places libres sur le tronçon demandé). */
+  async seatSpansOf(departureIds: string[]): Promise<Map<string, SeatSpan[]>> {
+    const rows = departureIds.length
+      ? await this.prisma.lineSeat.findMany({ where: { departureId: { in: departureIds } }, select: { departureId: true, seatNumber: true, fromIndex: true, toIndex: true } })
+      : [];
+    const out = new Map<string, SeatSpan[]>();
+    for (const r of rows) out.set(r.departureId, [...(out.get(r.departureId) ?? []), r]);
+    return out;
+  }
+
+  /**
+   * Rend des places (annulation d'une réservation). Vente à la place : les sièges de
+   * la course sont libérés et la charge recalculée (la place revient à la vente sur
+   * son seul tronçon). Véhicule privatisé ou réservation sans siège : compteur.
+   */
   async releaseSeats(departureId: string, seats: number, tripId?: string) {
-    if (tripId) await this.prisma.lineSeat.deleteMany({ where: { departureId, tripId } });
     const d = await this.prisma.lineDeparture.findUnique({ where: { id: departureId } });
-    if (!d) return;
+    const line = d && (await this.prisma.recurringLine.findUnique({ where: { id: d.lineId } }));
+    if (!d || !line) return;
+    if (tripId && d.pricingMode === 'per_seat') {
+      const all: (SeatSpan & { tripId: string })[] = await this.prisma.lineSeat.findMany({
+        where: { departureId }, select: { seatNumber: true, fromIndex: true, toIndex: true, tripId: true },
+      });
+      if (all.some((x) => x.tripId === tripId)) {
+        const legs = legCount((await this.routeOf(d, line)).length);
+        const before = unseated(d, all, legs);
+        await this.prisma.lineSeat.deleteMany({ where: { departureId, tripId } });
+        const left = all.filter((x) => x.tripId !== tripId);
+        await this.prisma.lineDeparture.update({ where: { id: departureId }, data: { seatsBooked: before + peakLoad(left, legs) } });
+        return;
+      }
+    }
     await this.prisma.lineDeparture.update({
       where: { id: departureId },
       data: { seatsBooked: d.pricingMode === 'per_vehicle' ? 0 : Math.max(0, d.seatsBooked - seats) },
@@ -619,7 +690,23 @@ export class LinesService {
     return now < thresholdDeadline(new Date(d.departureAt), await this.thresholdHours(line.jurisdiction));
   }
 
-  /** Places des réservations confirmées (payées) du départ. */
+  /**
+   * Voyageurs des réservations retenues (confirmées ou en attente de paiement) de chaque
+   * départ : chaque voyageur compte, même sur un tronçon (décision du 2026-10-19).
+   */
+  async travellersOf(departureIds: string[]): Promise<Map<string, number>> {
+    const trips = departureIds.length
+      ? await this.prisma.trip.findMany({
+          where: { lineDepartureId: { in: departureIds }, type: 'passenger', status: { in: [...SEATED, 'awaiting_payment'] } },
+          include: { passengerBooking: true },
+        })
+      : [];
+    const out = new Map<string, number>();
+    for (const t of trips) out.set(t.lineDepartureId!, (out.get(t.lineDepartureId!) ?? 0) + (t.passengerBooking?.seats ?? 0));
+    return out;
+  }
+
+  /** Places des réservations confirmées (payées) du départ : chaque voyageur compte, même sur un tronçon. */
   async seatedPassengers(departureId: string): Promise<number> {
     const trips = await this.prisma.trip.findMany({
       where: { lineDepartureId: departureId, status: { in: SEATED } },
@@ -719,6 +806,11 @@ export class LinesService {
     const userMap = byId(users);
     const vehicleMap = byId(vehicles);
     const stopsMap = await this.stopsByLine(lines.map((l) => l.id));
+    // Vente à la place : sièges vendus (places libres sur le tronçon demandé) et
+    // voyageurs confirmés (seuil : chaque voyageur compte, même sur un tronçon).
+    const perSeatIds = departures.filter((d: Departure) => d.pricingMode === 'per_seat').map((d: Departure) => d.id);
+    const spansMap = await this.seatSpansOf(perSeatIds);
+    const travellersMap = await this.travellersOf(departures.filter((d: Departure) => d.minPassengers !== null && !d.guaranteedAt).map((d: Departure) => d.id));
 
     const from = { lat: q.fromLat, lng: q.fromLng };
     const to = { lat: q.toLat, lng: q.toLng };
@@ -737,7 +829,8 @@ export class LinesService {
         // Colis : un emplacement libre et un prix fixé par l'opérateur.
         if (!line.parcelSlots || !line.parcelPriceCents || (d.parcelsBooked ?? 0) >= line.parcelSlots) continue;
       } else {
-        if (!bookable(d, q.seats)) continue;
+        // Vente à la place : places vérifiées plus bas, sur le tronçon du passager.
+        if (d.pricingMode === 'per_vehicle' && !bookable(d, q.seats)) continue;
         if ((q.luggage ?? 0) > line.luggage) continue;
       }
       if (!(await this.sellable(d, line, now))) continue;
@@ -757,6 +850,12 @@ export class LinesService {
         }
       }
       if (!best) continue;
+      // Places libres de la montée à la descente : une place quittée à un arrêt se revend.
+      const free =
+        d.pricingMode === 'per_seat'
+          ? freeOnSegment(spansMap.get(d.id) ?? [], sellableSeats(d, spansMap.get(d.id) ?? [], legCount(route.length)), best.i, best.j, legCount(route.length))
+          : null;
+      if (!q.parcels && free !== null && free < q.seats) continue;
       const { pickupKm, dropoffKm } = best;
       const board = route[best.i];
       const alight = route[best.j];
@@ -772,7 +871,7 @@ export class LinesService {
       const diffMin = q.time ? minutesOf(time) - minutesOf(q.time) : 0;
       if (Math.abs(diffMin) > flex) continue;
 
-      const seatsLeft = d.seatsTotal - d.seatsBooked;
+      const seatsLeft = free ?? d.seatsTotal - d.seatsBooked;
       const reasons: MatchReason[] = [
         { code: 'pickup', km: round1(pickupKm) },
         { code: 'dropoff', km: round1(dropoffKm) },
@@ -813,7 +912,8 @@ export class LinesService {
         // Seuil de départ garanti : « confirmé » ou « encore N passagers », et l'échéance.
         guarantee: {
           ...(await this.guaranteeOf(d, line)),
-          missingPassengers: d.minPassengers !== null && !d.guaranteedAt ? Math.max(0, d.minPassengers - d.seatsBooked) : 0,
+          missingPassengers:
+            d.minPassengers !== null && !d.guaranteedAt ? Math.max(0, d.minPassengers - (travellersMap.get(d.id) ?? 0)) : 0,
         },
         reasons,
         rank: { diffMin: Math.abs(diffMin), pickupKm, price: total },
@@ -1059,3 +1159,13 @@ const departureView = (d: Departure) => ({
   thresholdMissed: Boolean(d.thresholdMissedAt),
   parcelsBooked: d.parcelsBooked ?? 0,
 });
+
+/**
+ * Places comptées sur le départ sans siège enregistré (réservations d'avant le choix des
+ * sièges, retenues directes) : considérées occupées sur tout le trajet, jamais revendues.
+ */
+const unseated = (d: { seatsBooked: number }, spans: SeatSpan[], legs: number) => Math.max(0, d.seatsBooked - peakLoad(spans, legs));
+
+/** Sièges vendables d'un départ à la place : capacité moins les places sans siège. */
+const sellableSeats = (d: { seatsTotal: number; seatsBooked: number }, spans: SeatSpan[], legs: number) =>
+  Math.max(0, d.seatsTotal - unseated(d, spans, legs));

@@ -190,6 +190,8 @@ void main() {
 
       await tester.tap(find.text('Réserver'));
       await tester.pumpAndSettle();
+      // Plan des sièges sur le tronçon du passager : une place quittée avant sa montée est libre.
+      expect(market.seatMapCalls.last, ('d1', 's1', null));
       await tester.tap(find.textContaining('Confirmer ·'));
       await tester.pumpAndSettle();
       expect(market.bookedStops, ('s1', null));

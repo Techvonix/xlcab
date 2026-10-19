@@ -199,3 +199,16 @@ export class PenaltyDecisionDto {
   @MaxLength(500, { message: 'Motif limité à 500 caractères' })
   reason!: string;
 }
+
+/** Plan des sièges sur le trajet du passager (revente en cours de trajet). */
+export class SeatMapQueryDto {
+  /** Arrêt de montée (absent = départ de la ligne). */
+  @IsOptional()
+  @IsUUID('4', { message: 'Arrêt invalide' })
+  boardStopId?: string;
+
+  /** Arrêt de descente (absent = arrivée de la ligne). */
+  @IsOptional()
+  @IsUUID('4', { message: 'Arrêt invalide' })
+  alightStopId?: string;
+}

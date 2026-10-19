@@ -580,8 +580,20 @@ référence — les exigences de la Partie 8 priment.
   Réservation : `boardStopId`/`alightStopId` (absents = extrémités ; ordre vérifié, 400 sinon ; refusés sur un
   véhicule privatisé) → prix du tronçon × places, course aux adresses des points, `scheduledAt` = heure de montée,
   `PassengerBooking.boardStopId/alightStopId` ; `/trips/:id` → `meetingPoint` (nom, adresse, consignes, transports) ;
-  liste d'embarquement → `pickup`/`dropoff`/`pickupAt`. LIMITE v1 (à faire évoluer) : une place vendue sur un tronçon
-  reste occupée sur tout le trajet (pas de revente de la place après la descente) ; le départ démarre en bloc.
+  liste d'embarquement → `pickup`/`dropoff`/`pickupAt`. Le départ démarre en bloc.
+  REVENTE EN COURS DE TRAJET (2026-10-19, migration `line_seat_segments`) : `LineSeat.fromIndex/toIndex` (points du
+  départ ; toIndex null = jusqu'à l'arrivée), plus d'unicité (départ, siège) ; `src/operators/seat-legs.ts` (pur, testé) :
+  un siège n'est occupé que sur son tronçon, places libres = sièges libres DE BOUT EN BOUT (on ne change pas de siège en
+  route), attribution auto en préférant le siège qu'un voyageur quitte à la montée. Vente à la place :
+  `LinesService.assertOnSale` puis, dans la transaction de la réservation, `pickSegmentSeats` (verrou du départ par
+  un updateMany sans effet, choix AVANT toute écriture — le faux Prisma n'annule pas les transactions) et
+  `recordSeats` ; `seatsBooked` = plus forte charge (+ places comptées sans siège, `unseated`, prudence : occupées
+  sur tout le trajet) ; `releaseSeats(…, tripId)` recalcule. Véhicule privatisé : compteur inchangé (`reserveSeats`).
+  Recherche : places libres sur le tronçon demandé ; `GET /lines/bookings/seats/:id?boardStopId&alightStopId`.
+  Seuil : CHAQUE VOYAGEUR COMPTE, même sur un tronçon (décision du 2026-10-19 ; `travellersOf` pour
+  `missingPassengers`). Colis : emplacements toujours comptés sur tout le trajet. App passager : `SeatMapKey`
+  (départ, montée, descente) pour `seatMapProvider`. Tests : `seat-legs.spec.ts`, « revente en cours de trajet » de
+  `departure-threshold.integration.spec.ts`.
   Admin : page « Points de rencontre » (`features/meeting-points/MeetingPointsPage.tsx`, route `/points-de-rencontre`,
   clés i18n `mp*`, test `src/features/meeting-points.test.tsx`). Apps : `core/models/meeting_point.dart` (`MeetingPoint`,
   `LineStopView`, `StopDraft`, `RoutePointView`) ; chauffeur : `screens/operator/stops_editor.dart` (`StopsEditor` +

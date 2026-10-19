@@ -6,9 +6,13 @@ import 'package:xlcab_core/services/market_service.dart';
 import 'package:xlcab_ui/theme/app_spacing.dart';
 import 'package:xlcab_ui/theme/app_typography.dart';
 
-/// Sièges déjà pris sur un départ.
-final seatMapProvider = FutureProvider.autoDispose.family<SeatMap, String>(
-  (ref, departureId) => ref.watch(marketServiceProvider).seatMap(departureId),
+/// Trajet du passager sur un départ : sans arrêt indiqué, du départ à l'arrivée.
+typedef SeatMapKey = ({String departureId, String? boardStopId, String? alightStopId});
+
+/// Sièges déjà pris sur le trajet du passager (revente en cours de trajet : une place
+/// quittée avant sa montée est libre).
+final seatMapProvider = FutureProvider.autoDispose.family<SeatMap, SeatMapKey>(
+  (ref, key) => ref.watch(marketServiceProvider).seatMap(key.departureId, boardStopId: key.boardStopId, alightStopId: key.alightStopId),
 );
 
 /// Choix du siège sur un départ de ligne vendu à la place : une grille de
@@ -18,9 +22,23 @@ final seatMapProvider = FutureProvider.autoDispose.family<SeatMap, String>(
 /// Les sièges sont présentés par numéro, pas selon un plan du véhicule :
 /// XLCAB ne connaît pas la disposition intérieure de chaque navette.
 class SeatPicker extends ConsumerWidget {
-  const SeatPicker({super.key, required this.departureId, required this.count, required this.selected, required this.onChanged});
+  const SeatPicker({
+    super.key,
+    required this.departureId,
+    this.boardStopId,
+    this.alightStopId,
+    required this.count,
+    required this.selected,
+    required this.onChanged,
+  });
 
   final String departureId;
+
+  /// Montée et descente du passager (null : extrémités de la ligne).
+  final String? boardStopId;
+  final String? alightStopId;
+
+  SeatMapKey get mapKey => (departureId: departureId, boardStopId: boardStopId, alightStopId: alightStopId);
 
   /// Nombre de places réservées : autant de sièges à choisir.
   final int count;
@@ -43,7 +61,7 @@ class SeatPicker extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final scheme = Theme.of(context).colorScheme;
     final muted = scheme.onSurface.withValues(alpha: 0.75);
-    final map = ref.watch(seatMapProvider(departureId));
+    final map = ref.watch(seatMapProvider(mapKey));
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
