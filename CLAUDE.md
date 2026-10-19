@@ -625,6 +625,11 @@ référence — les exigences de la Partie 8 priment.
   coordonnées du calendrier valables pour octobre 2026 tournées le 18. Favoris de démo ajoutés : Clermont pour Léa,
   Lyon et Limoges pour Sami (sans clé Google, pas d'autre saisie d'adresse). Si l'enregistrement s'arrête pendant un
   chargement réseau, enregistrer un court complément et le raccorder (`-f concat -c copy`).
+  Chapitre « caméra embarquée » ajouté à la fin des deux vidéos le 2026-10-19 (aussi seul : `xlcab-camera-chauffeur-fr.mp4`
+  58 s, `xlcab-camera-passager-fr.mp4` 25 s ; script `scratchpad/demo/takes3.sh c1|c2`). Côté chauffeur, c'est NADIA
+  (compte 2) : Sami n'a aucun trajet passé sur lequel poser un incident. Préparation : retirer son acceptation de la charte
+  et créer un `Incident` avec `footageRequestedAt` / `footageDriverId` sur un trajet PASSÉ (sinon « incident sur votre
+  trajet de demain »), relancer l'appli (l'onglet en mémoire ne relit pas), puis remettre la charte acceptée après la prise.
 - Caméra embarquée, niveau 2 (étape 5, 2026-10-18, migration `dashcam_charter`) : charte `CHARTE_CAMERA_EMBARQUEE.md`
   (version `2026-10-18`, À FAIRE VALIDER par le juriste : boucle 72 h, sans son, habitacle, AIPD, responsable du
   traitement…). L'appli ne filme rien : l'enregistrement reste dans la caméra du véhicule. `src/dashcam/dashcam.ts` :
