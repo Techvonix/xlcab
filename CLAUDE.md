@@ -205,7 +205,9 @@ référence — les exigences de la Partie 8 priment.
   providers `providers/operator_provider.dart` (dont `timePickerProvider` / `datePickerProvider` injectables),
   écrans `lib/screens/operator/` : `my_lines_screen` (bannière profil, « J'assure mes départs des 7 prochains
   jours »), `line_form_screen`, `line_detail_screen` (départs, jours fermés, réserves n° 2/3 par e-mail),
-  `departure_screen` (liste d'embarquement, « Je suis en route », scan QR, démarrer / terminer, annuler →
+  `departure_screen` (liste d'embarquement, « Je suis en route » — bouton affiché seulement à partir de
+  `Manifest.readyOpensAt` = départ − `READY_WINDOW_MIN` (180 min, `protocol.constants.ts`, refusé avant par le
+  serveur), heure d'ouverture affichée avant (2026-10-19, clé `opEnRouteOuvertA`) —, scan QR, démarrer / terminer, annuler →
   protocole), `operator_profile_screen` (CG opérateur : `operatorTermsFor`, URL à confirmer), `market_feed_screen`
   (demandes + mes propositions, `ProposeSheet`), `offer_messages_sheet`, `cancellations_screen`. Mode chauffeur :
   `OperatorSection` en haut (reprises urgentes, invitations de réserve, mes départs de ligne — seulement s'il y en
