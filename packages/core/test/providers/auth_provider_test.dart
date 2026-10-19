@@ -113,10 +113,31 @@ void main() {
   });
 
   test('session expirée : déconnexion avec message', () async {
+    storage
+      ..access = fakeJwt({'sub': 'u1', 'role': 'passenger'})
+      ..refresh = 'r';
+    refresher.result = RefreshResult.offline;
     final c = makeContainer();
     await settle();
     await c.read(authProvider.notifier).sessionExpired();
+    expect(c.read(authProvider).isAuthenticated, isFalse);
     expect(c.read(authProvider).notice, 'Votre session a expiré. Reconnectez-vous.');
+  });
+
+  test('déconnexion volontaire : jamais « session expirée », même si un écran reçoit un 401', () async {
+    storage
+      ..access = fakeJwt({'sub': 'u1', 'role': 'driver'})
+      ..refresh = 'r';
+    refresher.result = RefreshResult.offline;
+    final c = makeContainer();
+    await settle();
+    final auth = c.read(authProvider.notifier);
+    // Pendant la révocation, puis juste après : requêtes d'écrans encore ouverts.
+    service.duringLogout = auth.sessionExpired;
+    await auth.signOut();
+    await auth.sessionExpired();
+    expect(c.read(authProvider).isAuthenticated, isFalse);
+    expect(c.read(authProvider).notice, isNull);
   });
 
   group('rafraîchissement automatique (intercepteur dio)', () {

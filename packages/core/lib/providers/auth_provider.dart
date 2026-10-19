@@ -94,12 +94,21 @@ class AuthNotifier extends StateNotifier<AuthState> {
     state = AuthState.fromAccessToken(t.accessToken);
   }
 
+  /// Vrai pendant une déconnexion volontaire : les requêtes encore en vol
+  /// reçoivent alors un 401 (session révoquée) qui n'est pas une expiration.
+  bool _signingOut = false;
+
   /// Déconnexion volontaire : révocation de la session de cet appareil.
   Future<void> signOut() async {
-    final access = await _tokens.readAccessToken();
-    if (access != null) await _service.logout(access);
-    await _tokens.clear();
-    state = const AuthState(isLoading: false);
+    _signingOut = true;
+    try {
+      final access = await _tokens.readAccessToken();
+      if (access != null) await _service.logout(access);
+      await _tokens.clear();
+      state = const AuthState(isLoading: false);
+    } finally {
+      _signingOut = false;
+    }
   }
 
   /// Compte supprimé (RGPD) : le serveur a déjà révoqué toutes les sessions.
@@ -109,7 +118,10 @@ class AuthNotifier extends StateNotifier<AuthState> {
   }
 
   /// Le serveur a refusé le refresh token (révoqué, expiré).
+  /// Sans effet pendant ou après une déconnexion volontaire : les écrans encore ouverts
+  /// peuvent recevoir un 401 juste après, et « session expirée » serait faux.
   Future<void> sessionExpired() async {
+    if (_signingOut || !state.isAuthenticated) return;
     await _tokens.clear();
     state = AuthState(isLoading: false, notice: l10n.votreSessionAExpireReconnectez);
   }

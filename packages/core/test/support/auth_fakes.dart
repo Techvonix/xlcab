@@ -60,8 +60,14 @@ class FakeAuthService extends AuthService {
     return next!;
   }
 
+  /// Appelé pendant la déconnexion (ex. : une requête en vol reçoit un 401).
+  Future<void> Function()? duringLogout;
+
   @override
-  Future<void> logout(String accessToken) async => loggedOutWith = accessToken;
+  Future<void> logout(String accessToken) async {
+    loggedOutWith = accessToken;
+    await duringLogout?.call();
+  }
 }
 
 class FakeTokenRefresher extends TokenRefresher {
