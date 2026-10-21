@@ -41,7 +41,8 @@ class AppTheme {
       onSecondaryContainer: isDark ? AppColors.onSelectionDark : AppColors.onSelectionLight,
       tertiary: AppColors.tertiary,
       onTertiary: Colors.white,
-      error: AppColors.error,
+      // Textes d'erreur lisibles (AA) : rouge foncé le jour, rouge vif la nuit (5,3 sur la nuit).
+      error: isDark ? AppColors.error : AppColors.errorOnLight,
       onError: Colors.white,
       surface: surface,
       onSurface: onSurface,

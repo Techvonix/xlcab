@@ -61,6 +61,9 @@ class AppColors {
   static const Color success = Color(0xFF4CAF50);
   static const Color warning = Color(0xFFFFC107);
   static const Color error = Color(0xFFF44336);
+  /// Rouge d'erreur des TEXTES du thème clair : #F44336 n'a qu'un contraste de 3,4 sur le
+  /// fond glacier (AA exige 4,5) ; #C62828 : 5,2 sur le fond, 5,6 sur une carte blanche.
+  static const Color errorOnLight = Color(0xFFC62828);
 
   // ── Thème clair « Orbite Jour » (par défaut depuis le 2026-10-12) ─────
   // Fond bleu glacier très clair, cartes blanches, bordures bleutées : lumineux
