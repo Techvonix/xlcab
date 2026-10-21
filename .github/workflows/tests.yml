@@ -63,6 +63,13 @@ jobs:
             echo "Pas de tests dans ce paquet." | tee "$RUNNER_TEMP/tests.log"
           fi
 
+      # Tests en échec publiés en annotations et dans le résumé du passage : lisibles sur la
+      # page du passage sans télécharger le journal (et sans être connecté à GitHub).
+      - name: Échecs en clair
+        if: failure()
+        run: |
+          [ -f "$RUNNER_TEMP/tests.log" ] && node .github/scripts/flutter-failures.js "$RUNNER_TEMP/tests.log" || true
+
       # Journal complet téléchargeable, même (surtout) quand des tests échouent.
       - name: Journal des tests
         if: always()

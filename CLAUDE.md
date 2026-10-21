@@ -502,8 +502,13 @@ référence — les exigences de la Partie 8 priment.
   Revenus → « Compte de versement et reversements » (tuile en 360 730, mêmes coordonnées en anglais) avec le
   bonus de reprise de démo, puis Profil. Volet de notifications resté ouvert après le mode Avion : le refermer par
   `adb shell cmd statusbar collapse` (jamais la touche Retour).
-- Tests automatiques (2026-10-13, `.github/workflows/tests.yml`) : dépôt PRIVÉ `https://github.com/Techvonix/xlcab`
-  (remote `origin`, branche `main`). GitHub Actions sur push / PR / lancement manuel : Flutter 3.47.5 (analyse +
+- Tests automatiques (2026-10-13, `.github/workflows/tests.yml`) : dépôt `https://github.com/Techvonix/xlcab`
+  (remote `origin`, branche `main`) — constaté PUBLIC le 2026-10-19 (lisible sans connexion ; aucun secret dans les
+  fichiers ni l'historique) ; repasser en privé = réglage du porteur de projet (Settings → Danger Zone). Poussées
+  du 14 au 19 octobre JAMAIS arrivées (21 commits) : toujours vérifier `git status -sb` (« ahead N ») après
+  « c'est poussé ». Échecs Flutter lisibles SANS connexion : étape « Échecs en clair »
+  (`.github/scripts/flutter-failures.js`) → annotations + résumé de la page du passage, lus par le navigateur intégré
+  (les journaux complets, eux, exigent d'être connecté). GitHub Actions sur push / PR / lancement manuel : Flutter 3.47.5 (analyse +
   tests de `packages/core`, `packages/ui`, `apps/passenger`, `apps/driver`, journal en artefact
   `journal-flutter-N`), serveur (Node 24 — Jest exige >= 24.9 pour require(esm) —, `npm ci`, `prisma generate`,
   tests, build), portails admin et entreprise. Aucun secret requis. TOUT EST VERT depuis le 3e passage
