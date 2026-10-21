@@ -511,8 +511,9 @@ référence — les exigences de la Partie 8 priment.
   (les journaux complets, eux, exigent d'être connecté). GitHub Actions sur push / PR / lancement manuel : Flutter 3.47.5 (analyse +
   tests de `packages/core`, `packages/ui`, `apps/passenger`, `apps/driver`, journal en artefact
   `journal-flutter-N`), serveur (Node 24 — Jest exige >= 24.9 pour require(esm) —, `npm ci`, `prisma generate`,
-  tests, build), portails admin et entreprise. Aucun secret requis. TOUT EST VERT depuis le 3e passage
-  (2026-10-13) : 188 tests passager, 92 chauffeur, 606 serveur, 46 admin, 42 entreprise. C'est désormais LE moyen
+  tests, build), portails admin et entreprise. Aucun secret requis. TOUT EST VERT au 7e passage
+  (2026-10-21, commit ed58205 : étapes 1 à 5 du modèle, revente des places, « Je suis en route », déconnexion) ;
+  seul échec rencontré : contraste du rouge d'erreur sur le thème clair (corrigé, `AppColors.errorOnLight`). C'est désormais LE moyen
   de faire tourner les tests Flutter (impossibles sur ce PC).
   `git push` est REFUSÉ à Claude par le garde-fou de l'application (sortie de données) : le porteur de projet le
   lance lui-même (bouton Run ou PowerShell ouvert dans le dossier du projet). Résultats : il colle la page, envoie une capture, ou
