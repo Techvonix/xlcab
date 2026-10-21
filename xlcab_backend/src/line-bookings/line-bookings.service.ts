@@ -453,6 +453,8 @@ export class LineBookingsService {
         origin: outbound ? line.originAddress : line.destinationAddress,
         destination: outbound ? line.destinationAddress : line.originAddress,
         passengers: active.reduce((n, t) => n + (t.passengerBooking?.seats ?? 0), 0),
+        // Revente en cours de trajet : plus de voyageurs que de places possible, jamais plus à bord.
+        onBoardMax: d.pricingMode === 'per_seat' ? d.seatsBooked : null,
         bookings: active.length - parcelsOnDeparture,
         parcels: parcelsOnDeparture,
         started: active.some((t) => t.status === TripStatus.STARTED),
@@ -493,6 +495,7 @@ export class LineBookingsService {
       // Ouverture de « Je suis en route » : l'appli masque le bouton avant.
       readyOpensAt: new Date(departure.departureAt.getTime() - READY_WINDOW_MIN * 60_000),
       seatsBooked: trips.reduce((n, t) => n + (t.passengerBooking?.seats ?? 0), 0),
+      onBoardMax: departure.pricingMode === 'per_seat' ? departure.seatsBooked : null,
       guarantee: await this.lines.guaranteeOf(departure, line),
       // Colis du départ : même fiche que la checklist des missions (QR, code de remise, photo).
       parcels: [...(await this.parcels.checklistFor(parcelTrips, showPhone ? new Set(parcelTrips) : new Set())).values()].flat(),

@@ -500,6 +500,10 @@ describe('Seuil de départ garanti (intégration)', () => {
 
       // La liste d'embarquement : Léa descend à Clermont, Nina y monte, sur les mêmes sièges.
       const manifest = await http().get(`/api/v1/operators/me/departures/${departureId}/manifest`).set('Authorization', as(SAMI, 'driver'));
+      // 4 voyageurs, jamais plus de 2 à bord : les deux chiffres sont donnés au chauffeur.
+      expect(manifest.body).toMatchObject({ seatsBooked: 4, onBoardMax: 2 });
+      const mine = await http().get('/api/v1/operators/me/assignments').set('Authorization', as(SAMI, 'driver'));
+      expect(mine.body.find((a: any) => a.departureId === departureId)).toMatchObject({ passengers: 4, onBoardMax: 2 });
       expect(manifest.body.passengers).toEqual(expect.arrayContaining([
         expect.objectContaining({ seatNumbers: [1, 2], dropoff: 'Gare routière, Clermont-Ferrand' }),
         expect.objectContaining({ seatNumbers: [1, 2], pickup: 'Gare routière, Clermont-Ferrand' }),

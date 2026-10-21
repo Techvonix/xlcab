@@ -218,6 +218,9 @@ void main() {
     testWidgets('place sur une ligne régulière : le retour ouvre la recherche de lignes', (tester) async {
       trips.tripDetail = locatedTrip(TripStatus.accepted, source: 'line');
       await pump(tester, initial: AppRoutes.confirmationFor('trip-paid'));
+      // Place de ligne réservée des jours à l'avance : jamais « Chauffeur en route ».
+      expect(find.text('Place réservée'), findsOneWidget);
+      expect(find.text('Chauffeur en route'), findsNothing);
       await tester.tap(find.text('Réserver le retour'));
       await tester.pumpAndSettle();
       expect(find.text('LIGNES : ${rouen.address} > ${paris.address} (2)'), findsOneWidget);

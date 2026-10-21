@@ -1148,5 +1148,7 @@
   "pcLigne": "Vehicle equipped with a dashcam (safety)",
   "pcExplication": "For everyone’s safety, the vehicle has a camera. The recording stays in the camera, without sound, and is erased automatically after 72 hours at most. It is only viewed after an SOS, a reported incident or a court request. Details and rights: privacy policy.",
   "pcCompris": "Got it",
-  "opEnRouteOuvertA": "“I’m on my way” opens 3 hours before departure, on {date}."
+  "opEnRouteOuvertA": "“I’m on my way” opens 3 hours before departure, on {date}.",
+  "opABordAuPlus": "at most {count} on board",
+  "lnPlaceReservee": "Seat booked"
 }

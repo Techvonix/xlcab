@@ -87,8 +87,9 @@ Future<void> pump(WidgetTester tester, Widget screen, {double height = 4200}) as
   await tester.pumpAndSettle();
 }
 
-Manifest manifest({bool ready = false, bool checkedIn = false, bool started = false, DepartureGuarantee? guarantee, String? tomPickup, List<ParcelTask> parcels = const [], DateTime? at}) => Manifest(
+Manifest manifest({bool ready = false, bool checkedIn = false, bool started = false, DepartureGuarantee? guarantee, String? tomPickup, List<ParcelTask> parcels = const [], DateTime? at, int? onBoardMax}) => Manifest(
       departureId: 'd1',
+      onBoardMax: onBoardMax,
       parcels: parcels,
       guarantee: guarantee,
       departureAt: at ?? DateTime(2026, 10, 12, 5),
@@ -315,6 +316,12 @@ void main() {
   });
 
   group('départ', () {
+    testWidgets('revente en cours de trajet : plus de voyageurs que de places, nombre maximal à bord affiché', (tester) async {
+      operators.currentManifest = manifest(onBoardMax: 3); // 5 voyageurs, 3 à bord au plus
+      await pump(tester, const DepartureScreen(departureId: 'd1'));
+      expect(find.text('5 passagers · 2 réservations · 3 à bord au plus'), findsOneWidget);
+    });
+
     testWidgets('plus de 3 h avant le départ : pas de « Je suis en route », seulement son heure d’ouverture', (tester) async {
       operators.currentManifest = manifest(); // départ dans 2 jours
       await pump(tester, const DepartureScreen(departureId: 'd1'));

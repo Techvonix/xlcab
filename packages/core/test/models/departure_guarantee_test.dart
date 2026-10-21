@@ -65,6 +65,18 @@ void main() {
     expect(json.containsKey('daysOfWeek') || json.containsKey('startDate') || json.containsKey('returnTime'), isFalse);
   });
 
+  test('revente en cours de trajet : « à bord au plus » seulement quand les voyageurs dépassent les places', () {
+    final resold = Manifest.fromJson({'departureId': 'd1', 'departureAt': '2026-10-23T06:00:00.000Z', 'seatsBooked': 8, 'onBoardMax': 7});
+    expect(resold.onBoardCap, 7);
+    final plain = Manifest.fromJson({'departureId': 'd1', 'departureAt': '2026-10-23T06:00:00.000Z', 'seatsBooked': 5, 'onBoardMax': 5});
+    expect(plain.onBoardCap, isNull);
+    final tile = Assignment.fromJson({
+      'departureId': 'd1', 'departureAt': '2026-10-23T06:00:00.000Z', 'passengers': 8, 'onBoardMax': 7, 'bookings': 3,
+    })!;
+    expect(tile.onBoardCap, 7);
+    expect(Assignment.fromJson({'departureId': 'd1', 'departureAt': '2026-10-23T06:00:00.000Z', 'passengers': 3})!.onBoardCap, isNull);
+  });
+
   test('« Je suis en route » : seulement à partir de l’heure d’ouverture donnée par le serveur', () {
     final m = Manifest.fromJson({
       'departureId': 'd1', 'departureAt': '2026-10-20T08:00:00.000Z', 'readyOpensAt': '2026-10-20T05:00:00.000Z', 'ready': false,

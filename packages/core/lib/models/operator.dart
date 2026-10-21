@@ -455,6 +455,7 @@ class Assignment {
     required this.ready,
     required this.rescued,
     this.guarantee,
+    this.onBoardMax,
   });
 
   final String departureId;
@@ -464,6 +465,11 @@ class Assignment {
   /// Seuil de départ garanti (null : serveur plus ancien).
   final DepartureGuarantee? guarantee;
   final int passengers;
+  /// Le plus de passagers à bord en même temps (vente à la place ; null sinon).
+  final int? onBoardMax;
+
+  /// À afficher seulement quand la revente en cours de trajet fait dépasser le nombre de places.
+  int? get onBoardCap => onBoardMax != null && onBoardMax! < passengers ? onBoardMax : null;
   final int bookings;
   final bool started;
   /// « Je suis en route » confirmé.
@@ -486,6 +492,7 @@ class Assignment {
       ready: json['ready'] == true,
       rescued: json['rescued'] == true,
       guarantee: DepartureGuarantee.fromJson(json['guarantee']),
+      onBoardMax: _int(json['onBoardMax']),
     );
   }
 }
@@ -535,7 +542,14 @@ class Manifest {
     this.guarantee,
     this.parcels = const [],
     this.readyOpensAt,
+    this.onBoardMax,
   });
+
+  /// Le plus de passagers à bord en même temps (vente à la place ; null sinon).
+  final int? onBoardMax;
+
+  /// À afficher seulement quand la revente en cours de trajet fait dépasser le nombre de places.
+  int? get onBoardCap => onBoardMax != null && onBoardMax! < seatsBooked ? onBoardMax : null;
 
   /// « Je suis en route » possible à partir de cette heure (T−3 h, refusé avant par le serveur).
   final DateTime? readyOpensAt;
@@ -569,6 +583,7 @@ class Manifest {
       destination: _str(m['destination']) ?? '',
       ready: m['ready'] == true,
       readyOpensAt: _date(m['readyOpensAt']),
+      onBoardMax: _int(m['onBoardMax']),
       seatsBooked: _int(m['seatsBooked']) ?? 0,
       guarantee: DepartureGuarantee.fromJson(m['guarantee']),
       parcels: m['parcels'] is List ? (m['parcels'] as List).map(ParcelTask.fromJson).whereType<ParcelTask>().toList() : const [],

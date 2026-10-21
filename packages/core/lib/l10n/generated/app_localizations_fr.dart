@@ -4119,4 +4119,12 @@ class AppLocalizationsFr extends AppLocalizations {
   String opEnRouteOuvertA(String date) {
     return '« Je suis en route » s’ouvrira 3 h avant le départ, le $date.';
   }
+
+  @override
+  String opABordAuPlus(int count) {
+    return '$count à bord au plus';
+  }
+
+  @override
+  String get lnPlaceReservee => 'Place réservée';
 }

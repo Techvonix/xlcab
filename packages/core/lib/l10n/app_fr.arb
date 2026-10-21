@@ -2410,5 +2410,14 @@
         "type": "String"
       }
     }
-  }
+  },
+  "opABordAuPlus": "{count} à bord au plus",
+  "@opABordAuPlus": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "lnPlaceReservee": "Place réservée"
 }

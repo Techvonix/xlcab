@@ -141,7 +141,13 @@ class _DepartureScreenState extends ConsumerState<DepartureScreen> {
             children: [
               Text(formatTripDate(m.departureAt, locale: locale), style: AppTypography.h3),
               Text(l10n.opTrajet(m.origin, m.destination)),
-              Text(l10n.opPassagersReservations(m.seatsBooked, m.passengers.length), style: AppTypography.caption),
+              Text(
+                [
+                  l10n.opPassagersReservations(m.seatsBooked, m.passengers.length),
+                  if (m.onBoardCap != null) l10n.opABordAuPlus(m.onBoardCap!),
+                ].join(' · '),
+                style: AppTypography.caption,
+              ),
               const SizedBox(height: AppSpacing.md),
               if (m.guarantee?.pending == true && !m.started)
                 OpCard(

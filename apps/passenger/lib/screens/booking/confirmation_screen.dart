@@ -207,6 +207,8 @@ class _Body extends ConsumerWidget {
     if (trip.status == TripStatus.pending && at != null && at.isAfter(DateTime.now())) {
       return l10n.votreChauffeurSeraAttribueA(formatTripDate(at, locale: locale));
     }
+    // Place de ligne : le chauffeur du départ est déjà connu, il n'est pas « en route » des jours avant.
+    if (trip.isLine && trip.status == TripStatus.accepted) return l10n.lnPlaceReservee;
     return trip.status.label;
   }
 

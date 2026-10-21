@@ -4095,4 +4095,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String opEnRouteOuvertA(String date) {
     return '“I’m on my way” opens 3 hours before departure, on $date.';
   }
+
+  @override
+  String opABordAuPlus(int count) {
+    return 'at most $count on board';
+  }
+
+  @override
+  String get lnPlaceReservee => 'Seat booked';
 }

@@ -6992,6 +6992,18 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'« Je suis en route » s’ouvrira 3 h avant le départ, le {date}.'**
   String opEnRouteOuvertA(String date);
+
+  /// No description provided for @opABordAuPlus.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count} à bord au plus'**
+  String opABordAuPlus(int count);
+
+  /// No description provided for @lnPlaceReservee.
+  ///
+  /// In fr, this message translates to:
+  /// **'Place réservée'**
+  String get lnPlaceReservee;
 }
 
 class _AppLocalizationsDelegate

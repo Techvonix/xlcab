@@ -262,7 +262,7 @@ class AssignmentTile extends StatelessWidget {
               Text(formatTripDate(a.departureAt, locale: locale), style: AppTypography.bodyBold),
               Text(l10n.opTrajet(a.origin, a.destination)),
               Text(
-                '${l10n.mkPassagers(a.passengers)} · $state${a.rescued ? ' · ${l10n.opRepris}' : ''}',
+                '${l10n.mkPassagers(a.passengers)}${a.onBoardCap != null ? ' · ${l10n.opABordAuPlus(a.onBoardCap!)}' : ''} · $state${a.rescued ? ' · ${l10n.opRepris}' : ''}',
                 style: AppTypography.caption,
               ),
             ]),
