@@ -113,8 +113,8 @@ référence — les exigences de la Partie 8 priment.
 - Factures légales : `src/invoices/` (pdfkit, `import PDFDocument = require('pdfkit')`). `Invoice`
   jamais modifiée (avoir `credit_note` sinon), numéro `FA-AAAA-000001` / `AV-AAAA-…` via
   `InvoiceCounter` incrémenté dans la transaction (sans trou). Émission : fin de course particulier
-  (`TripsService.complete`, colis partagé à la remise), frais d'annulation (hors champ TVA, à valider),
-  remboursement admin → avoir au prorata des taux ; entreprises : facture mensuelle due à 30 j
+  (`TripsService.complete`, colis partagé à la remise),
+  frais d'annulation AVEC la TVA du transport réservé (décision du 2026-10-22, à confirmer par l'expert-comptable), remboursement admin → avoir au prorata des taux ; entreprises : facture mensuelle due à 30 j
   (planificateur, clé Redis `invoices:monthly:AAAA-MM`, ou `POST /admin/invoices/monthly`). Vendeur
   figé depuis `INVOICE_SELLER_*` (sinon « [à compléter] » + alerte admin). Accès PDF : client,
   admin de l'entreprise, équipe ; app mobile via `POST /invoices/:id/link` (jeton 5 min, clé dérivée
@@ -432,7 +432,7 @@ référence — les exigences de la Partie 8 priment.
   `draft` (jamais viré), `finalize` retient les `DriverPenalty` `applied` non soldées du chauffeur (jamais
   pending / contested / cancelled), les plus anciennes d'abord, par écriture conditionnelle sur `collectedCents` +
   `PayoutDeduction` dans une transaction, puis fixe `grossCents` / `withheldCents` / `amountCents` et le statut
-  (pending, `withheld` = tout retenu, void). Plafond `PENALTY_WITHHOLD_PERCENT` (100 par défaut, À VALIDER).
+  (pending, `withheld` = tout retenu, void). Plafond `PENALTY_WITHHOLD_PERCENT` (50 par défaut, décision du 2026-10-22).
   `DriverPenalty.collectedCents` / `collectedAt` (soldée). Brouillon de plus de 5 min repris par `tick` sans double
   retenue. Notification `payout.withheld` (reste dû). NON fait : paiement Stripe du `DriverBonus` de 160 € au
   secours (ligne en base seulement), facture de pénalité à 30 j faute de reversements. Tests sensibles à
@@ -670,6 +670,8 @@ référence — les exigences de la Partie 8 priment.
   noté »), test `dashcam_screens_test.dart`, `FakeDashcamService` (charte acceptée par défaut) ; passager — ligne
   « Véhicule équipé d'une caméra embarquée » + explication sur l'écran 8 (`_DashcamNotice`). Clés ARB `dc*` / `pc*`.
   Admin : état et bouton « Demander au chauffeur de conserver l'enregistrement » dans la page Incidents (clés `dc*`).
+- Pré-lancement (2026-10-22) : `PRE_LANCEMENT.md` = tout ce qui reste (comptes à créer, juridique, code, production,
+  exploitation) et les 3 décisions du jour (retenue 50 %, secours d'abord, TVA des frais d'annulation).
 - Migrations : `init_xlcab` appliquée sur la base locale ; toute modification de
   `prisma/schema.prisma` demande désormais `npx prisma migrate dev --name <nom>`. Référentiel :
   `npx prisma db seed` (config FR uniquement).

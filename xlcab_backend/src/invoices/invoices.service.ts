@@ -76,12 +76,19 @@ export class InvoicesService {
     }
   }
 
-  /** Frais d'annulation retenus (CGV) : facture de l'indemnité. */
+  /**
+   * Frais d'annulation retenus (CGV) : facture de l'indemnité. TVA au taux du transport annulé (décision
+   * du 2026-10-22, lecture prudente de la jurisprudence européenne : la somme conservée est la contrepartie
+   * du service réservé) — À CONFIRMER par l'expert-comptable. Course mixte : taux de la ligne principale.
+   */
   async issueCancellationFee(tripId: string, feeCents: number) {
     if (feeCents <= 0) return null;
     try {
-      const trip = await this.prisma.trip.findUnique({ where: { id: tripId } });
+      const trip = await this.prisma.trip.findUnique({ where: { id: tripId }, include: { priceLines: true } });
       if (!trip || trip.corporateId || !trip.passengerId) return null;
+      const main = [...trip.priceLines].sort((a, b) => b.baseCents - a.baseCents)[0];
+      const vatRate = Number(main?.ratePercent ?? 0);
+      const baseCents = Math.round(feeCents / (1 + vatRate / 100));
       return await this.issue({
         kind: 'invoice',
         jurisdiction: trip.jurisdiction,
@@ -90,7 +97,7 @@ export class InvoicesService {
         buyer: await this.personBuyer(trip.passengerId),
         lines: [{
           description: `Frais d’annulation (conditions générales de vente) — course ${this.route(trip)} prévue le ${day(trip.scheduledAt)}`,
-          quantity: 1, unitCents: feeCents, regime: 'cancellation', vatRate: 0, vatCents: 0, totalCents: feeCents,
+          quantity: 1, unitCents: baseCents, regime: 'cancellation', vatRate, vatCents: feeCents - baseCents, totalCents: feeCents,
         }],
         paymentStatus: 'paid',
       });
@@ -482,7 +489,7 @@ export class InvoicesService {
       m.push(this.config.get<string>('INVOICE_PASSENGER_VAT_MENTION') || 'Transport de personnes : exonération de TVA (article 261-4-4° du CGI).');
     }
     if (lines.some((l) => l.regime === 'cancellation')) {
-      m.push('Indemnité d’annulation prévue par les conditions générales de vente : hors champ de la TVA.');
+      m.push('Frais d’annulation prévus par les conditions générales de vente : TVA au taux du transport réservé.');
     }
     if (b2bDue) {
       m.push('En cas de retard de paiement : pénalités au taux de trois fois le taux d’intérêt légal, et indemnité forfaitaire pour frais de recouvrement de 40 € (articles L441-10 et D441-5 du Code de commerce). Pas d’escompte pour paiement anticipé.');

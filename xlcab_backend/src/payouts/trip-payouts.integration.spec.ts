@@ -358,6 +358,10 @@ describe('Reversement à l’opérateur en fin de trajet (intégration)', () => 
     }
     const deductionsOf = (tripId: string) => db.payoutDeduction.rows.filter((d: any) => d.payoutId === payoutOf(tripId).id);
 
+    // Ces scénarios portent sur la retenue elle-même : plafond relevé à 100 % (le défaut est 50 %).
+    beforeEach(() => {
+      process.env.PENALTY_WITHHOLD_PERCENT = '100';
+    });
     afterEach(() => {
       delete process.env.PENALTY_WITHHOLD_PERCENT;
     });
@@ -435,8 +439,8 @@ describe('Reversement à l’opérateur en fin de trajet (intégration)', () => 
       expect(deductionsOf(tripId).map((d: any) => d.amountCents)).toEqual([10000, 6200]);
     });
 
-    it('plafond réglable : avec 50 %, la moitié du reversement reste versée', async () => {
-      process.env.PENALTY_WITHHOLD_PERCENT = '50';
+    it('plafond par défaut (décision du 2026-10-22) : 50 %, la moitié du reversement reste versée', async () => {
+      delete process.env.PENALTY_WITHHOLD_PERCENT;
       const p = penalty();
       const tripId = completedTrip();
       await payouts.onTripCompleted(tripId);

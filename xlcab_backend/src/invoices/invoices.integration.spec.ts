@@ -182,13 +182,22 @@ describe('Factures (intégration)', () => {
   });
 
   describe('annulation et remboursement', () => {
-    it('frais d’annulation retenus : facture de l’indemnité, hors champ TVA', async () => {
+    it('frais d’annulation retenus : facture avec la TVA du transport réservé (décision du 2026-10-22)', async () => {
       seedTrip(1, { status: 'accepted', startedAt: null, scheduledAt: new Date(Date.now() + HOUR) });
       const res = await http().post(`/api/v1/trips/${id(1)}/cancel`).set('Authorization', as('p1')).send({ reason: 'Imprévu' });
       expect(res.body.feeCents).toBe(12186); // moins de 2 h : 100 %
       const inv = db.invoice.rows[0];
       expect(inv).toMatchObject({ number: `FA-${year}-000001`, totalCents: 12186, vatCents: 0 });
       expect(inv.lines[0]).toMatchObject({ regime: 'cancellation', vatRate: 0, description: expect.stringContaining('Frais d’annulation') });
+    });
+
+    it('frais d’annulation d’un transport à 10 % de TVA : même taux sur les frais', async () => {
+      seedTrip(1, { status: 'accepted', startedAt: null, scheduledAt: new Date(Date.now() + HOUR) });
+      db.tripPriceLine.rows.find((l: any) => l.id === 'l1a').ratePercent = 10;
+      await http().post(`/api/v1/trips/${id(1)}/cancel`).set('Authorization', as('p1')).send({ reason: 'Imprévu' });
+      const inv = db.invoice.rows[0];
+      expect(inv).toMatchObject({ totalCents: 12186, vatCents: 1108 }); // 11 078 HT + 1 108 de TVA
+      expect(inv.lines[0]).toMatchObject({ regime: 'cancellation', vatRate: 10, unitCents: 11078 });
     });
 
     it('annulation sans frais : aucune facture', async () => {

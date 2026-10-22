@@ -52,12 +52,14 @@ const DRAFT_STALE_MS = 5 * 60_000;
 
 /**
  * Part maximale d'un reversement qui peut être retenue pour une pénalité
- * d'annulation (PENALTY_WITHHOLD_PERCENT, 100 par défaut : la pénalité est
- * recouvrée sur les premiers reversements). À VALIDER par le porteur de projet.
+ * d'annulation (PENALTY_WITHHOLD_PERCENT, 50 par défaut — décision du porteur de projet du 2026-10-22 :
+ * le chauffeur touche toujours au moins la moitié de chaque trajet, la pénalité est recouvrée en 2 ou 3
+ * trajets, puis la facture à 30 jours prend le relais).
  */
 export function penaltyWithholdPercent(): number {
-  const value = Number(process.env.PENALTY_WITHHOLD_PERCENT);
-  return Number.isFinite(value) && value >= 0 && value <= 100 ? value : 100;
+  const raw = process.env.PENALTY_WITHHOLD_PERCENT;
+  const value = Number(raw);
+  return raw !== undefined && raw !== '' && Number.isFinite(value) && value >= 0 && value <= 100 ? value : 50;
 }
 
 export const PAYOUT_STATUSES = ['draft', 'pending', 'paid', 'blocked', 'failed', 'withheld', 'void'] as const;
