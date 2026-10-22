@@ -670,6 +670,17 @@ référence — les exigences de la Partie 8 priment.
   noté »), test `dashcam_screens_test.dart`, `FakeDashcamService` (charte acceptée par défaut) ; passager — ligne
   « Véhicule équipé d'une caméra embarquée » + explication sur l'écran 8 (`_DashcamNotice`). Clés ARB `dc*` / `pc*`.
   Admin : état et bouton « Demander au chauffeur de conserver l'enregistrement » dans la page Incidents (clés `dc*`).
+- Mot de passe oublié (2026-10-22, hors du Module 2 figé) : `src/account-recovery/account-recovery.ts` —
+  `POST /api/v1/auth/password/forgot { email }` (202, même réponse que le compte existe ou non ; 3/h par adresse,
+  10/h par IP) envoie un CODE à 6 chiffres (15 min, 5 essais, empreinte HMAC dans Redis `pwreset:code:{userId}`,
+  jamais en clair), `POST …/reset { email, code, password }` (8 à 128 car.) change `User.passwordHash` (bcrypt 12),
+  ferme TOUTES les sessions (`refresh:{id}:*`), AuditLog. Adresse comparée telle quelle, comme à la connexion.
+  E-mails : `src/mail/mail.ts` (`MailService`, `MAIL_PROVIDER` = sendgrid | log par défaut hors production — écrit
+  l'e-mail, code compris, dans le journal du serveur ; mémoire `outbox` en tests ; rien en production sans fournisseur),
+  `SENDGRID_API_KEY`, `MAIL_FROM`. Apps : `core/services/password_reset_service.dart`, écran partagé
+  `xlcab_ui/screens/forgot_password_screen.dart` (lien « Mot de passe oublié ? » de la connexion, retour avec message),
+  `xlcab_ui/widgets/form_message.dart`. Clés ARB `pw*`. Tests : `account-recovery.integration.spec.ts`,
+  `apps/passenger/test/screens/login_screen_test.dart`.
 - Pré-lancement (2026-10-22) : `PRE_LANCEMENT.md` = tout ce qui reste (comptes à créer, juridique, code, production,
   exploitation) et les 3 décisions du jour (retenue 50 %, secours d'abord, TVA des frais d'annulation).
 - Migrations : `init_xlcab` appliquée sur la base locale ; toute modification de

@@ -4103,4 +4103,50 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get lnPlaceReservee => 'Seat booked';
+
+  @override
+  String get pwOublie => 'Forgot password?';
+
+  @override
+  String get pwTitre => 'Forgot password';
+
+  @override
+  String get pwExplication =>
+      'Enter your account e-mail address: we will send you a code to choose a new password.';
+
+  @override
+  String get pwEmailInvalide => 'Invalid e-mail address';
+
+  @override
+  String get pwRecevoirCode => 'Send me a code';
+
+  @override
+  String pwCodeEnvoye(String email) {
+    return 'If an account exists for $email, a 6-digit code has just been sent to it. It is valid for 15 minutes.';
+  }
+
+  @override
+  String get pwCode => 'Code received by e-mail';
+
+  @override
+  String get pwCodeInvalide => 'The code has 6 digits';
+
+  @override
+  String get pwNouveau => 'New password';
+
+  @override
+  String get pwConfirmer => 'Confirm the password';
+
+  @override
+  String get pwDifferents => 'The two passwords are different';
+
+  @override
+  String get pwChanger => 'Change my password';
+
+  @override
+  String get pwRenvoyer => 'Send a new code';
+
+  @override
+  String get pwModifie =>
+      'Password changed: sign in with the new one. Your other devices have been signed out.';
 }

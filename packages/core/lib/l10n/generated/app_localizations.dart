@@ -7004,6 +7004,90 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Place réservée'**
   String get lnPlaceReservee;
+
+  /// No description provided for @pwOublie.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mot de passe oublié ?'**
+  String get pwOublie;
+
+  /// No description provided for @pwTitre.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mot de passe oublié'**
+  String get pwTitre;
+
+  /// No description provided for @pwExplication.
+  ///
+  /// In fr, this message translates to:
+  /// **'Saisissez l’adresse e-mail de votre compte : nous vous envoyons un code pour choisir un nouveau mot de passe.'**
+  String get pwExplication;
+
+  /// No description provided for @pwEmailInvalide.
+  ///
+  /// In fr, this message translates to:
+  /// **'Adresse e-mail invalide'**
+  String get pwEmailInvalide;
+
+  /// No description provided for @pwRecevoirCode.
+  ///
+  /// In fr, this message translates to:
+  /// **'Recevoir un code'**
+  String get pwRecevoirCode;
+
+  /// No description provided for @pwCodeEnvoye.
+  ///
+  /// In fr, this message translates to:
+  /// **'Si un compte existe pour {email}, un code à 6 chiffres vient de lui être envoyé. Il est valable 15 minutes.'**
+  String pwCodeEnvoye(String email);
+
+  /// No description provided for @pwCode.
+  ///
+  /// In fr, this message translates to:
+  /// **'Code reçu par e-mail'**
+  String get pwCode;
+
+  /// No description provided for @pwCodeInvalide.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le code compte 6 chiffres'**
+  String get pwCodeInvalide;
+
+  /// No description provided for @pwNouveau.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouveau mot de passe'**
+  String get pwNouveau;
+
+  /// No description provided for @pwConfirmer.
+  ///
+  /// In fr, this message translates to:
+  /// **'Confirmer le mot de passe'**
+  String get pwConfirmer;
+
+  /// No description provided for @pwDifferents.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les deux mots de passe sont différents'**
+  String get pwDifferents;
+
+  /// No description provided for @pwChanger.
+  ///
+  /// In fr, this message translates to:
+  /// **'Changer mon mot de passe'**
+  String get pwChanger;
+
+  /// No description provided for @pwRenvoyer.
+  ///
+  /// In fr, this message translates to:
+  /// **'Renvoyer un code'**
+  String get pwRenvoyer;
+
+  /// No description provided for @pwModifie.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mot de passe modifié : connectez-vous avec le nouveau. Vos autres appareils ont été déconnectés.'**
+  String get pwModifie;
 }
 
 class _AppLocalizationsDelegate

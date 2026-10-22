@@ -2419,5 +2419,26 @@
       }
     }
   },
-  "lnPlaceReservee": "Place réservée"
+  "lnPlaceReservee": "Place réservée",
+  "pwOublie": "Mot de passe oublié ?",
+  "pwTitre": "Mot de passe oublié",
+  "pwExplication": "Saisissez l’adresse e-mail de votre compte : nous vous envoyons un code pour choisir un nouveau mot de passe.",
+  "pwEmailInvalide": "Adresse e-mail invalide",
+  "pwRecevoirCode": "Recevoir un code",
+  "pwCodeEnvoye": "Si un compte existe pour {email}, un code à 6 chiffres vient de lui être envoyé. Il est valable 15 minutes.",
+  "@pwCodeEnvoye": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "pwCode": "Code reçu par e-mail",
+  "pwCodeInvalide": "Le code compte 6 chiffres",
+  "pwNouveau": "Nouveau mot de passe",
+  "pwConfirmer": "Confirmer le mot de passe",
+  "pwDifferents": "Les deux mots de passe sont différents",
+  "pwChanger": "Changer mon mot de passe",
+  "pwRenvoyer": "Renvoyer un code",
+  "pwModifie": "Mot de passe modifié : connectez-vous avec le nouveau. Vos autres appareils ont été déconnectés."
 }

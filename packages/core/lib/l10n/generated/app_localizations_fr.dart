@@ -4127,4 +4127,50 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get lnPlaceReservee => 'Place réservée';
+
+  @override
+  String get pwOublie => 'Mot de passe oublié ?';
+
+  @override
+  String get pwTitre => 'Mot de passe oublié';
+
+  @override
+  String get pwExplication =>
+      'Saisissez l’adresse e-mail de votre compte : nous vous envoyons un code pour choisir un nouveau mot de passe.';
+
+  @override
+  String get pwEmailInvalide => 'Adresse e-mail invalide';
+
+  @override
+  String get pwRecevoirCode => 'Recevoir un code';
+
+  @override
+  String pwCodeEnvoye(String email) {
+    return 'Si un compte existe pour $email, un code à 6 chiffres vient de lui être envoyé. Il est valable 15 minutes.';
+  }
+
+  @override
+  String get pwCode => 'Code reçu par e-mail';
+
+  @override
+  String get pwCodeInvalide => 'Le code compte 6 chiffres';
+
+  @override
+  String get pwNouveau => 'Nouveau mot de passe';
+
+  @override
+  String get pwConfirmer => 'Confirmer le mot de passe';
+
+  @override
+  String get pwDifferents => 'Les deux mots de passe sont différents';
+
+  @override
+  String get pwChanger => 'Changer mon mot de passe';
+
+  @override
+  String get pwRenvoyer => 'Renvoyer un code';
+
+  @override
+  String get pwModifie =>
+      'Mot de passe modifié : connectez-vous avec le nouveau. Vos autres appareils ont été déconnectés.';
 }

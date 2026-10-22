@@ -3,16 +3,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:xlcab_core/providers/auth_provider.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_spacing.dart';
-import '../theme/app_typography.dart';
+import '../widgets/form_message.dart';
 import '../widgets/primary_button.dart';
 import '../widgets/xlcab_logo.dart';
 import 'package:xlcab_core/l10n/l10n.dart';
+import 'forgot_password_screen.dart';
 
 /// Écran 3 — Connexion / Inscription (Partie 7) par email et mot de passe.
 ///
 /// Non affichés tant qu'ils ne fonctionnent pas : connexion Google/Apple
-/// (projet Firebase à créer), OTP SMS (Twilio à brancher), mot de passe
-/// oublié (SendGrid à brancher). La redirection après connexion est faite
+/// (projet Firebase à créer), OTP SMS (Twilio à brancher). Mot de passe
+/// oublié : code par e-mail (`ForgotPasswordScreen`). La redirection après connexion est faite
 /// par le routeur (authProvider).
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -33,6 +34,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   bool _consentError = false;
   bool _busy = false;
   String? _error;
+  /// Message de réussite (mot de passe changé).
+  String? _info;
 
   @override
   void dispose() {
@@ -41,9 +44,23 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     super.dispose();
   }
 
+  Future<void> _forgotPassword() async {
+    final changed = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(builder: (_) => ForgotPasswordScreen(initialEmail: _email.text)),
+    );
+    if (changed == true && mounted) {
+      setState(() {
+        _info = l10n.pwModifie;
+        _error = null;
+        _password.clear();
+      });
+    }
+  }
+
   Future<void> _submit() async {
     setState(() {
       _error = null;
+      _info = null;
       _consentError = _mode == _Mode.signup && !_consent;
     });
     final valid = _formKey.currentState!.validate();
@@ -98,8 +115,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         }),
                       ),
                       const SizedBox(height: AppSpacing.lg),
-                      if (notice != null && !signup) ...[
-                        _Message(text: notice, icon: Icons.info_outline, color: AppColors.secondary),
+                      if (_info != null && !signup) ...[
+                        FormMessage(text: _info!, icon: Icons.check_circle_outline, color: AppColors.success),
+                        const SizedBox(height: AppSpacing.md),
+                      ] else if (notice != null && !signup) ...[
+                        FormMessage(text: notice, icon: Icons.info_outline, color: AppColors.secondary),
                         const SizedBox(height: AppSpacing.md),
                       ],
                       TextFormField(
@@ -113,7 +133,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           final value = (v ?? '').trim();
                           if (value.isEmpty) return l10n.emailRequis;
                           // Même exigence de forme que le serveur (IsEmail).
-                          if (!RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]{2,}$').hasMatch(value)) return 'Adresse email invalide';
+                          if (!emailPattern.hasMatch(value)) return l10n.pwEmailInvalide;
                           return null;
                         },
                       ),
@@ -141,6 +161,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           return null;
                         },
                       ),
+                      if (!signup)
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: TextButton(onPressed: _busy ? null : _forgotPassword, child: Text(l10n.pwOublie)),
+                        ),
                       if (signup) ...[
                         const SizedBox(height: AppSpacing.sm),
                         // Partie 8 : consentement explicite à l'inscription. Non pré-coché.
@@ -162,7 +187,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       ],
                       if (_error != null) ...[
                         const SizedBox(height: AppSpacing.md),
-                        _Message(text: _error!, icon: Icons.error_outline, color: AppColors.error),
+                        FormMessage(text: _error!, icon: Icons.error_outline, color: AppColors.error),
                       ],
                       const SizedBox(height: AppSpacing.lg),
                       PrimaryButton(
@@ -175,35 +200,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               ),
             ),
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class _Message extends StatelessWidget {
-  const _Message({required this.text, required this.icon, required this.color});
-
-  final String text;
-  final IconData icon;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    return Semantics(
-      liveRegion: true,
-      child: Container(
-        padding: const EdgeInsets.all(AppSpacing.md),
-        decoration: BoxDecoration(
-          border: Border.all(color: color, width: 2),
-          borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
-        ),
-        child: Row(
-          children: [
-            ExcludeSemantics(child: Icon(icon, color: color)),
-            const SizedBox(width: AppSpacing.sm),
-            Expanded(child: Text(text, style: AppTypography.body.copyWith(color: Theme.of(context).colorScheme.onSurface))),
-          ],
         ),
       ),
     );

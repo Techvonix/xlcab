@@ -1150,5 +1150,19 @@
   "pcCompris": "Got it",
   "opEnRouteOuvertA": "“I’m on my way” opens 3 hours before departure, on {date}.",
   "opABordAuPlus": "at most {count} on board",
-  "lnPlaceReservee": "Seat booked"
+  "lnPlaceReservee": "Seat booked",
+  "pwOublie": "Forgot password?",
+  "pwTitre": "Forgot password",
+  "pwExplication": "Enter your account e-mail address: we will send you a code to choose a new password.",
+  "pwEmailInvalide": "Invalid e-mail address",
+  "pwRecevoirCode": "Send me a code",
+  "pwCodeEnvoye": "If an account exists for {email}, a 6-digit code has just been sent to it. It is valid for 15 minutes.",
+  "pwCode": "Code received by e-mail",
+  "pwCodeInvalide": "The code has 6 digits",
+  "pwNouveau": "New password",
+  "pwConfirmer": "Confirm the password",
+  "pwDifferents": "The two passwords are different",
+  "pwChanger": "Change my password",
+  "pwRenvoyer": "Send a new code",
+  "pwModifie": "Password changed: sign in with the new one. Your other devices have been signed out."
 }

@@ -29,6 +29,8 @@ import { I18nModule } from './i18n/localized-exception.filter';
 import { FeedbackModule } from './feedback/feedback.controller';
 import { MeetingPointsModule } from './meeting-points/meeting-points';
 import { DashcamModule } from './dashcam/dashcam';
+import { MailModule } from './mail/mail';
+import { AccountRecoveryModule } from './account-recovery/account-recovery';
 import { OperatorsModule } from './operators/operators.module';
 import { LineBookingsModule } from './line-bookings/line-bookings.module';
 import { MarketModule } from './market/market.module';
@@ -48,6 +50,8 @@ import { validateEnv } from './security/env.validation';
     OperatorsModule,
     MeetingPointsModule,
     DashcamModule,
+    MailModule,
+    AccountRecoveryModule,
     LineBookingsModule,
     MarketModule,
     PrismaModule,

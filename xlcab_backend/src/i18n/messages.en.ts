@@ -642,4 +642,10 @@ export const MESSAGES_EN: Record<string, string> = {
     'The driver withdrew the {} departure before it was confirmed: your booking is cancelled and fully refunded.',
   'Seuil non atteint pour votre départ de {} : il est annulé et les passagers sont remboursés. Aucune pénalité.':
     'Threshold not reached for your {} departure: it is cancelled and passengers are refunded. No penalty.',
+  // Mot de passe oublié (src/account-recovery).
+  'Le code reçu par e-mail compte 6 chiffres': 'The code sent by e-mail has 6 digits',
+  'Le mot de passe ne doit pas dépasser 128 caractères': 'Password must not exceed 128 characters',
+  'Trop de demandes — réessayez dans une heure': 'Too many requests — try again in an hour',
+  'Code invalide ou expiré : demandez un nouveau code': 'Invalid or expired code: ask for a new code',
+  'Trop d’essais : demandez un nouveau code': 'Too many attempts: ask for a new code',
 };

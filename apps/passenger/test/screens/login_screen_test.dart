@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:xlcab_passenger/router.dart';
 import 'package:xlcab_core/services/api_service.dart';
 import 'package:xlcab_core/services/auth_service.dart';
+import 'package:xlcab_core/services/password_reset_service.dart';
 import 'package:xlcab_core/services/preferences_store.dart';
 import 'package:xlcab_core/services/token_storage.dart';
 import 'package:xlcab_ui/theme/app_theme.dart';
@@ -18,6 +20,24 @@ import '../support/auth_fakes.dart';
 late MemoryTokenStorage storage;
 late FakeAuthService service;
 late FakeTokenRefresher refresher;
+late FakePasswordResetService resets;
+
+/// Mot de passe oublié : appels enregistrés, erreur programmable.
+class FakePasswordResetService extends PasswordResetService {
+  FakePasswordResetService() : super(Dio());
+
+  final List<String> calls = [];
+  ApiException? resetError;
+
+  @override
+  Future<void> requestCode(String email) async => calls.add('code:$email');
+
+  @override
+  Future<void> reset({required String email, required String code, required String password}) async {
+    calls.add('reset:$email:$code:$password');
+    if (resetError != null) throw resetError!;
+  }
+}
 
 Future<void> pumpApp(WidgetTester tester) async {
   tester.view.physicalSize = const Size(1080, 4200);
@@ -30,6 +50,7 @@ Future<void> pumpApp(WidgetTester tester) async {
         tokenStorageProvider.overrideWithValue(storage),
         authServiceProvider.overrideWithValue(service),
         tokenRefresherProvider.overrideWithValue(refresher),
+        passwordResetServiceProvider.overrideWithValue(resets),
         // Onboarding déjà vu : ces tests portent sur la connexion.
         preferencesStoreProvider.overrideWithValue(MemoryPreferencesStore(onboardingSeen: true)),
       ],
@@ -56,6 +77,7 @@ void main() {
     storage = MemoryTokenStorage();
     service = FakeAuthService();
     refresher = FakeTokenRefresher(storage);
+    resets = FakePasswordResetService();
   });
 
   testWidgets('non connecté : le splash mène à la connexion (plus de blocage)', (tester) async {
@@ -68,7 +90,7 @@ void main() {
     await tester.enterText(find.widgetWithText(TextFormField, 'Email'), 'pas-un-email');
     await tester.tap(find.widgetWithText(PrimaryButton, 'Se connecter'));
     await tester.pumpAndSettle();
-    expect(find.text('Adresse email invalide'), findsOneWidget);
+    expect(find.text('Adresse e-mail invalide'), findsOneWidget);
     expect(find.text('Mot de passe requis'), findsOneWidget);
     expect(service.calls, isEmpty);
   });
@@ -116,6 +138,52 @@ void main() {
     await tester.pumpAndSettle();
     expect(service.calls, ['signup:new@x.fr']);
     expect(find.text('Bonjour'), findsOneWidget);
+  });
+
+  testWidgets('mot de passe oublié : code par e-mail, nouveau mot de passe, retour à la connexion avec un message', (tester) async {
+    await pumpApp(tester);
+    await tester.enterText(find.widgetWithText(TextFormField, 'Email'), 'lea@x.fr');
+    await tester.tap(find.text('Mot de passe oublié ?'));
+    await tester.pumpAndSettle();
+    expect(find.widgetWithText(TextFormField, 'Email'), findsOneWidget); // adresse reprise de la connexion
+    await tester.tap(find.widgetWithText(PrimaryButton, 'Recevoir un code'));
+    await tester.pumpAndSettle();
+    expect(resets.calls, ['code:lea@x.fr']);
+    expect(find.textContaining('un code à 6 chiffres vient de lui être envoyé'), findsOneWidget);
+
+    await tester.enterText(find.widgetWithText(TextFormField, 'Code reçu par e-mail'), '123456');
+    await tester.enterText(find.widgetWithText(TextFormField, 'Nouveau mot de passe'), 'nouveau-mdp');
+    await tester.enterText(find.widgetWithText(TextFormField, 'Confirmer le mot de passe'), 'autre-chose');
+    await tester.tap(find.widgetWithText(PrimaryButton, 'Changer mon mot de passe'));
+    await tester.pumpAndSettle();
+    expect(find.text('Les deux mots de passe sont différents'), findsOneWidget);
+    expect(resets.calls, hasLength(1));
+
+    await tester.enterText(find.widgetWithText(TextFormField, 'Confirmer le mot de passe'), 'nouveau-mdp');
+    await tester.tap(find.widgetWithText(PrimaryButton, 'Changer mon mot de passe'));
+    await tester.pumpAndSettle();
+    expect(resets.calls.last, 'reset:lea@x.fr:123456:nouveau-mdp');
+    expect(find.textContaining('Mot de passe modifié : connectez-vous avec le nouveau.'), findsOneWidget);
+    expect(find.widgetWithText(PrimaryButton, 'Se connecter'), findsOneWidget);
+  });
+
+  testWidgets('mot de passe oublié : code refusé par le serveur, message affiché, on reste sur l’écran', (tester) async {
+    resets.resetError = const ApiException('Code invalide ou expiré : demandez un nouveau code');
+    await pumpApp(tester);
+    await tester.tap(find.text('Mot de passe oublié ?'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.widgetWithText(TextFormField, 'Email'), 'lea@x.fr');
+    await tester.tap(find.widgetWithText(PrimaryButton, 'Recevoir un code'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.widgetWithText(TextFormField, 'Code reçu par e-mail'), '000000');
+    await tester.enterText(find.widgetWithText(TextFormField, 'Nouveau mot de passe'), 'nouveau-mdp');
+    await tester.enterText(find.widgetWithText(TextFormField, 'Confirmer le mot de passe'), 'nouveau-mdp');
+    await tester.tap(find.widgetWithText(PrimaryButton, 'Changer mon mot de passe'));
+    await tester.pumpAndSettle();
+    expect(find.text('Code invalide ou expiré : demandez un nouveau code'), findsOneWidget);
+    expect(find.text('Renvoyer un code'), findsOneWidget);
+    await expectLater(tester, meetsGuideline(textContrastGuideline));
+    await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
   });
 
   testWidgets('afficher / masquer le mot de passe', (tester) async {
