@@ -23,6 +23,9 @@ dependencies:
   # Photo (colis, documents) compressée sous 2 Mo
   image_picker: ^1.2.3
   flutter_image_compress: ^2.5.1
+  # Notifications push (services/push_service.dart) ; déjà résolues pour les deux applis.
+  firebase_core: ^3.3.0
+  firebase_messaging: ^15.0.4
 
 dev_dependencies:
   flutter_test:

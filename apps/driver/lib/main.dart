@@ -3,7 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:xlcab_core/services/preferences_store.dart';
+import 'package:xlcab_core/services/push_service.dart';
 import 'package:xlcab_ui/xlcab_app.dart';
+import 'notification_targets.dart';
 import 'router.dart';
 
 /// Application chauffeur « XLCAB Driver » : missions, départs de ligne, revenus.
@@ -23,5 +25,10 @@ Future<void> main() async {
   // DateFormat(..., 'fr') lève une exception (utils/formatters.dart).
   await initializeDateFormatting();
 
-  runApp(ProviderScope(child: XlcabApp(router: routerProvider, title: 'XLCAB Driver')));
+  // Notifications push (Firebase, paramètres --dart-define FIREBASE_*) ; sans eux, pas de push.
+  await initPush();
+
+  runApp(ProviderScope(
+    child: XlcabApp(router: routerProvider, title: 'XLCAB Driver', pushApp: 'driver', pushTarget: driverNotificationTarget),
+  ));
 }

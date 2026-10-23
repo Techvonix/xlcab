@@ -7088,6 +7088,24 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Mot de passe modifié : connectez-vous avec le nouveau. Vos autres appareils ont été déconnectés.'**
   String get pwModifie;
+
+  /// No description provided for @ntTitre.
+  ///
+  /// In fr, this message translates to:
+  /// **'Notifications'**
+  String get ntTitre;
+
+  /// No description provided for @ntAucune.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune notification pour l’instant.'**
+  String get ntAucune;
+
+  /// No description provided for @ntNonLues.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{Notifications, 1 non lue} other{Notifications, {count} non lues}}'**
+  String ntNonLues(int count);
 }
 
 class _AppLocalizationsDelegate

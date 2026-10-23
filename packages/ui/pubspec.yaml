@@ -16,6 +16,8 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   url_launcher: ^6.3.0
+  # Navigation depuis la boîte de réception (déjà résolu pour les deux applis).
+  go_router: ^14.2.0
   xlcab_core:
     path: ../core
 

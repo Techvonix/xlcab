@@ -6,6 +6,7 @@ import 'package:xlcab_core/models/trip.dart';
 import '../../providers/driver_mode_provider.dart';
 import 'package:xlcab_core/services/document_picker.dart';
 import '../../services/driver_device.dart';
+import 'package:xlcab_ui/widgets/notification_bell.dart';
 import 'package:xlcab_ui/theme/app_colors.dart';
 import 'package:xlcab_ui/theme/app_spacing.dart';
 import 'package:xlcab_ui/theme/app_typography.dart';
@@ -199,6 +200,7 @@ class _DriverModeScreenState extends ConsumerState<DriverModeScreen> with Widget
         // Onglet « Aujourd'hui » : revenus, départs et profil ont leur propre onglet.
         title: Text(l10n.aujourdHui),
         automaticallyImplyLeading: false,
+        actions: const [NotificationBell()],
       ),
       body: Stack(
         children: [

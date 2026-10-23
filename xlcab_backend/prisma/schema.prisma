@@ -316,6 +316,22 @@ model AuditLog {
 
 // Partie 4. Notifications in-app ; l'envoi push (FCM) s'y branchera avec
 // Firebase.
+// Téléphone qui reçoit les notifications push d'un utilisateur (jeton Firebase Cloud Messaging).
+// Un jeton n'appartient qu'à un compte à la fois : à la connexion d'un autre compte sur le même
+// téléphone, il change de propriétaire. Supprimé à la déconnexion, quand Firebase le déclare
+// invalide, et à l'anonymisation du compte.
+model PushDevice {
+  id         String   @id @default(uuid())
+  userId     String
+  token      String   @unique
+  platform   String // android | ios
+  app        String // passenger | driver
+  createdAt  DateTime @default(now())
+  lastSeenAt DateTime @default(now())
+
+  @@index([userId])
+}
+
 model Notification {
   id        String    @id @default(uuid())
   userId    String

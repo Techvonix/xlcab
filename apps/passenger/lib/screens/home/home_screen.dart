@@ -6,6 +6,7 @@ import 'package:xlcab_core/models/trip.dart';
 import '../../providers/home_provider.dart';
 import 'package:xlcab_core/routes.dart';
 import 'package:xlcab_core/services/api_service.dart';
+import 'package:xlcab_ui/widgets/notification_bell.dart';
 import 'package:xlcab_ui/theme/app_colors.dart';
 import 'package:xlcab_ui/theme/app_spacing.dart';
 import 'package:xlcab_ui/theme/app_typography.dart';
@@ -121,15 +122,7 @@ class _HomeHeader extends StatelessWidget {
           icon: const Icon(Icons.accessibility_new),
           onPressed: () => showAccessibilitySheet(context),
         ),
-        IconButton(
-          tooltip: l10n.notifications,
-          icon: const Icon(Icons.notifications_none),
-          // Pas encore d'écran ni d'API de notifications (Partie 6 : module
-          // Notifications) : on le dit plutôt que de ne rien faire.
-          onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(l10n.lesNotificationsArriventBientot)),
-          ),
-        ),
+        const NotificationBell(),
       ],
     );
   }

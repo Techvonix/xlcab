@@ -2440,5 +2440,15 @@
   "pwDifferents": "Les deux mots de passe sont différents",
   "pwChanger": "Changer mon mot de passe",
   "pwRenvoyer": "Renvoyer un code",
-  "pwModifie": "Mot de passe modifié : connectez-vous avec le nouveau. Vos autres appareils ont été déconnectés."
+  "pwModifie": "Mot de passe modifié : connectez-vous avec le nouveau. Vos autres appareils ont été déconnectés.",
+  "ntTitre": "Notifications",
+  "ntAucune": "Aucune notification pour l’instant.",
+  "ntNonLues": "{count, plural, =1{Notifications, 1 non lue} other{Notifications, {count} non lues}}",
+  "@ntNonLues": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

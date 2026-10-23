@@ -681,6 +681,23 @@ référence — les exigences de la Partie 8 priment.
   `xlcab_ui/screens/forgot_password_screen.dart` (lien « Mot de passe oublié ? » de la connexion, retour avec message),
   `xlcab_ui/widgets/form_message.dart`. Clés ARB `pw*`. Tests : `account-recovery.integration.spec.ts`,
   `apps/passenger/test/screens/login_screen_test.dart`.
+- Notifications (2026-10-23) : `src/notifications/notifications.service.ts` — `notify` enregistre en base PUIS envoie en
+  push (sans attendre, jamais d'échec remonté) sur les `PushDevice` du compte (migration `push_devices` ; jeton unique,
+  change de propriétaire d'un compte à l'autre, 10 par compte, effacés à l'anonymisation et quand FCM les déclare
+  invalides), dans la langue du compte (`toEnglish`), sauf `UserPreference.notifyPush` = false. `push.ts` :
+  `FcmPushSender` = API HTTP v1 de FCM SANS SDK (jeton Google signé RS256 avec le compte de service,
+  `FCM_SERVICE_ACCOUNT` = JSON en base64 ; absent = désactivé), double `PUSH_SENDER` dans les tests,
+  `NotificationsService.settled()` pour les attendre. Routes `GET /users/me/notifications?page` (30 par page,
+  `unread`, traduit selon X-Locale), `POST …/notifications/read { ids? }`, `PUT /users/me/devices { token, platform,
+  app }`, `POST /users/me/devices/remove { token }`. Apps : `core/services/notifications_service.dart` (`inboxProvider`,
+  `unreadNotificationsProvider`), `core/services/push_service.dart` (`initPush()` dans les deux `main` : Firebase
+  initialisé par `--dart-define` FIREBASE_API_KEY / FIREBASE_APP_ID / FIREBASE_SENDER_ID / FIREBASE_PROJECT_ID, SANS
+  google-services.json ; `PushSource` injectable, `PushController` démarré par `XlcabApp(pushApp:, pushTarget:)` à la
+  connexion, téléphone retiré AVANT la déconnexion via `AuthNotifier.addBeforeSignOut`), écran partagé
+  `xlcab_ui/screens/notifications_screen.dart` (route `AppRoutes.notifications`, tout marqué lu à l'ouverture) et
+  `widgets/notification_bell.dart` (accueil passager, onglet « Aujourd'hui » chauffeur). Écran ouvert par une notification :
+  `apps/*/lib/notification_targets.dart`. Clés ARB `nt*`. Tests : `notifications.integration.spec.ts`,
+  `core/test/services/push_service_test.dart`, `apps/passenger/test/screens/notifications_screen_test.dart`.
 - Pré-lancement (2026-10-22) : `PRE_LANCEMENT.md` = tout ce qui reste (comptes à créer, juridique, code, production,
   exploitation) et les 3 décisions du jour (retenue 50 %, secours d'abord, TVA des frais d'annulation).
 - Migrations : `init_xlcab` appliquée sur la base locale ; toute modification de

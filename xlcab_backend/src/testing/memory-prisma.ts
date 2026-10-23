@@ -195,6 +195,7 @@ export function memoryPrisma() {
     })),
     auditLog: new Table(() => ({ id: BigInt(++auditSeq), createdAt: new Date() })),
     notification: new Table(() => ({ readAt: null, createdAt: new Date() })),
+    pushDevice: new Table(() => ({ createdAt: new Date(), lastSeenAt: new Date() })),
     tariff: new Table(() => ({ createdAt: new Date() })),
     invoice: new Table(() => ({ issuedAt: new Date(), currency: "EUR", tripIds: [], pdfKey: null, corporateId: null, creditedInvoiceId: null, dueDate: null, periodStart: null, periodEnd: null })),
     invoiceCounter: new Table(),

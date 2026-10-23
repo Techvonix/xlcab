@@ -56,8 +56,8 @@ tableau de bord admin, deux applis (passager, chauffeur), français et anglais. 
 
 | # | Quoi | Dépend de |
 |---|---|---|
-| 5.1 🔴 | **Mot de passe oublié** et confirmation de l'adresse e-mail (serveur + deux applis) | code faisable tout de suite ; envoi réel avec 3.3 |
-| 5.2 🔴 | **Notifications push** dans les deux applis (seuil atteint ou manqué, secours, colis, demandes de conservation…) | code faisable tout de suite ; envoi réel avec 3.2 |
+| 5.1 ✅ | **Mot de passe oublié** fait le 22 octobre (code à 6 chiffres par e-mail) ; reste 🟠 la confirmation de l'adresse e-mail à l'inscription | envoi réel avec 3.3 (`MAIL_PROVIDER=sendgrid`) |
+| 5.2 ✅ | **Notifications** faites le 23 octobre : boîte de réception (cloche des deux applis) et push Firebase | envoi réel avec 3.2 : `FCM_SERVICE_ACCOUNT` côté serveur, paramètres `FIREBASE_*` à la compilation des applis |
 | 5.3 🔴 | **Mise en production** : image du serveur, configuration de production, déploiement, sauvegardes, journaux et alertes | 3.5 |
 | 5.4 🔴 | **Versions publiables des applis** : signature, icônes et écrans des stores, fiches « données collectées » | 3.7, 3.8 |
 | 5.5 🔴 | **Stockage S3** des documents chauffeurs | 3.6 |

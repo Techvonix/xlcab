@@ -98,10 +98,22 @@ class AuthNotifier extends StateNotifier<AuthState> {
   /// reçoivent alors un 401 (session révoquée) qui n'est pas une expiration.
   bool _signingOut = false;
 
+  /// Actions à faire tant que la session est encore valide, juste avant une déconnexion
+  /// volontaire (ex. ce téléphone ne doit plus recevoir les notifications du compte).
+  final List<Future<void> Function()> _beforeSignOut = [];
+
+  void addBeforeSignOut(Future<void> Function() action) => _beforeSignOut.add(action);
+
   /// Déconnexion volontaire : révocation de la session de cet appareil.
   Future<void> signOut() async {
     _signingOut = true;
     try {
+      for (final action in _beforeSignOut) {
+        // Au mieux, sans bloquer la déconnexion (réseau absent, serveur lent).
+        try {
+          await action().timeout(const Duration(seconds: 3));
+        } catch (_) {}
+      }
       final access = await _tokens.readAccessToken();
       if (access != null) await _service.logout(access);
       await _tokens.clear();

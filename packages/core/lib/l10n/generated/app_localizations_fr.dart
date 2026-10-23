@@ -4173,4 +4173,21 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get pwModifie =>
       'Mot de passe modifié : connectez-vous avec le nouveau. Vos autres appareils ont été déconnectés.';
+
+  @override
+  String get ntTitre => 'Notifications';
+
+  @override
+  String get ntAucune => 'Aucune notification pour l’instant.';
+
+  @override
+  String ntNonLues(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Notifications, $count non lues',
+      one: 'Notifications, 1 non lue',
+    );
+    return '$_temp0';
+  }
 }

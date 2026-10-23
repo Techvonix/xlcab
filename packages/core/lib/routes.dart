@@ -25,6 +25,8 @@ class AppRoutes {
   static const savedAddresses = '/profile/addresses';
   static const trustedContacts = '/profile/contacts';
   static const notificationPreferences = '/profile/notifications';
+  /// Boîte de réception des notifications (les deux applis).
+  static const notifications = '/notifications';
   static const corporatePortal = '/corporate';
   static const driverMode = '/driver-mode';
   static const driverOnboarding = '/driver/onboarding';

@@ -225,6 +225,7 @@ export class UsersService {
         },
       });
       await tx.notification.deleteMany({ where: { userId: userId } });
+      await tx.pushDevice.deleteMany({ where: { userId } });
       await tx.savedAddress.deleteMany({ where: { userId } });
       await tx.userPreference.deleteMany({ where: { userId } });
       // Espace sécurité : contacts (données de tiers) effacés, liens de suivi coupés.

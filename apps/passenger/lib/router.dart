@@ -1,5 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:xlcab_ui/screens/notifications_screen.dart';
+import 'notification_targets.dart';
 import 'package:xlcab_core/models/quote.dart';
 import 'package:xlcab_core/models/shuttle.dart';
 import 'package:xlcab_core/providers/auth_provider.dart';
@@ -138,6 +140,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(path: AppRoutes.savedAddresses, builder: (context, state) => const SavedAddressesScreen()),
       GoRoute(path: AppRoutes.trustedContacts, builder: (context, state) => const TrustedContactsScreen()),
       GoRoute(path: AppRoutes.notificationPreferences, builder: (context, state) => const NotificationPreferencesScreen()),
+      GoRoute(path: AppRoutes.notifications, builder: (context, state) => const NotificationsScreen(targetOf: passengerNotificationTarget)),
       GoRoute(path: AppRoutes.corporatePortal, builder: (context, state) => const CorporatePortalScreen()),
 
       // ── Bourse de transport côté client : lignes régulières et devis ──

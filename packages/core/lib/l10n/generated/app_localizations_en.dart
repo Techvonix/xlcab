@@ -4149,4 +4149,21 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get pwModifie =>
       'Password changed: sign in with the new one. Your other devices have been signed out.';
+
+  @override
+  String get ntTitre => 'Notifications';
+
+  @override
+  String get ntAucune => 'No notifications yet.';
+
+  @override
+  String ntNonLues(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Notifications, $count unread',
+      one: 'Notifications, 1 unread',
+    );
+    return '$_temp0';
+  }
 }

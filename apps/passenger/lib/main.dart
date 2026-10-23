@@ -3,7 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:xlcab_core/services/preferences_store.dart';
+import 'package:xlcab_core/services/push_service.dart';
 import 'package:xlcab_ui/xlcab_app.dart';
+import 'notification_targets.dart';
 import 'router.dart';
 import 'services/payment_service.dart';
 
@@ -27,5 +29,10 @@ Future<void> main() async {
   // Paiement Stripe (clé publiable via --dart-define=STRIPE_PUBLISHABLE_KEY).
   await initStripe();
 
-  runApp(ProviderScope(child: XlcabApp(router: routerProvider)));
+  // Notifications push (Firebase, paramètres --dart-define FIREBASE_*) ; sans eux, pas de push.
+  await initPush();
+
+  runApp(ProviderScope(
+    child: XlcabApp(router: routerProvider, pushApp: 'passenger', pushTarget: passengerNotificationTarget),
+  ));
 }

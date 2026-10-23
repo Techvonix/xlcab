@@ -1164,5 +1164,8 @@
   "pwDifferents": "The two passwords are different",
   "pwChanger": "Change my password",
   "pwRenvoyer": "Send a new code",
-  "pwModifie": "Password changed: sign in with the new one. Your other devices have been signed out."
+  "pwModifie": "Password changed: sign in with the new one. Your other devices have been signed out.",
+  "ntTitre": "Notifications",
+  "ntAucune": "No notifications yet.",
+  "ntNonLues": "{count, plural, =1{Notifications, 1 unread} other{Notifications, {count} unread}}"
 }
