@@ -12,6 +12,7 @@ import 'package:xlcab_passenger/providers/home_provider.dart';
 import 'package:xlcab_passenger/router.dart';
 import 'package:xlcab_passenger/screens/home/home_screen.dart';
 import 'package:xlcab_core/services/api_service.dart';
+import 'package:xlcab_core/services/notifications_service.dart';
 import 'package:xlcab_ui/theme/app_theme.dart';
 
 // Tests de l'écran 4 (Accueil passager). Les données viennent d'un
@@ -71,7 +72,11 @@ Future<void> pumpHome(
 
   await tester.pumpWidget(
     ProviderScope(
-      overrides: [recentTripsProvider.overrideWith((ref) => loadTrips())],
+      overrides: [
+        recentTripsProvider.overrideWith((ref) => loadTrips()),
+        // Cloche de la barre : boîte de réception vide, sans requête réelle.
+        inboxProvider.overrideWith((ref) async => const Inbox(items: [], unread: 0)),
+      ],
       child: MaterialApp.router(
         theme: AppTheme.light,
         locale: const Locale('fr'),

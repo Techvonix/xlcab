@@ -35,13 +35,19 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    // fireImmediately : la boîte est souvent déjà chargée par la cloche avant l'ouverture.
+    ref.listenManual(inboxProvider, (_, next) {
+      if (next.valueOrNull?.unread case final n? when n > 0) _markAllRead();
+    }, fireImmediately: true);
+  }
+
+  @override
   Widget build(BuildContext context) {
     final inbox = ref.watch(inboxProvider);
     final locale = Localizations.localeOf(context).languageCode;
     final scheme = Theme.of(context).colorScheme;
-    ref.listen(inboxProvider, (_, next) {
-      if (next.valueOrNull?.unread case final n? when n > 0) _markAllRead();
-    });
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.ntTitre)),
