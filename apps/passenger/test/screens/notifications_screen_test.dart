@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:xlcab_core/routes.dart';
 import 'package:xlcab_core/services/notifications_service.dart';
 import 'package:xlcab_passenger/notification_targets.dart';
@@ -53,6 +54,8 @@ Future<void> pump(WidgetTester tester, FakeNotificationsService api) async {
 }
 
 void main() {
+  setUpAll(() => initializeDateFormatting('fr'));
+
   testWidgets('pastille des non-lues ; à l’ouverture tout est marqué lu ; une notification de trajet ouvre le récapitulatif', (tester) async {
     final api = FakeNotificationsService(Inbox(
       unread: 2,

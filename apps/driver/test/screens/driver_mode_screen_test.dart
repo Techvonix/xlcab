@@ -9,6 +9,7 @@ import 'package:xlcab_driver/providers/driver_mode_provider.dart';
 import 'package:xlcab_driver/screens/driver/driver_mode_screen.dart';
 import 'package:xlcab_driver/screens/driver/widgets/offer_card.dart';
 import 'package:xlcab_core/services/api_service.dart';
+import 'package:xlcab_core/services/notifications_service.dart';
 import 'package:xlcab_driver/services/driver_channel.dart';
 import 'package:xlcab_core/services/document_picker.dart';
 import 'package:xlcab_driver/services/driver_device.dart';
@@ -54,6 +55,8 @@ Future<void> pump(WidgetTester tester) async {
       // Section opérateur du mode chauffeur : aucun appel réseau réel.
       operatorServiceProvider.overrideWithValue(operators),
       dashcamServiceProvider.overrideWithValue(FakeDashcamService()),
+      // Cloche de la barre : boîte de réception vide, sans requête réelle.
+      inboxProvider.overrideWith((ref) async => const Inbox(items: [], unread: 0)),
     ],
     child: MaterialApp(
       theme: AppTheme.light,
